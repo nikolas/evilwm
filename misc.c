@@ -106,9 +106,12 @@ int ignore_xerror(Display *dsply, XErrorEvent *e) {
 #ifdef DEBUG
 void dump_clients() {
 	Client *c;
+	XWindowAttributes attr;
 
-	for (c = head_client; c; c = c->next)
-		LOG_DEBUG("MISC: (%d, %d) @ %d,%d\n", wm_state(c),
+	for (c = head_client; c; c = c->next) {
+		XGetWindowAttributes(dpy, c->window, &attr);
+		LOG_DEBUG("MISC: (%d, %d) @ %d,%d\n", attr.map_state,
 			c->ignore_unmap, c->x, c->y);
+	}
 }
 #endif /* DEBUG */

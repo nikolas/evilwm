@@ -29,23 +29,6 @@ void set_wm_state(Client *c, int state) {
 			PropModeReplace, (unsigned char *)data, 2);
 }
 
-int wm_state(Client *c) {
-	Atom actual_type;
-	int actual_format, state = WithdrawnState;
-	unsigned long nitems, bytes_after;
-	CARD32 *data;
-	if ((XGetWindowProperty(dpy, c->window, xa_wm_state, 0L, 1L, False,
-			AnyPropertyType, &actual_type, &actual_format, &nitems,
-			&bytes_after, (unsigned char **)&data) == Success)
-			&& nitems) {
-		if (data) {
-			state = (int)*data;
-			XFree(data);
-		}
-	}
-	return state;
-}
-
 void send_config(Client *c) {
 	XConfigureEvent ce;
 
