@@ -208,6 +208,7 @@ void handle_enter_event(XCrossingEvent *e);
 void handle_map_request(XMapRequestEvent *e);
 void handle_property_change(XPropertyEvent *e);
 void handle_unmap_event(XUnmapEvent *e);
+void handle_reparent_event(XReparentEvent *e);
 #ifdef SHAPE
 void handle_shape_event(XShapeEvent *e);
 #endif

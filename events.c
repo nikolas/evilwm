@@ -170,6 +170,23 @@ void handle_unmap_event(XUnmapEvent *e) {
 	}
 }
 
+void handle_reparent_event(XReparentEvent *e) {
+	Client *c = find_client(e->window);
+	/* If an unmanaged window is reparented such that its new parent is
+	 * a root window and it is not in WithdrawnState, manage it */
+	if (!c) {
+		ScreenInfo *s = find_screen(e->parent);
+		if (s) {
+			XWindowAttributes attr;
+			XGetWindowAttributes(dpy, e->window, &attr);
+			if (attr.map_state != WithdrawnState) {
+				LOG_DEBUG("handle_reparent_event(): window reparented to root - making client\n");
+				make_new_client(e->window, s);
+			}
+		}
+	}
+}
+
 #ifdef VDESK
 void handle_client_message(XClientMessageEvent *e) {
 	Client *c = find_client(e->window);

@@ -179,6 +179,8 @@ int main(int argc, char *argv[]) {
 				handle_property_change(&ev.xproperty); break;
 			case UnmapNotify:
 				handle_unmap_event(&ev.xunmap); break;
+			case ReparentNotify:
+				handle_reparent_event(&ev.xreparent); break;
 #ifdef SHAPE
 			default:
 				if (have_shape && ev.type == shape_event) {

@@ -335,3 +335,7 @@ Old
 
 2005-03-20
 	Add -mask1 and mask2 switches to override default modifier grabs.
+
+2005-03-30
+	Handle applications reparenting a window to root - manage them unless
+	in Withdrawn state.
