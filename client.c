@@ -144,22 +144,6 @@ static int send_xmessage(Window w, Atom a, long x) {
 
 	return XSendEvent(dpy, w, False, NoEventMask, &ev);
 }
-/*
-void client_to_front(Client *c) {
-	Client *p;
-
-	if (head_client == c) {
-		head_client = c->next;
-	}
-	for (p = head_client; p->next; p = p->next) {
-		if (p->next == c) {
-			p->next = c->next;
-		}
-	}
-	p->next = c;
-	c->next = NULL;
-}
-*/
 
 #ifdef SHAPE
 void set_shape(Client *c) {
