@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2002 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2005 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 #include "evilwm.h"
@@ -39,6 +39,8 @@ void handle_key_event(XKeyEvent *e) {
 			move(c, 1);
 			setmouse(c->window, c->width + c->border - 1,
 					c->height + c->border - 1);
+			/* Need to think about this - see note about shaped
+			 * windows in TODO */
 			break;
 		case KEY_KILL:
 			send_wm_delete(c); break;
@@ -225,12 +227,7 @@ void handle_enter_event(XCrossingEvent *e) {
 		if (wdesk != vdesk && wdesk != STICKY)
 			return;
 #endif
-#ifdef COLOURMAP
-		XInstallColormap(dpy, c->cmap);
-#endif
-		client_update_current(current, c);
-		client_update_current(c, current);
-		XSetInputFocus(dpy, c->window, RevertToPointerRoot, CurrentTime);
+		select_client(c);
 #ifdef MOUSE
 		grab_button(c->parent, Mod1Mask, AnyButton);
 #endif

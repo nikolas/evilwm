@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2002 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2005 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 #include <stdio.h>
@@ -441,9 +441,12 @@ void next(void) {
 		if (newc->vdesk == vdesk || newc->vdesk == STICKY) {
 #endif
 			unhide(newc, RAISE);
+			select_client(newc);
 			setmouse(newc->window, 0, 0);
 			setmouse(newc->window, newc->width + newc->border - 1,
 				newc->height + newc->border - 1);
+			/* Need to think about this - see note about shaped
+			 * windows in TODO */
 #ifdef VWM
 		}
 #endif
@@ -453,7 +456,6 @@ void next(void) {
                fprintf(stderr,"NEXT: hmm, no next window\n");
        }
 #endif
-
 }
 
 #ifdef VWM

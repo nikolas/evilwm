@@ -178,6 +178,7 @@ extern unsigned int numlockmask;
 Client *find_client(Window w);
 int wm_state(Client *c);
 void change_gravity(Client *c, int multiplier);
+void select_client(Client *c);
 void remove_client(Client *c);
 void send_config(Client *c);
 void send_wm_delete(Client *c);

@@ -65,6 +65,15 @@ void send_config(Client *c) {
 	XSendEvent(dpy, c->window, False, StructureNotifyMask, (XEvent *)&ce);
 }
 
+void select_client(Client *c) {
+#ifdef COLOURMAP
+	XInstallColormap(dpy, c->cmap);
+#endif
+	client_update_current(current, c);
+	client_update_current(c, current);
+	XSetInputFocus(dpy, c->window, RevertToPointerRoot, CurrentTime);
+}
+
 void remove_client(Client *c) {
 	Client *p;
 
