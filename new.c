@@ -77,19 +77,19 @@ void make_new_client(Window w, ScreenInfo *s) {
 	c->window = w;
 	c->ignore_unmap = 0;
 
-	/* Jon Perkin reported a crash with an app called 'sunpci' which we
-	 * traced to getting divide-by-zeros because it sets PResizeInc
-	 * but then has increments as 0.  So we check for 0s here and set them
-	 * to sensible defaults. */
 	c->size = XAllocSizeHints();
-	if (c->size->width_inc == 0)
-		c->size->width_inc = 1;
-	if (c->size->height_inc == 0)
-		c->size->height_inc = 1;
 #ifdef XDEBUG
 	fprintf(stderr, "XGetWMNormalHints(); ");
 #endif
 	XGetWMNormalHints(dpy, c->window, c->size, &dummy);
+	/* Jon Perkin reported a crash with an app called 'sunpci' which we
+	 * traced to getting divide-by-zeros because it sets PResizeInc
+	 * but then has increments as 0.  So we check for 0s here and set them
+	 * to sensible defaults. */
+	if (c->size->width_inc == 0)
+		c->size->width_inc = 1;
+	if (c->size->height_inc == 0)
+		c->size->height_inc = 1;
 
 	XGetWindowAttributes(dpy, c->window, &attr);
 
