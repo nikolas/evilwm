@@ -314,3 +314,7 @@ Old
 	It's worth noting that Per Weijnitz sent a similar patch a while
 	ago, but I never got around to using it :(
 	Released 0.99.17.
+
+2004-07-11
+	Coalesce move() and resize() into moveresize().
+	Refactor window move/resize-by-mouse to eliminate arg to moveresize().

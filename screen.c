@@ -148,6 +148,7 @@ void sweep(Client *c) {
 
 	if (!grab_pointer(c->screen->root, MouseMask, resize_curs)) return;
 
+	XRaiseWindow(dpy, c->parent);
 #ifdef INFOBANNER_MOVERESIZE
 	create_info_window(c);
 #endif
@@ -179,6 +180,7 @@ void sweep(Client *c) {
 				remove_info_window();
 #endif
 				XUngrabPointer(dpy, CurrentTime);
+				moveresize(c);
 				return;
 		}
 	}
@@ -263,6 +265,7 @@ void drag(Client *c) {
 	int reallymove = 0;
 
 	if (!grab_pointer(c->screen->root, MouseMask, move_curs)) return;
+	XRaiseWindow(dpy, c->parent);
 	get_mouse_position(&x1, &y1, c->screen->root);
 #ifdef INFOBANNER_MOVERESIZE
 	create_info_window(c);
@@ -315,10 +318,13 @@ void drag(Client *c) {
 				remove_info_window();
 #endif
 				XUngrabPointer(dpy, CurrentTime);
+#ifndef SOLIDDRAG
 				if (!reallymove) {
 					c->x = old_cx;
 					c->y = old_cy;
 				}
+				moveresize(c);
+#endif
 				return;
 			default:
 				break;
@@ -327,32 +333,13 @@ void drag(Client *c) {
 }
 #endif /* def MOUSE */
 
-void move(Client *c, int set) {
-	if (c) {
-		XRaiseWindow(dpy, c->parent);
-#ifdef MOUSE
-		if (!set)
-			drag(c);
-#endif
-		XMoveWindow(dpy, c->parent, c->x - c->border, c->y - c->border);
-		send_config(c);
-	}
-}
-
-void resize(Client *c, int set) {
-	if (c) {
-		XRaiseWindow(dpy, c->parent);
-#ifdef MOUSE
-		if (!set)
-			sweep(c);
-#endif
-		XMoveResizeWindow(dpy, c->parent, c->x - c->border,
-				c->y - c->border, c->width + (c->border*2),
-				c->height + (c->border*2));
-		XMoveResizeWindow(dpy, c->window, c->border, c->border,
-				c->width, c->height);
-		send_config(c);
-	}
+void moveresize(Client *c) {
+	XRaiseWindow(dpy, c->parent);
+	XMoveResizeWindow(dpy, c->parent, c->x - c->border,
+			c->y - c->border, c->width + (c->border*2),
+			c->height + (c->border*2));
+	XMoveResizeWindow(dpy, c->window, c->border, c->border,
+			c->width, c->height);
 }
 
 void maximise_horiz(Client *c) {

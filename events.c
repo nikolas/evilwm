@@ -36,7 +36,7 @@ void handle_key_event(XKeyEvent *e) {
 			{ c->x = c->border; c->y = DisplayHeight(dpy, c->screen->screen)-c->height-c->border; } if (0)
 		case KEY_BOTTOMRIGHT:
 			{ c->x = DisplayWidth(dpy, c->screen->screen)-c->width-c->border; c->y = DisplayHeight(dpy, c->screen->screen)-c->height-c->border; }
-			move(c, 1);
+			moveresize(c);
 			setmouse(c->window, c->width + c->border - 1,
 					c->height + c->border - 1);
 			/* Need to think about this - see note about shaped
@@ -54,7 +54,7 @@ void handle_key_event(XKeyEvent *e) {
 			maximise_horiz(c);
 		case KEY_MAXVERT:
 			maximise_vert(c);
-			resize(c, 1);
+			moveresize(c);
 			setmouse(c->window, c->width + c->border - 1,
 					c->height + c->border - 1);
 			break;
@@ -99,9 +99,9 @@ void handle_button_event(XButtonEvent *e) {
 	if (c && e->window != c->screen->root) {
 		switch (e->button) {
 			case Button1:
-				move(c, 0); break;
+				drag(c); break;
 			case Button2:
-				resize(c, 0); break;
+				sweep(c); break;
 			case Button3:
 				XLowerWindow(dpy, c->parent); break;
 		}
