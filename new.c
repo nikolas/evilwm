@@ -241,20 +241,20 @@ void reparent(Client *c) {
 	send_config(c);
 }
 
-/* Taken from aewm-1.2.0 */
-
 #ifdef MWM_HINTS
 static PropMwmHints *get_mwm_hints(Window w) {
-	Atom real_type; int real_format;
-	unsigned long items_read, bytes_left;
-	unsigned char *data;
-	if (XGetWindowProperty(dpy, w, mwm_hints, 0L, 20L, False,
-		mwm_hints, &real_type, &real_format, &items_read, &bytes_left,
-		&data) == Success
-		&& items_read >= PROP_MOTIF_WM_HINTS_ELEMENTS) {
+	Atom actual_type;
+	int actual_format;
+	unsigned long nitems, bytes_after;
+	PropMwmHints *data;
+	if (XGetWindowProperty(dpy, w, mwm_hints, 0L,
+				(long)PROP_MWM_HINTS_ELEMENTS, False,
+				mwm_hints, &actual_type, &actual_format,
+				&nitems, &bytes_after,
+				(unsigned char **)&data)
+			== Success && nitems >= PROP_MWM_HINTS_ELEMENTS) {
 		return (PropMwmHints *)data;
-	} else {
-		return NULL;
 	}
+	return NULL;
 }
 #endif
