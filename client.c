@@ -121,38 +121,6 @@ void remove_client(Client *c) {
 	XUngrabServer(dpy);
 }
 
-void change_gravity(Client *c, int multiplier) {
-	int dx = 0, dy = 0;
-	int gravity = (c->size->flags & PWinGravity) ?
-		c->size->win_gravity : NorthWestGravity;
-
-	switch (gravity) {
-		case NorthWestGravity:
-		case SouthWestGravity:
-		case NorthEastGravity:
-		case StaticGravity:
-			dx = c->border;
-		case NorthGravity:
-			dy = c->border; break;
-	}
-
-	c->x += multiplier * dx;
-	c->y += multiplier * dy;
-#ifdef DEBUG
-	if (dx || dy) {
-		fprintf(stderr, "change_gravity() : window adjustment of %d,%d for ", multiplier * dx, multiplier * dy);
-	switch (gravity) {
-		case NorthWestGravity: fprintf(stderr, "NorthWestGravity\n"); break;
-		case SouthWestGravity: fprintf(stderr, "SouthWestGravity\n"); break;
-		case NorthEastGravity: fprintf(stderr, "NorthEastGravity\n"); break;
-		case NorthGravity: fprintf(stderr, "NorthGravity\n"); break;
-		case StaticGravity: fprintf(stderr, "StaticGravity\n"); break;
-		default: fprintf(stderr, "unhandled gravity %d\n", gravity); break;
-	}
-	}
-#endif
-}
-
 void send_wm_delete(Client *c) {
 	int i, n, found = 0;
 	Atom *protocols;

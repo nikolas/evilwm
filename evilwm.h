@@ -79,10 +79,8 @@
 	}
 #define setmouse(w, x, y) \
 	XWarpPointer(dpy, None, w, 0, 0, 0, 0, x, y)
-#define gravitate(c) \
-	change_gravity(c, 1)
-#define ungravitate(c) \
-	change_gravity(c, -1)
+#define gravitate(c) { c->x += c->border; c->y += c->border; }
+#define ungravitate(c) { c->x -= c->border; c->y -= c->border; }
 
 /* screen structure */
 
@@ -177,7 +175,6 @@ extern unsigned int numlockmask;
 
 Client *find_client(Window w);
 int wm_state(Client *c);
-void change_gravity(Client *c, int multiplier);
 void select_client(Client *c);
 void remove_client(Client *c);
 void send_config(Client *c);
