@@ -22,9 +22,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	long dummy;
 	XWMHints *hints;
 	char *name;
-	/*
 	XClassHint *class;
-	*/
 #ifdef MWM_HINTS
 	PropMwmHints *mhints;
 #endif
@@ -60,17 +58,6 @@ void make_new_client(Window w, ScreenInfo *s) {
 	initialising = None;
 	c->next = head_client;
 	head_client = c;
-
-	/*
-	class = XAllocClassHint();
-	if (class) {
-		XGetClassHint(dpy, w, class);
-		fprintf(stderr, "res_name = %s, res_class = %s\n", class->res_name, class->res_class);
-		XFree(class->res_name);
-		XFree(class->res_class);
-		XFree(class);
-	}
-	*/
 
 	/* initialise(c, w); */
 	c->screen = s;
@@ -177,6 +164,46 @@ void make_new_client(Window w, ScreenInfo *s) {
 	    set_shape(c);
 	}
 #endif
+
+	/* Read instance/class information for client and check against list
+	 * built with -app options */
+	class = XAllocClassHint();
+	if (class) {
+		Application *a = head_app;
+		XGetClassHint(dpy, w, class);
+		while (a) {
+			if ((!a->res_name || (class->res_name && !strcmp(class->res_name, a->res_name)))
+					&& (!a->res_class || (class->res_class && !strcmp(class->res_class, a->res_class)))) {
+				if (a->geometry_mask & WidthValue)
+					c->width = a->width * ((c->size->flags & PResizeInc) ? c->size->width_inc : 1);
+				if (a->geometry_mask & HeightValue)
+					c->height = a->height * ((c->size->flags & PResizeInc) ? c->size->height_inc : 1);
+				if (a->geometry_mask & XValue) {
+					if (a->geometry_mask & XNegative)
+						c->x = a->x + DisplayWidth(dpy, s->screen)-c->width-c->border;
+					else
+						c->x = a->x + c->border;
+				}
+				if (a->geometry_mask & YValue) {
+					if (a->geometry_mask & YNegative)
+						c->y = a->y + DisplayHeight(dpy, s->screen)-c->height-c->border;
+					else
+						c->y = a->y + c->border;
+				}
+				moveresize(c);
+#ifdef VWM
+				if (a->vdesk != -1) c->vdesk = a->vdesk;
+				if (vdesk != c->vdesk && c->vdesk != STICKY) {
+					hide(c);
+				}
+#endif
+			}
+			a = a->next;
+		}
+		XFree(class->res_name);
+		XFree(class->res_class);
+		XFree(class);
+	}
 
 #ifndef MOUSE
 	setmouse(c->window, c->width + c->border - 1,

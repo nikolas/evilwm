@@ -123,6 +123,19 @@ struct Client {
 #endif /* def VWM */
 };
 
+typedef struct Application Application;
+struct Application {
+	char *res_name;
+	char *res_class;
+	int geometry_mask;
+	int x, y;
+	unsigned int width, height;
+#ifdef VWM
+	int vdesk;
+#endif
+	Application *next;
+};
+
 /* declarations for global variables in main.c */
 
 extern Display		*dpy;
@@ -142,6 +155,7 @@ extern Client		*current;
 extern Window		initialising;
 extern XFontStruct	*font;
 extern Client		*head_client;
+extern Application	*head_app;
 extern Atom		xa_wm_state;
 extern Atom		xa_wm_change_state;
 extern Atom		xa_wm_protos;

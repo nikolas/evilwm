@@ -319,5 +319,13 @@ Old
 	Coalesce move() and resize() into moveresize().
 	Refactor window move/resize-by-mouse to eliminate arg to moveresize().
 
+2004-07-12
+	Added -app option to specify default vdesk (incl sticky), positions
+	and dimensions.
+
 2004-07-13
 	Fix so shape information is applied on WM startup.
+
+2005-03-19
+	Split geometry and vdesk out of -app option into separate -g and -v
+	options (each apply to the last -app defined).
