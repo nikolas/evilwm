@@ -75,7 +75,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	c->window = w;
 	c->ignore_unmap = 0;
 
-	/* Jon Perkin reported a crash wish an app called 'sunpci' which we
+	/* Jon Perkin reported a crash with an app called 'sunpci' which we
 	 * traced to getting divide-by-zeros because it sets PResizeInc
 	 * but then has increments as 0.  So we check for 0s here and set them
 	 * to sensible defaults. */
@@ -153,29 +153,29 @@ void make_new_client(Window w, ScreenInfo *s) {
 	/* client is initialised */
 
 	gravitate(c);
+
+#ifdef COLOURMAP
+	XSelectInput(dpy, c->window, ColormapChangeMask | EnterWindowMask | PropertyChangeMask);
+#else
+	XSelectInput(dpy, c->window, EnterWindowMask | PropertyChangeMask);
+#endif
+
 	reparent(c);
 
-#ifdef DEBUG
-	if (wm_state(c) == IconicState) {
-		fprintf(stderr, "make_new_client() : client thinks it's iconised\n");
-	} else {
-		if (wm_state(c) == NormalState) {
-			fprintf(stderr, "make_new_client() : client is in NormalState - good\n");
-		} else {
-			if (wm_state(c) == WithdrawnState) {
-				fprintf(stderr, "make_new_client() : silly client!  it's in WithdrawnState\n");
-			} else {
-				fprintf(stderr, "make_new_client() : don't know what state client is in\n");
-			}
-		}
-	}
-#endif
 	XMapWindow(dpy, c->window);
 	XMapRaised(dpy, c->parent);
 	set_wm_state(c, NormalState);
 
 	XSync(dpy, False);
 	XUngrabServer(dpy);
+
+#ifdef SHAPE
+	if (have_shape) {
+	    XShapeSelectInput(dpy, c->window, ShapeNotifyMask);
+	    set_shape(c);
+	}
+#endif
+
 #ifndef MOUSE
 	setmouse(c->window, c->width + c->border - 1,
 			c->height + c->border - 1);
@@ -225,12 +225,6 @@ void init_position(Client *c) {
 void reparent(Client *c) {
 	XSetWindowAttributes p_attr;
 
-#ifdef COLOURMAP
-	XSelectInput(dpy, c->window, ColormapChangeMask | EnterWindowMask | PropertyChangeMask);
-#else
-	XSelectInput(dpy, c->window, EnterWindowMask | PropertyChangeMask);
-#endif
-
 	p_attr.override_redirect = True;
 	p_attr.background_pixel = c->screen->bg.pixel;
 	p_attr.event_mask = ChildMask | ButtonPressMask | ExposureMask | EnterWindowMask;
@@ -239,12 +233,6 @@ void reparent(Client *c) {
 		DefaultDepth(dpy, c->screen->screen), CopyFromParent,
 		DefaultVisual(dpy, c->screen->screen),
 		CWOverrideRedirect | CWBackPixel | CWEventMask, &p_attr);
-#ifdef SHAPE
-	if (have_shape) {
-	    XShapeSelectInput(dpy, c->window, ShapeNotifyMask);
-	    set_shape(c);
-	}
-#endif
 
 	XAddToSaveSet(dpy, c->window);
 	XSetWindowBorderWidth(dpy, c->window, 0);
