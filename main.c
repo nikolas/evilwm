@@ -176,8 +176,6 @@ int main(int argc, char *argv[]) {
 #endif
 			case EnterNotify:
 				handle_enter_event(&ev.xcrossing); break;
-			case LeaveNotify:
-				handle_leave_event(&ev.xcrossing); break;
 			case PropertyNotify:
 				handle_property_change(&ev.xproperty); break;
 			case UnmapNotify:
@@ -274,7 +272,7 @@ static void setup_display(void) {
 	gv.font = font->fid;
 
 	/* set up root window attributes - same for each screen */
-	attr.event_mask = ChildMask | PropertyChangeMask | EnterWindowMask | LeaveWindowMask
+	attr.event_mask = ChildMask | PropertyChangeMask | EnterWindowMask
 #ifdef COLOURMAP
 		| ColormapChangeMask
 #endif

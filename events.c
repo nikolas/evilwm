@@ -231,12 +231,6 @@ void handle_enter_event(XCrossingEvent *e) {
 	}
 }
 
-void handle_leave_event(XCrossingEvent *e) {
-	/* if (e->window == root && !e->same_screen) {
-		client_update_current(current, NULL);
-	} */
-}
-
 #ifdef SHAPE
 void handle_shape_event(XShapeEvent *e) {
 	Client *c = find_client(e->window);

@@ -205,7 +205,6 @@ void handle_colormap_change(XColormapEvent *e);
 #endif
 void handle_configure_request(XConfigureRequestEvent *e);
 void handle_enter_event(XCrossingEvent *e);
-void handle_leave_event(XCrossingEvent *e);
 void handle_map_request(XMapRequestEvent *e);
 void handle_property_change(XPropertyEvent *e);
 void handle_unmap_event(XUnmapEvent *e);
