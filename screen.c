@@ -403,50 +403,33 @@ void unhide(Client *c, int raise) {
 
 void next(void) {
 	Client *newc = current;
-
-	if (!newc) {
-#ifdef DEBUG
-		fprintf(stderr,"NEXT: no current window, looking on this desktop\n");
-#endif
-		newc = head_client;
-#ifdef VWM
-		if(newc->vdesk != vdesk && newc->vdesk != STICKY) {
-			do {
-				newc = newc->next;
-			} while (newc && newc->vdesk != vdesk && newc->vdesk != STICKY);
-		}
-#endif
-	} else {
-#ifdef VWM
-		do {
-#endif
+	do {
+		if (newc) {
 			newc = newc->next;
-			if (current && !newc)
-				newc = head_client;
-#ifdef VWM
-		} while (newc && newc->vdesk != vdesk && newc->vdesk != STICKY);
-#endif
-	}
-	if (newc) {
-#ifdef VWM
-		if (newc->vdesk == vdesk || newc->vdesk == STICKY) {
-#endif
-			unhide(newc, RAISE);
-			select_client(newc);
-			setmouse(newc->window, 0, 0);
-			setmouse(newc->window, newc->width + newc->border - 1,
-				newc->height + newc->border - 1);
-			/* Need to think about this - see note about shaped
-			 * windows in TODO */
-#ifdef VWM
+			if (!newc && !current)
+				return;
 		}
-#endif
+		if (!newc)
+			newc = head_client;
+		if (!newc)
+			return;
+		if (newc == current)
+			return;
 	}
-#ifdef DEBUG
-       else {
-               fprintf(stderr,"NEXT: hmm, no next window\n");
-       }
+#ifdef VWM
+	while (newc->vdesk != vdesk && newc->vdesk != STICKY);
+#else
+	while (0);
 #endif
+	if (!newc)
+		return;
+	unhide(newc, RAISE);
+	select_client(newc);
+	setmouse(newc->window, 0, 0);
+	setmouse(newc->window, newc->width + newc->border - 1,
+		newc->height + newc->border - 1);
+	/* Need to think about this - see note about shaped
+	 * windows in TODO */
 }
 
 #ifdef VWM

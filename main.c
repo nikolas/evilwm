@@ -320,7 +320,7 @@ static void setup_display(void) {
 		for (keysym = keys_to_grab; *keysym; keysym++) {
 			grab_keysym(screens[i].root, ControlMask|Mod1Mask, *keysym);
 		}
-		grab_keysym(screens[i].root, Mod1Mask, XK_Tab);
+		grab_keysym(screens[i].root, Mod1Mask, KEY_NEXT);
 
 		/* scan all the windows on this screen */
 #ifdef XDEBUG
