@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2002 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2005 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 #include "evilwm.h"
@@ -23,44 +23,30 @@ Client *find_client(Window w) {
 	return NULL;
 }
 
-static void __set_wm_state(const Window win, const Atom a, int state, long vis) {
-	long data[2];
-
-	data[0] = (long) state;
-	data[1] = vis;
-
-	XChangeProperty(dpy, win, a, a,
-		32, PropModeReplace, (unsigned char *)data, 2);
-}
 void set_wm_state(Client *c, int state) {
-	/* iconify window and set state */
-	__set_wm_state(c->window, xa_wm_state, state, None);
+	CARD32 data[2];
+	data[0] = (CARD32)state;
+	data[1] = None;
+	XChangeProperty(dpy, c->window, xa_wm_state, xa_wm_state, 32,
+			PropModeReplace, (unsigned char *)data, 2);
 }
 
-static long * _g_wm_state(const Window win, const Atom where) {
-	Atom real_type;
-	int real_format;
-	unsigned long n, extra;
-	unsigned char *data;
-
-	if ((XGetWindowProperty(dpy, win, where, 0L, 2L, False,
-			AnyPropertyType, &real_type, &real_format, &n,
-			&extra, &data) == Success) && n) {
-		return (long *)data;
-	}
-	return NULL;
-}
-static int __wm_state(const Window win, const Atom where) {
-	long *data, state = WithdrawnState;
-
-	data = _g_wm_state(win, where);
-	if (data) {
-		state = *data;
-		XFree(data);
+int wm_state(Client *c) {
+	Atom actual_type;
+	int actual_format, state = WithdrawnState;
+	unsigned long nitems, bytes_after;
+	CARD32 *data;
+	if ((XGetWindowProperty(dpy, c->window, xa_wm_state, 0L, 1L, False,
+			AnyPropertyType, &actual_type, &actual_format, &nitems,
+			&bytes_after, (unsigned char **)&data) == Success)
+			&& nitems) {
+		if (data) {
+			state = (int)*data;
+			XFree(data);
+		}
 	}
 	return state;
 }
-int wm_state(Client *c) { return __wm_state(c->window, xa_wm_state); }
 
 void send_config(Client *c) {
 	XConfigureEvent ce;
