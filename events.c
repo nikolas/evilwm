@@ -6,9 +6,6 @@
 #include <stdlib.h>
 #include <X11/Xatom.h>
 #include <stdio.h>
-#ifdef SHAPE
-#include <X11/extensions/shape.h>
-#endif
 
 void handle_key_event(XKeyEvent *e) {
 	Client *c = find_client(e->window);

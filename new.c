@@ -6,9 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#ifdef SHAPE
-#include <X11/extensions/shape.h>
-#endif
 
 #ifdef MWM_HINTS
 static PropMwmHints *get_mwm_hints(Window);

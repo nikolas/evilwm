@@ -5,9 +5,6 @@
 #include "evilwm.h"
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef SHAPE
-#include <X11/extensions/shape.h>
-#endif
 
 static int send_xmessage(Window w, Atom a, long x);
 

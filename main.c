@@ -8,9 +8,6 @@
 #include <signal.h>
 #include <X11/cursorfont.h>
 #include <stdio.h>
-#ifdef SHAPE
-#include <X11/extensions/shape.h>
-#endif
 
 Display		*dpy;
 int 		num_screens;

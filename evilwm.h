@@ -33,9 +33,6 @@
 #endif
 
 /* readability stuff */
-#ifdef SHAPE
-#include <X11/extensions/shape.h>
-#endif
 
 #define STICKY 0	/* Desktop number for sticky clients */
 #define KEY_TO_VDESK( key ) ( ( key ) - XK_1 + 1 )
