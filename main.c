@@ -19,7 +19,7 @@ ScreenInfo	*current_screen;
 Client		*current = NULL;
 Window		initialising = None;
 XFontStruct	*font;
-Client		*head_client;
+Client		*head_client = NULL;
 Atom		xa_wm_state;
 Atom		xa_wm_change_state;
 Atom		xa_wm_protos;
