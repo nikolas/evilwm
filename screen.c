@@ -235,7 +235,11 @@ static void snap_client(Client *c) {
 	/* snap to other windows */
 	dx = dy = opt_snap;
 	for (ci = head_client; ci; ci = ci->next) {
-		if (ci != c && (ci->vdesk == vdesk || ci->vdesk == STICKY)) {
+		if (ci != c
+#ifdef VWM
+				&& (ci->vdesk == vdesk || ci->vdesk == STICKY)
+#endif
+				) {
 			if (ci->y - ci->border - c->border - c->height - c->y <= opt_snap && c->y - c->border - ci->border - ci->height - ci->y <= opt_snap) {
 				dx = absmin(dx, ci->x + ci->width - c->x + c->border + ci->border);
 				dx = absmin(dx, ci->x + ci->width - c->x - c->width);
