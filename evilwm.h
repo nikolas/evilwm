@@ -184,6 +184,7 @@ extern int		quitting;
 extern Atom		mwm_hints;
 #endif
 extern unsigned int numlockmask;
+extern unsigned int grabmask2;
 
 /* client.c */
 

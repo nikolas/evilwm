@@ -49,9 +49,13 @@ int		quitting = 0;
 Atom		mwm_hints;
 #endif
 unsigned int numlockmask = 0;
+static unsigned int grabmask1 = ControlMask|Mod1Mask;
+/* This one is used for per-client mousebutton grabs, so global: */
+unsigned int grabmask2 = Mod1Mask;
 
 static void setup_display(void);
 static void *xmalloc(size_t size);
+static unsigned int parse_modifiers(char *s);
 
 int main(int argc, char *argv[]) {
 	struct sigaction act;
@@ -111,11 +115,17 @@ int main(int argc, char *argv[]) {
 					&head_app->x, &head_app->y,
 					&head_app->width, &head_app->height);
 #ifdef VWM
-		} else if (!strcmp(argv[i], "-v") && i+1<argv) {
+		} else if (!strcmp(argv[i], "-v") && i+1<argc) {
 			i++;
 			if (head_app)
 				head_app->vdesk = atoi(argv[i]);
 #endif
+		} else if (!strcmp(argv[i], "-mask1") && i+1<argc) {
+			i++;
+			grabmask1 = parse_modifiers(argv[i]);
+		} else if (!strcmp(argv[i], "-mask2") && i+1<argc) {
+			i++;
+			grabmask2 = parse_modifiers(argv[i]);
 #ifdef STDIO
 		} else if (!strcmp(argv[i], "-V")) {
 			printf("evilwm version " VERSION "\n");
@@ -318,9 +328,9 @@ static void setup_display(void) {
 		/* So now I grab each and every one. */
 
 		for (keysym = keys_to_grab; *keysym; keysym++) {
-			grab_keysym(screens[i].root, ControlMask|Mod1Mask, *keysym);
+			grab_keysym(screens[i].root, grabmask1, *keysym);
 		}
-		grab_keysym(screens[i].root, Mod1Mask, KEY_NEXT);
+		grab_keysym(screens[i].root, grabmask2, KEY_NEXT);
 
 		/* scan all the windows on this screen */
 #ifdef XDEBUG
@@ -338,4 +348,35 @@ static void setup_display(void) {
 		XFree(wins);
 	}
 	current_screen = find_screen(DefaultScreen(dpy));
+}
+
+/* Used for overriding the default WM modifiers */
+static unsigned int parse_modifiers(char *s) {
+	static struct {
+		const char *name;
+		unsigned int mask;
+	} modifiers[9] = {
+		{ "shift", ShiftMask },
+		{ "lock", LockMask },
+		{ "control", ControlMask },
+		{ "alt", Mod1Mask },
+		{ "mod1", Mod1Mask },
+		{ "mod2", Mod2Mask },
+		{ "mod3", Mod3Mask },
+		{ "mod4", Mod4Mask },
+		{ "mod5", Mod5Mask }
+	};
+	char *tmp = strtok(s, ",+");
+	unsigned int ret = 0;
+	int i;
+	if (!tmp)
+		return;
+	do {
+		for (i = 0; i < 9; i++) {
+			if (!strcmp(modifiers[i].name, tmp))
+				ret |= modifiers[i].mask;
+		}
+		tmp = strtok(NULL, ",+");
+	} while (tmp);
+	return ret;
 }

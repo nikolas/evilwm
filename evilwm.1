@@ -1,4 +1,4 @@
-.TH evilwm 1 "March  3, 2005" "" ""
+.TH evilwm 1 "March 20, 2005" "" ""
 .SH NAME
 evilwm \- Minimalist Window Manager for X
 .SH SYNOPSIS
@@ -14,6 +14,10 @@ evilwm \- Minimalist Window Manager for X
 .I borderwidth
 .B ] [ \-snap
 .I num
+.B ] [ \-mask1
+.I modifiers
+.B ] [ \-mask2
+.I modifiers
 .B ] [ \-app
 .I name/class
 .B [ \-g
@@ -93,6 +97,16 @@ frame colour of inactive windows.
 width of window borders in pixels.
 .IP "\-snap num"
 enable snap-to-border support.  num gives the proximity in pixels to snap to.
+.IP "\-mask1 modifiers"
+.IP "\-mask2 modifiers"
+override the default keyboard modifiers used to grab keys for window manager
+functionality.
+.I mask1
+is used for most keyboard controls (default: control+alt), and
+.I mask2
+is used for mousebutton controls and cycling windows (default: alt).  Modifiers
+may be separated with + signs.  Valid modifiers are shift, lock, control, alt,
+mod1, mod2, mod3, mod4, mod5.
 .IP "\-app name/class"
 match an application by instance name and class (for help in finding these,
 use the

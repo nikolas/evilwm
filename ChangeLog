@@ -332,3 +332,6 @@ Old
 2005-03-19
 	Split geometry and vdesk out of -app option into separate -g and -v
 	options (each apply to the last -app defined).
+
+2005-03-20
+	Add -mask1 and mask2 switches to override default modifier grabs.

@@ -229,7 +229,7 @@ void handle_enter_event(XCrossingEvent *e) {
 #endif
 		select_client(c);
 #ifdef MOUSE
-		grab_button(c->parent, Mod1Mask, AnyButton);
+		grab_button(c->parent, grabmask2, AnyButton);
 #endif
 	}
 }
