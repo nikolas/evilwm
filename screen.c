@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "evilwm.h"
+#include "log.h"
 
 #ifdef VWM
 # define HAS_HIDE 1
@@ -23,9 +24,7 @@ void create_info_window(Client *c) {
 	int namew, iwinx, iwiny, iwinw, iwinh;
 	int width_inc = 1, height_inc = 1;
 
-#ifdef DEBUG
-	fprintf(stderr, "create_info_window() : Creating...\n");
-#endif
+	LOG_DEBUG("create_info_window() : Creating...\n");
 	if (c->size->flags & PResizeInc) {
 		width_inc = c->size->width_inc;
 		height_inc = c->size->height_inc;
@@ -68,9 +67,7 @@ void create_info_window(Client *c) {
 }
 
 void remove_info_window(void) {
-#ifdef DEBUG
-	fprintf(stderr, "remove_info_window() : Removing...\n");
-#endif
+	LOG_DEBUG("remove_info_window() : Removing...\n");
 	if (info_window)
 		XDestroyWindow(dpy, info_window);
 	info_window = None;
@@ -347,9 +344,7 @@ void moveresize(Client *c) {
 }
 
 void maximise_horiz(Client *c) {
-#ifdef DEBUG
-	fprintf(stderr, "SCREEN: maximise_horiz()\n");
-#endif
+	LOG_DEBUG("SCREEN: maximise_horiz()\n");
 	if (c->oldw) {
 		c->x = c->oldx;
 		c->width = c->oldw;
@@ -363,9 +358,7 @@ void maximise_horiz(Client *c) {
 }
 
 void maximise_vert(Client *c) {
-#ifdef DEBUG
-	fprintf(stderr, "SCREEN: maximise_vert()\n");
-#endif
+	LOG_DEBUG("SCREEN: maximise_vert()\n");
 	if (c->oldh) {
 		c->y = c->oldy;
 		c->height = c->oldh;
@@ -382,13 +375,9 @@ void maximise_vert(Client *c) {
 void hide(Client *c) {
 	if (c) {
 		c->ignore_unmap += 2;
-#ifdef XDEBUG
-		fprintf(stderr, "screen:XUnmapWindow(parent); ");
-#endif
+		LOG_XDEBUG("screen:XUnmapWindow(parent); ");
 		XUnmapWindow(dpy, c->parent);
-#ifdef XDEBUG
-		fprintf(stderr, "screen:XUnmapWindow(window); ");
-#endif
+		LOG_XDEBUG("screen:XUnmapWindow(window); ");
 		XUnmapWindow(dpy, c->window);
 		set_wm_state(c, IconicState);
 	}
@@ -454,9 +443,7 @@ void switch_vdesk(int v) {
 	if (current && current->vdesk != STICKY) {
 		client_update_current(current, NULL);
 	}
-#ifdef DEBUG
-	fprintf(stderr, "switch_vdesk() : Switching to desk %d\n", v);
-#endif
+	LOG_DEBUG("switch_vdesk() : Switching to desk %d\n", v);
 	for (c = head_client; c; c = c->next) {
 		wdesk = c->vdesk;
 		if (wdesk == vdesk) {
@@ -478,9 +465,7 @@ void switch_vdesk(int v) {
 		}
 	}
 	vdesk = v;
-#ifdef DEBUG
-	fprintf(stderr, "\tswitch_vdesk() : %d hidden, %d raised\n", hidden, raised);
-#endif
+	LOG_DEBUG("\tswitch_vdesk() : %d hidden, %d raised\n", hidden, raised);
 }
 #endif /* def VDESK_BOTH */
 #endif /* def VWM */

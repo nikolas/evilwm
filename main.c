@@ -2,12 +2,13 @@
  * Copyright (C) 1999-2005 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
-#include "evilwm.h"
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
 #include <X11/cursorfont.h>
 #include <stdio.h>
+#include "evilwm.h"
+#include "log.h"
 
 Display		*dpy;
 int 		num_screens;
@@ -125,14 +126,12 @@ int main(int argc, char *argv[]) {
 			grabmask2 = parse_modifiers(argv[i]);
 #ifdef STDIO
 		} else if (!strcmp(argv[i], "-V")) {
-			printf("evilwm version " VERSION "\n");
+			LOG_INFO("evilwm version " VERSION "\n");
 			exit(0);
 #endif
 		} else {
-#ifdef STDIO
-			printf("usage: evilwm [-display display] [-term termprog] [-fg foreground]\n");
-			printf("\t[-bg background] [-bw borderwidth] [-snap num] [-V]\n");
-#endif
+			LOG_INFO("usage: evilwm [-display display] [-term termprog] [-fg foreground]\n");
+			LOG_INFO("\t[-bg background] [-bw borderwidth] [-snap num] [-V]\n");
 			exit(2);
 		}
 	}
@@ -194,9 +193,7 @@ int main(int argc, char *argv[]) {
 static void *xmalloc(size_t size) {
 	void *ptr = malloc(size);
 	if (!ptr) {
-#ifdef STDIO
-		fprintf(stderr,"out of memory, looking for %d bytes\n",size);
-#endif
+		LOG_ERROR("out of memory, looking for %d bytes\n", size);
 		exit(1);
 	}
 	return ptr;
@@ -226,9 +223,7 @@ static void setup_display(void) {
 
 	dpy = XOpenDisplay(opt_display);
 	if (!dpy) { 
-#ifdef STDIO
-		fprintf(stderr, "can't open display %s\n", opt_display);
-#endif
+		LOG_ERROR("can't open display %s\n", opt_display);
 		exit(1);
 	}
 	XSetErrorHandler(handle_xerror);
@@ -257,9 +252,7 @@ static void setup_display(void) {
 		for (j = 0; j < modmap->max_keypermod; j++) {
 			if (modmap->modifiermap[i*modmap->max_keypermod+j] == XKeysymToKeycode(dpy, XK_Num_Lock)) {
 				numlockmask = (1<<i);
-#ifdef DEBUG
-				fprintf(stderr, "setup_display() : XK_Num_Lock is (1<<0x%02x)\n", i);
-#endif
+				LOG_DEBUG("setup_display() : XK_Num_Lock is (1<<0x%02x)\n", i);
 			}
 		}
 	}
@@ -328,13 +321,9 @@ static void setup_display(void) {
 		grab_keysym(screens[i].root, grabmask2, KEY_NEXT);
 
 		/* scan all the windows on this screen */
-#ifdef XDEBUG
-		fprintf(stderr, "main:XQueryTree(); ");
-#endif
+		LOG_XDEBUG("main:XQueryTree(); ");
 		XQueryTree(dpy, screens[i].root, &dw1, &dw2, &wins, &nwins);
-#ifdef XDEBUG
-		fprintf(stderr, "%d windows\n", nwins);
-#endif
+		LOG_XDEBUG("%d windows\n", nwins);
 		for (j = 0; j < nwins; j++) {
 			XGetWindowAttributes(dpy, wins[j], &winattr);
 			if (!winattr.override_redirect && winattr.map_state == IsViewable)

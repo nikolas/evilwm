@@ -2,9 +2,10 @@
  * Copyright (C) 1999-2005 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
-#include "evilwm.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include "evilwm.h"
+#include "log.h"
 
 static int send_xmessage(Window w, Atom a, long x);
 
@@ -74,17 +75,13 @@ void select_client(Client *c) {
 void remove_client(Client *c) {
 	Client *p;
 
-#ifdef DEBUG
-	fprintf(stderr, "remove_client() : Removing...\n");
-#endif
+	LOG_DEBUG("remove_client() : Removing...\n");
 
 	XGrabServer(dpy);
 	XSetErrorHandler(ignore_xerror);
 
 	if (!quitting) {
-#ifdef DEBUG
-		fprintf(stderr, "\tremove_client() : setting WithdrawnState\n");
-#endif
+		LOG_DEBUG("\tremove_client() : setting WithdrawnState\n");
 		set_wm_state(c, WithdrawnState);
 		XRemoveFromSaveSet(dpy, c->window);
 	}
@@ -109,7 +106,7 @@ void remove_client(Client *c) {
 		int i = 0;
 		for (p = head_client; p; p = p->next)
 			i++;
-		fprintf(stderr, "\tremove_client() : free(), window count now %d\n", i);
+		LOG_DEBUG("\tremove_client() : free(), window count now %d\n", i);
 	}
 #endif
 

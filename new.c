@@ -2,10 +2,11 @@
  * Copyright (C) 1999-2005 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
-#include "evilwm.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "evilwm.h"
+#include "log.h"
 
 #ifdef MWM_HINTS
 static PropMwmHints *get_mwm_hints(Window);
@@ -29,9 +30,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	c = malloc(sizeof(Client));
 	/* Don't crash the window manager, just fail the operation. */
 	if (!c) {
-#ifdef STDIO
-		fprintf(stderr, "out of memory in new_client; limping onward\n");
-#endif
+		LOG_ERROR("out of memory in new_client; limping onward\n");
 		return;
 	}
 	/* We do this first of all as a test to see if the window actually
@@ -44,9 +43,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	 * XFetchName raised BadWindow - the window has been removed before
 	 * we got a chance to grab the server. */
 	if (initialising == None) {
-#ifdef DEBUG
-		fprintf(stderr, "make_new_client() : XError occurred for initialising window - aborting...\n");
-#endif
+		LOG_DEBUG("make_new_client() : XError occurred for initialising window - aborting...\n");
 		free(c);
 		XSync(dpy, False);
 		XUngrabServer(dpy);
@@ -62,9 +59,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	c->ignore_unmap = 0;
 
 	c->size = XAllocSizeHints();
-#ifdef XDEBUG
-	fprintf(stderr, "XGetWMNormalHints(); ");
-#endif
+	LOG_XDEBUG("XGetWMNormalHints(); ");
 	XGetWMNormalHints(dpy, c->window, c->size, &dummy);
 	/* Jon Perkin reported a crash with an app called 'sunpci' which we
 	 * traced to getting divide-by-zeros because it sets PResizeInc
@@ -118,7 +113,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 		int i = 0;
 		for (p = head_client; p; p = p->next)
 			i++;
-		fprintf(stderr, "make_new_client() : new window %dx%d+%d+%d, wincount=%d\n", c->width, c->height, c->x, c->y, i);
+		LOG_DEBUG("make_new_client() : new window %dx%d+%d+%d, wincount=%d\n", c->width, c->height, c->x, c->y, i);
 	}
 #endif
 

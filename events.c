@@ -2,10 +2,11 @@
  * Copyright (C) 1999-2005 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
-#include "evilwm.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <X11/Xatom.h>
-#include <stdio.h>
+#include "evilwm.h"
+#include "log.h"
 
 void handle_key_event(XKeyEvent *e) {
 	Client *c = find_client(e->window);
@@ -133,9 +134,7 @@ void handle_configure_request(XConfigureRequestEvent *e) {
 		wc.border_width = 0;
 		XConfigureWindow(dpy, c->parent, e->value_mask, &wc);
 		send_config(c);
-#ifdef DEBUG
-		fprintf(stderr, "handle_configure_request() : window configured to %dx%d+%d+%d\n", wc.width, wc.height, wc.x, wc.y);
-#endif
+		LOG_DEBUG("handle_configure_request() : window configured to %dx%d+%d+%d\n", wc.width, wc.height, wc.x, wc.y);
 	}
 
 	wc.x = c ? c->border : e->x;
@@ -156,9 +155,7 @@ void handle_map_request(XMapRequestEvent *e) {
 		unhide(c, RAISE);
 	} else {
 		XWindowAttributes attr;
-#ifdef DEBUG
-		fprintf(stderr, "handle_map_request() : don't know this window, calling make_new_client();\n");
-#endif
+		LOG_DEBUG("handle_map_request() : don't know this window, calling make_new_client();\n");
 		XGetWindowAttributes(dpy, e->window, &attr);
 		make_new_client(e->window, find_screen(attr.root));
 	}
@@ -168,10 +165,6 @@ void handle_unmap_event(XUnmapEvent *e) {
 	Client *c = find_client(e->window);
 
 	if (c) {
-#ifdef DEBUG
-		/* fprintf(stderr, "handle_unmap_event() : ignore_unmap = %d\n", c->ignore_unmap);
-		 * */
-#endif
 		if (c->ignore_unmap) c->ignore_unmap--;
 		else remove_client(c);
 	}
