@@ -26,6 +26,8 @@ DEFINES += -DMWM_HINTS
 
 # To support virtual desktops, uncomment one or both of the following 2 lines.
 DEFINES += -DVWM
+# I want to deprecate support for the 'vdesk' external pager.  Let me know if
+# you really use it.
 #DEFINES += -DVDESK
 # VWM enables the built-in virtual desktop code and VDESK allows the use
 # of the extern pager program "vdesk".
@@ -66,7 +68,6 @@ subrev = 17
 distdir = evilwm-$(version).$(revision).$(subrev).orig
 disttar = evilwm_$(version).$(revision).$(subrev).orig.tar.gz
 
-#DEFINES += -DSANITY	# active sanity checks
 #DEFINES += -DXDEBUG	# show some X calls
 
 DEFINES += -DVERSION=\"$(version).$(revision).$(subrev)\" $(DEBIAN)

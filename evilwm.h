@@ -208,9 +208,6 @@ void scan_windows(void);
 void setup_display(void);
 
 /* misc.c */
-#ifdef SANITY
-void sanity_check(void);
-#endif
 #ifdef VDESK_BOTH
 void spawn_vdesk(int todesk, Client *c);
 #endif

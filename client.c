@@ -60,7 +60,7 @@ void send_config(Client *c) {
 	ce.height = c->height;
 	ce.border_width = 0;
 	ce.above = None;
-	ce.override_redirect = 0;
+	ce.override_redirect = False;
 
 	XSendEvent(dpy, c->window, False, StructureNotifyMask, (XEvent *)&ce);
 }
