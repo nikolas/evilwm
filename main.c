@@ -288,13 +288,13 @@ static void setup_display(void) {
 		char *ds, *colon, *dot;
 		ds = DisplayString(dpy);
 		/* set up DISPLAY environment variable to use */
-		colon = rindex(ds, ':');
+		colon = strrchr(ds, ':');
 		if (colon && num_screens > 1) {
 			screens[i].display = xmalloc(14 + strlen(ds));
 			strcpy(screens[i].display, "DISPLAY=");
 			strcat(screens[i].display, ds);
-			colon = rindex(screens[i].display, ':');
-			dot = index(colon, '.');
+			colon = strrchr(screens[i].display, ':');
+			dot = strchr(colon, '.');
 			if (!dot)
 				dot = colon + strlen(colon);
 			snprintf(dot, 5, ".%d", i);
