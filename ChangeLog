@@ -342,3 +342,4 @@ Old
 
 2005-04-04
 	Use strchr,strrchr instead of index,rindex.
+	Set border size to frame size when unmanaging window.

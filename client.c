@@ -70,7 +70,10 @@ void remove_client(Client *c) {
 	}
 
 	ungravitate(c);
-	XSetWindowBorderWidth(dpy, c->window, 1);
+	/* Setting window's border to the frame width means windows don't
+	 * move around on WM exit.  OTOH, subsequent WMs might not reset them
+	 * to 0.  What's considered "correct"? */
+	XSetWindowBorderWidth(dpy, c->window, c->border);
 	XReparentWindow(dpy, c->window, c->screen->root, c->x, c->y);
 	if (c->parent)
 		XDestroyWindow(dpy, c->parent);
