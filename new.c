@@ -13,6 +13,8 @@
 #ifdef MWM_HINTS
 static PropMwmHints *get_mwm_hints(Window);
 #endif
+static void init_position(Client *c);
+static void reparent(Client *c);
 
 void make_new_client(Window w, ScreenInfo *s) {
 	Client *c;
@@ -182,7 +184,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 #endif
 }
 
-void init_position(Client *c) {
+static void init_position(Client *c) {
 #ifdef MOUSE
 	int x, y;
 #endif
@@ -222,7 +224,7 @@ void init_position(Client *c) {
 		c->y = -c->border;
 }
 
-void reparent(Client *c) {
+static void reparent(Client *c) {
 	XSetWindowAttributes p_attr;
 
 	p_attr.override_redirect = True;

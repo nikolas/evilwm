@@ -49,18 +49,8 @@ Atom		mwm_hints;
 #endif
 unsigned int numlockmask = 0;
 
+static void setup_display(void);
 static void *xmalloc(size_t size);
-
-static void *xmalloc(size_t size) {
-	void *ptr = malloc(size);
-	if (!ptr) {
-#ifdef STDIO
-		fprintf(stderr,"out of memory, looking for %d bytes\n",size);
-#endif
-		exit(1);
-	}
-	return ptr;
-}
 
 int main(int argc, char *argv[]) {
 	struct sigaction act;
@@ -160,7 +150,18 @@ int main(int argc, char *argv[]) {
 	return 1;
 }
 
-void setup_display() {
+static void *xmalloc(size_t size) {
+	void *ptr = malloc(size);
+	if (!ptr) {
+#ifdef STDIO
+		fprintf(stderr,"out of memory, looking for %d bytes\n",size);
+#endif
+		exit(1);
+	}
+	return ptr;
+}
+
+static void setup_display(void) {
 	XGCValues gv;
 	XSetWindowAttributes attr;
 	XColor dummy;

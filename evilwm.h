@@ -205,7 +205,6 @@ void handle_shape_event(XShapeEvent *e);
 
 int main(int argc, char *argv[]);
 void scan_windows(void);
-void setup_display(void);
 
 /* misc.c */
 #ifdef VDESK_BOTH
@@ -224,9 +223,7 @@ void show_event(XEvent e);
 
 /* new.c */
 
-void init_position(Client *c);
 void make_new_client(Window w, ScreenInfo *s);
-void reparent(Client *c);
 
 /* screen.c */
 
