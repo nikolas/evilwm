@@ -134,7 +134,7 @@ void handle_configure_request(XConfigureRequestEvent *e) {
 		wc.border_width = 0;
 		XConfigureWindow(dpy, c->parent, e->value_mask, &wc);
 		send_config(c);
-		LOG_DEBUG("handle_configure_request() : window configured to %dx%d+%d+%d\n", wc.width, wc.height, wc.x, wc.y);
+		LOG_DEBUG("handle_configure_request() : window configured to %dx%d+%d+%d\n", c->width, c->height, c->x, c->y);
 	}
 
 	wc.x = c ? c->border : e->x;
