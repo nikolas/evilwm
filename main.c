@@ -365,7 +365,7 @@ static unsigned int parse_modifiers(char *s) {
 	unsigned int ret = 0;
 	int i;
 	if (!tmp)
-		return;
+		return 0;
 	do {
 		for (i = 0; i < 9; i++) {
 			if (!strcmp(modifiers[i].name, tmp))
