@@ -31,7 +31,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 
 	XGrabServer(dpy);
 
-	c = (Client *)malloc(sizeof(Client));
+	c = malloc(sizeof(Client));
 	/* Don't crash the window manager, just fail the operation. */
 	if (!c) {
 #ifdef STDIO

@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
 		else if (!strcmp(argv[i], "-bw") && i+1<argc)
 			opt_bw = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-term") && i+1<argc) {
-			opt_term = (const char **)xmalloc(3 * sizeof(const char *));
+			opt_term = xmalloc(3 * sizeof(char *));
 			opt_term[0] = argv[++i];
 			opt_term[1] = opt_term[0];
 			opt_term[2] = NULL;
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	if (!opt_term) {
-		opt_term = (const char **)xmalloc(3 * sizeof(const char *));
+		opt_term = xmalloc(3 * sizeof(char *));
 		opt_term[0] = DEF_TERM;
 		opt_term[1] = opt_term[0];
 		opt_term[2] = NULL;
@@ -247,14 +247,14 @@ static void setup_display(void) {
 
 	/* now set up each screen in turn */
 	num_screens = ScreenCount(dpy);
-	screens = (ScreenInfo *)xmalloc(num_screens * sizeof(ScreenInfo));
+	screens = xmalloc(num_screens * sizeof(ScreenInfo));
 	for (i = 0; i < num_screens; i++) {
 		char *ds, *colon, *dot;
 		ds = DisplayString(dpy);
 		/* set up DISPLAY environment variable to use */
 		colon = rindex(ds, ':');
 		if (colon && num_screens > 1) {
-			screens[i].display = (char *)xmalloc(14 + strlen(ds));
+			screens[i].display = xmalloc(14 + strlen(ds));
 			strcpy(screens[i].display, "DISPLAY=");
 			strcat(screens[i].display, ds);
 			colon = rindex(screens[i].display, ':');
