@@ -1,0 +1,134 @@
+evilwm 1.0 by Ciaran Anscomb <evilwm@6809.org.uk>
+
+evilwm is a minimalist window manager for the X Window System.
+
+The name evil came from Stuart 'Stuii' Ford, who thinks that any software
+I use must be evil and masochistic.  In reality, this window manager is
+clean and easy to use.
+
+
+FEATURES
+
+ * No window decorations apart from a simple 1 pixel border.
+ * No icons.
+ * Good keyboard control, including repositioning and maximise toggles.
+ * Solid window drags (compile time option - may be slow on old machines).
+ * Virtual desktops.
+ * Small binary size (even with everything turned on).
+
+
+INSTALLATION
+
+Please see the file INSTALL for details on building evilwm.
+
+
+STARTING EVILWM
+
+If you use a session manager from GNOME or KDE or something like that,
+you'll have to read its documentation to see how to set which window
+manager it uses.
+
+However if you're just using a standard X desktop, you can start evilwm
+by just changing your ~/.xinitrc file.  Here's a pretty standard sample
+file:
+
+-----CUT HERE-----
+[ -f $HOME/.Xdefaults ] && xrdb $HOME/.Xdefaults
+xsetroot -solid \#400040 -cursor_name top_left_arrow
+/usr/bin/evilwm &
+exec xclock -digital -padding 2 -g -0+0
+-----CUT HERE-----
+
+Note that in this case 'xclock' is the magic process (the one that if
+you kill it, your session dies).  You could change it around and have
+evilwm be your magic process if you prefer.  Also note that it sets the
+cursor shape and background colour with standard X tools (evilwm won't
+do this for you - the tools already exist!).
+
+
+CONTROLS
+
+You can use the mouse to manipulate windows either by click/dragging
+the 1 pixel border, or by holding down Alt and doing so anywhere in the
+client window.  The controls are:
+
+Button 1	Move window
+Button 2	Resize window
+Button 3	Lower window
+
+Most keyboard controls are used by holding down Control and Alt, then
+pressing a key.  Available functions are:
+
+Return		Spawn new xterm
+Escape		Delete current window
+Insert		Lower current window
+H, J, K, L	Move window left, down, up or right (16 pixels)
+Y, U, B, N	Move window to top-left, top-right, bottom-left or
+		bottom-right of screen
+I		Show information about current window
+Equals		Maximise current window vertically (toggle)
+X		Maximise current window (toggle)
+
+If compiled with virtual desktop support, these functions are also
+available:
+
+F		Fix or unfix window (toggle its 'sticky' status)
+1 - 8		Switch virtual desktop
+Left		Previous virtual desktop
+Right		Next virtual desktop
+
+In addition to the above, Alt+Tab can be used to cycle through windows
+on screen.
+
+
+ACKNOWLEDGEMENTS
+
+The original code base for this project was that of aewm by Decklin
+Foster.  His code is very clean and, in later versions, very well
+commented.  I'd recommend it if you want to learn more about window
+manager theory (or indeed want title bars, etc ;).
+
+http://www.red-bean.com/~decklin/aewm/
+		- aewm homepage
+
+
+LICENCE
+
+evilwm 1.0
+Copyright (C) 1999-2002 Ciaran Anscomb <evilwm@6809.org.uk>
+
+This is free software.  You can do what you want to it, but if it
+breaks something, you get to pay for the counselling.  The code was
+originally based on aewm, so this is distributed under the same terms,
+which follow.
+
+
+AEWM LICENCE
+
+Copyright (c) 1998-2000 Decklin Foster.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS", WITHOUT ANY EXPRESS
+OR IMPLIED WARRANTIES OF ANY KIND. IN NO EVENT SHALL THE AUTHOR BE
+HELD LIABLE FOR ANY DAMAGES CONNECTED WITH THE USE OF THIS PROGRAM.
+
+You are granted permission to copy, publish, distribute, and/or sell
+copies of this program and any modified versions or derived works,
+provided that this copyright and notice are not removed or altered.
+
+Portions of the code were based on 9wm, which contains this license:
+
+> 9wm is free software, and is Copyright (c) 1994 by David Hogan.
+> Permission is granted to all sentient beings to use this software,
+> to make copies of it, and to distribute those copies, provided
+> that:
+>
+>     (1) the copyright and licence notices are left intact
+>     (2) the recipients are aware that it is free software
+>     (3) any unapproved changes in functionality are either
+>           (i) only distributed as patches
+>       or (ii) distributed as a new program which is not called 9wm
+>               and whose documentation gives credit where it is due
+>     (4) the author is not held responsible for any defects
+>         or shortcomings in the software, or damages caused by it.
+>
+> There is no warranty for this software.  Have a nice day.

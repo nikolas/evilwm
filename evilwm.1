@@ -1,0 +1,100 @@
+.TH evilwm 1 "October 15, 2003" "" ""
+.SH NAME
+evilwm \- Minimalist Window Manager for X
+.SH SYNOPSIS
+.B evilwm [ \-display
+.I display
+.B ] [ \-term
+.I termprog
+.B ] [ \-fg
+.I foreground
+.B ] [ \-bg
+.I background
+.B ] [ \-bw
+.I borderwidth
+.B ] [ \-snap
+.I num
+.B ] [ \-V ]
+.SH DESCRIPTION
+.B evilwm
+is a minimalist window manager based on aewm, extended to feature
+many keyboard controls, and otherwise altered to be more friendly.
+.PP
+In
+.BR evilwm ,
+the focus follows the mouse pointer, and focus if not lost is
+you stray onto the root window.  The current window border is shaded
+gold, with other windows left as a dark grey.
+.PP
+You can use the mouse to manipulate windows either by click/dragging
+the 1 pixel border, or by holding down Alt and doing so anywhere in the
+client window. The controls are:
+.IP "Button 1"
+Move window.
+.IP "Button 2"
+Resize window.
+.IP "Button 3"
+Lower window.
+.PP
+Most keyboard controls are used by holding down Control and Alt, then
+pressing a key. Available functions are:
+.IP Return
+Spawn new terminal.
+.IP Escape
+Delete current window.
+.IP Insert
+Lower current window.
+.IP "H, J, K, L"
+Move window left, down, up or right (16 pixels).
+.IP "Y, U, B, N"
+Move window to top-left, top-right, bottom-left or
+bottom-right of screen.
+.IP I
+Show information about current window.
+.IP Equals
+Maximise current window vertically (toggle).
+.IP X
+Maximise current window (toggle).
+.PP
+If compiled with virtual desktop support, these functions are also available: 
+.IP F
+Fix or unfix current window.
+.IP "1 - 8"
+Switch virtual desktop.
+.IP Left
+Previous virtual desktop.
+.IP Right
+Next virtual desktop.
+.PP
+In addition to the above, Alt+Tab can be used to cycle through windows
+on screen.
+.PP
+To make 
+.B evilwm
+exit, you have to kill the process.
+.SH OPTIONS
+.IP "-display display"
+specifies the X display to run on.
+.IP "-term termprog"
+specifies an alternative program to run when spawning a new terminal (defaults
+to xterm, or x-terminal-emulator in Debian).
+.IP "-fg foreground"
+frame colour of currently active window.
+.IP "-bg background"
+frame colour of inactive windows.
+.IP "-bw borderwidth"
+width of window borders in pixels.
+.IP "-snap num"
+enable snap-to-border support.  num gives the proximity in pixels to snap to.
+.IP "-V"
+print version number.
+.SH BUGS
+The author's idea of friendly may differ to that of many other people.
+.SH AUTHOR
+Ciaran Anscomb <evilwm@6809.org.uk>.
+.br
+aewm was written by Decklin Foster <fosterd@hartwick.edu>.
+.br
+9wm was written by David Hogan <dhog@cs.su.oz.au>.
+.SH "SEE ALSO"
+.BR xterm (1)

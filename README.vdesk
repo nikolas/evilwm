@@ -1,0 +1,9 @@
+VDESK EXTERNAL PAGER
+
+vdesk is a small standalone application for providing virtual desktop
+support to window managers that do not support it themselves.  evilwm
+*does* have inbuilt virtual desktops, but if you want to support vdesk you
+can set a compile-time option to do so - read the Makefile for details.
+
+vdesk was written by Adam Sampson <azz@gnu.org> and is available from his
+web site:  http://azz.us-lot.org/code.html
