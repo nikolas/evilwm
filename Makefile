@@ -61,17 +61,14 @@ DEFINES += -DCOLOURMAP
 
 # ----- You shouldn't need to change anything under this line ------ #
 
-version = 0
-revision = 99
-subrev = 17
+version = 0.99.17
 
-distdir = evilwm-$(version).$(revision).$(subrev).orig
-disttar = evilwm_$(version).$(revision).$(subrev).orig.tar.gz
+distname = evilwm-$(version)
 
 #DEFINES += -DXDEBUG	# show some X calls
 
-DEFINES += -DVERSION=\"$(version).$(revision).$(subrev)\" $(DEBIAN)
-CFLAGS  += $(INCLUDES) $(DEFINES) -Os -Wall
+DEFINES += -DVERSION=\"$(version)\" $(DEBIAN)
+CFLAGS  += $(INCLUDES) $(DEFINES) -Os -g -Wall
 #CFLAGS  += $(INCLUDES) $(DEFINES) -g -Wall
 CFLAGS  += -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual -Wshadow -Waggregate-return -Wnested-externs -Winline -Wwrite-strings -Wundef
 LDFLAGS += $(LDPATH) $(LIBS)
@@ -85,10 +82,10 @@ all: evilwm
 evilwm: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS)
 
-allinone:
-	cat evilwm.h $(SRCS) | sed 's/^#include.*evilwm.*$$//' > allinone.c
-	$(CC) $(CFLAGS) -o evilwm allinone.c $(LDFLAGS)
-	rm allinone.c
+#allinone:
+#	cat evilwm.h $(SRCS) | sed 's/^#include.*evilwm.*$$//' > allinone.c
+#	$(CC) $(CFLAGS) -o evilwm allinone.c $(LDFLAGS)
+#	rm allinone.c
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $<
@@ -102,19 +99,17 @@ doinstall:
 
 install: doinstall
 
-dist: clean
-	cd debian && debuild clean
-	mkdir /var/tmp/$(distdir)
-	cp -a . /var/tmp/$(distdir)/
-	cd /var/tmp && tar cfz $(disttar) $(distdir) --exclude=$(distdir)/CVS --exclude=$(distdir)/debian --exclude=$(distdir)/.\#\* && rm -rf $(distdir)
-	mv /var/tmp/$(disttar) ..
+dist:
+	darcs dist --dist-name $(distname)
+	mv $(distname).tar.gz ..
 
 debuild: dist
-	-cd ..; rm -rf $(distdir)/
-	cd ..; tar xfz $(disttar)
-	cp -a debian ../$(distdir)/
-	rm -rf ../$(distdir)/debian/CVS/
-	cd ../$(distdir); debuild
+	-cd ..; rm -rf $(distname)/ $(distname).orig/
+	cd ..; mv $(distname).tar.gz evilwm_$(version).orig.tar.gz
+	cd ..; tar xfz evilwm_$(version).orig.tar.gz
+	cp -a debian ../$(distname)/
+	rm -rf ../$(distname)/debian/_darcs/
+	cd ../$(distname); debuild
 
 clean:
 	rm -f evilwm evilwm.exe $(OBJS)
