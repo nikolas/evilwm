@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2002 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2005 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 #include "evilwm.h"
@@ -118,10 +118,6 @@ int main(int argc, char *argv[]) {
 	sigaction(SIGHUP, &act, NULL);
 
 	setup_display();
-
-#ifdef SHAPE
-	have_shape = XShapeQueryExtension(dpy, &shape_event, &i);
-#endif
 
 	/* main event loop here */
 	for (;;) {
@@ -242,6 +238,11 @@ void setup_display() {
 		| ButtonMask
 #endif
 		;
+
+	/* SHAPE extension? */
+#ifdef SHAPE
+	have_shape = XShapeQueryExtension(dpy, &shape_event, &i);
+#endif
 
 	/* now set up each screen in turn */
 	num_screens = ScreenCount(dpy);

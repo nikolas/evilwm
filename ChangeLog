@@ -318,3 +318,6 @@ Old
 2004-07-11
 	Coalesce move() and resize() into moveresize().
 	Refactor window move/resize-by-mouse to eliminate arg to moveresize().
+
+2004-07-13
+	Fix so shape information is applied on WM startup.
