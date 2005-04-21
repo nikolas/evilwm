@@ -11,12 +11,6 @@
 
 #include "keymap.h"
 
-#ifdef VWM
-#ifdef VDESK
-#define VDESK_BOTH 1
-#endif
-#endif
-
 /* default settings */
 
 #define DEF_FONT	"variable"
@@ -76,8 +70,8 @@
 	}
 #define setmouse(w, x, y) \
 	XWarpPointer(dpy, None, w, 0, 0, 0, 0, x, y)
-#define gravitate(c) { c->x += c->border; c->y += c->border; }
-#define ungravitate(c) { c->x -= c->border; c->y -= c->border; }
+#define gravitate(c) gravitate_client(c, 1)
+#define ungravitate(c) gravitate_client(c, -1)
 
 /* screen structure */
 
@@ -109,12 +103,18 @@ struct Client {
 #ifdef COLOURMAP
 	Colormap	cmap;
 #endif
-	XSizeHints	*size;
 	int		ignore_unmap;
 
 	int		x, y, width, height;
-	int		oldx, oldy, oldw, oldh;  /* used when maximising */
 	int		border;
+	int		oldx, oldy, oldw, oldh;  /* used when maximising */
+
+	int		min_width, min_height;
+	int		max_width, max_height;
+	int		width_inc, height_inc;
+	int		base_width, base_height;
+	int		win_gravity;
+	int		old_border;
 #ifdef VWM
 	int		vdesk;
 #endif /* def VWM */
@@ -136,20 +136,11 @@ struct Application {
 /* declarations for global variables in main.c */
 
 extern Display		*dpy;
-/* extern int		screen;
-extern Window		root;
-extern GC		invert_gc;
-#ifdef VWM
-extern XColor		fg, bg, fc;
-#else
-extern XColor		fg, bg;
-#endif
-*/
 extern int		num_screens;
 extern ScreenInfo	*screens;
 extern ScreenInfo	*current_screen;
 extern Client		*current;
-extern Window		initialising;
+extern volatile Window	initialising;
 extern XFontStruct	*font;
 extern Client		*head_client;
 extern Application	*head_app;
@@ -187,6 +178,7 @@ extern unsigned int grabmask2;
 
 Client *find_client(Window w);
 int wm_state(Client *c);
+void gravitate_client(Client *c, int sign);
 void select_client(Client *c);
 void remove_client(Client *c);
 void send_config(Client *c);
@@ -199,7 +191,6 @@ void client_update_current(Client *c, Client *newcurrent);
 
 void handle_key_event(XKeyEvent *e);
 void handle_button_event(XButtonEvent *e);
-/* static void handle_client_message(XClientMessageEvent *e); */
 #ifdef COLOURMAP
 void handle_colormap_change(XColormapEvent *e);
 #endif
@@ -218,11 +209,6 @@ void handle_shape_event(XShapeEvent *e);
 int main(int argc, char *argv[]);
 void scan_windows(void);
 
-/* misc.c */
-#ifdef VDESK_BOTH
-void spawn_vdesk(int todesk, Client *c);
-#endif
-
 /* void do_event_loop(void); */
 int handle_xerror(Display *dsply, XErrorEvent *e);
 int ignore_xerror(Display *dsply, XErrorEvent *e);
@@ -236,6 +222,7 @@ void show_event(XEvent e);
 /* new.c */
 
 void make_new_client(Window w, ScreenInfo *s);
+CARD32 get_wm_normal_hints(Client *c);
 
 /* screen.c */
 
@@ -253,12 +240,5 @@ void next(void);
 #ifdef VWM
 void hide(Client *c);
 void switch_vdesk(int v);
-#else
-# ifdef VDESK
- void hide(Client *c);
-# endif
 #endif /* def VWM */
-#ifdef VDESK
-void handle_client_message(XClientMessageEvent *e);
-#endif
 ScreenInfo *find_screen(Window root);

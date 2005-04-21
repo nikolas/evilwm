@@ -59,9 +59,6 @@ void handle_key_event(XKeyEvent *e) {
 #ifdef VWM
 		case KEY_FIX:
 			c->vdesk = c->vdesk == STICKY ? vdesk : STICKY;
-#ifdef VDESK_BOTH
-			spawn_vdesk(c->vdesk, c);
-#endif
 			client_update_current(c, current);
 			break;
 #endif
@@ -187,15 +184,6 @@ void handle_reparent_event(XReparentEvent *e) {
 	}
 }
 
-#ifdef VDESK
-void handle_client_message(XClientMessageEvent *e) {
-	Client *c = find_client(e->window);
-
-	if (c && e->message_type == xa_wm_change_state &&
-		e->format == 32 && e->data.l[0] == IconicState) hide(c);
-}
-#endif
-
 #ifdef COLOURMAP
 void handle_colormap_change(XColormapEvent *e) {
 	Client *c = find_client(e->window);
@@ -209,11 +197,11 @@ void handle_colormap_change(XColormapEvent *e) {
 
 void handle_property_change(XPropertyEvent *e) {
 	Client *c = find_client(e->window);
-	long dummy;
 
 	if (c) {
-		if (e->atom == XA_WM_NORMAL_HINTS)
-				XGetWMNormalHints(dpy, c->window, c->size, &dummy);
+		if (e->atom == XA_WM_NORMAL_HINTS) {
+			get_wm_normal_hints(c);
+		}
 	}
 }
 

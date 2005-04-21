@@ -24,14 +24,9 @@ DEFINES += -DINFOBANNER
 # To use this option, you need to have the Motif development files installed.
 DEFINES += -DMWM_HINTS
 
-# To support virtual desktops, uncomment one or both of the following 2 lines.
+# To support virtual desktops, uncomment the following line.
 DEFINES += -DVWM
-# I want to deprecate support for the 'vdesk' external pager.  Let me know if
-# you really use it.
-#DEFINES += -DVDESK
-# VWM enables the built-in virtual desktop code and VDESK allows the use
-# of the extern pager program "vdesk".
-#
+
 # To support shaped windows properly, uncomment the following two lines:
 DEFINES += -DSHAPE
 LIBS	+= -lXext
@@ -61,7 +56,7 @@ DEFINES += -DCOLOURMAP
 
 # ----- You shouldn't need to change anything under this line ------ #
 
-version = 0.99.18
+version = 0.99.18pre1
 
 distname = evilwm-$(version)
 

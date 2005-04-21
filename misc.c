@@ -30,27 +30,6 @@ void spawn(const char *const cmd[]) {
 		wait(NULL);
 }
 
-#ifdef VDESK_BOTH
-void spawn_vdesk(int todesk, Client *c) {
-	char *vdesk_cmd[5];
-	char vdesk_num[2];
-	char vdesk_window[11];
-
-	vdesk_cmd[3] = vdesk_cmd[4] = NULL;
-	vdesk_cmd[0] = "vdesk";
-	vdesk_cmd[1] = "vdesk";
-	vdesk_num[0] = todesk + '0';
-	vdesk_num[1] = 0;
-	vdesk_cmd[2] = vdesk_num;
-	if (c) {
-		snprintf(vdesk_window, sizeof(vdesk_window), "%ld", c->window);
-		vdesk_cmd[3] = vdesk_window;
-	}
-	LOG_DEBUG("%s %s %s %s\n", vdesk_cmd[0], vdesk_cmd[1], vdesk_cmd[2], vdesk_cmd[3]);
-	spawn(vdesk_cmd);
-}
-#endif
-
 void handle_signal(int signo) {
 	int i;
 	/* SIGCHLD check no longer necessary */

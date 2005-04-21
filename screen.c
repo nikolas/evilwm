@@ -11,9 +11,6 @@
 #ifdef VWM
 # define HAS_HIDE 1
 #endif
-#ifdef VDESK
-# define HAS_HIDE 1
-#endif
 
 #ifdef INFOBANNER
 Window info_window = None;
@@ -22,15 +19,11 @@ void create_info_window(Client *c) {
 	char *name;
 	char buf[24];
 	int namew, iwinx, iwiny, iwinw, iwinh;
-	int width_inc = 1, height_inc = 1;
+	int width_inc = c->width_inc, height_inc = c->height_inc;
 
 	LOG_DEBUG("create_info_window() : Creating...\n");
-	if (c->size->flags & PResizeInc) {
-		width_inc = c->size->width_inc;
-		height_inc = c->size->height_inc;
-	}
-	snprintf(buf, sizeof(buf), "%dx%d+%d+%d", c->width/width_inc,
-		c->height/height_inc, c->x, c->y);
+	snprintf(buf, sizeof(buf), "%dx%d+%d+%d", (c->width-c->base_width)/width_inc,
+		(c->height-c->base_height)/height_inc, c->x, c->y);
 	iwinw = XTextWidth(font, buf, strlen(buf)) + 2;
 	iwinh = font->max_bounds.ascent + font->max_bounds.descent;
 	XFetchName(dpy, c->window, &name);
@@ -77,7 +70,7 @@ void remove_info_window(void) {
 void draw_outline(Client *c) {
 #ifndef INFOBANNER_MOVERESIZE
 	char buf[24];
-	int width_inc = 1, height_inc = 1;
+	int width_inc = c->width_inc, height_inc = c->height_inc;
 #endif  /* ndef INFOBANNER */
 
 	XDrawRectangle(dpy, c->screen->root, c->screen->invert_gc,
@@ -85,12 +78,8 @@ void draw_outline(Client *c) {
 		c->width + c->border, c->height + c->border);
 
 #ifndef INFOBANNER_MOVERESIZE
-	if (c->size->flags & PResizeInc) {
-		width_inc = c->size->width_inc;
-		height_inc = c->size->height_inc;
-	}
-	snprintf(buf, sizeof(buf), "%dx%d+%d+%d", c->width/width_inc,
-			c->height/height_inc, c->x, c->y);
+	snprintf(buf, sizeof(buf), "%dx%d+%d+%d", (c->width-c->base_width)/width_inc,
+			(c->height-c->base_height)/height_inc, c->x, c->y);
 	XDrawString(dpy, c->screen->root, c->screen->invert_gc,
 		c->x + c->width - XTextWidth(font, buf, strlen(buf)) - SPACE,
 		c->y + c->height - SPACE,
@@ -109,30 +98,14 @@ void get_mouse_position(int *x, int *y, Window root) {
 #endif
 
 void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2) {
-	int basex, basey;
-
 	c->width = abs(x1 - x2);
 	c->height = abs(y1 - y2);
-
-	if (c->size->flags & PResizeInc) {
-		basex = (c->size->flags & PBaseSize) ? c->size->base_width :
-			(c->size->flags & PMinSize) ? c->size->min_width : 0;
-		basey = (c->size->flags & PBaseSize) ? c->size->base_height :
-			(c->size->flags & PMinSize) ? c->size->min_height : 0;
-		c->width -= (c->width - basex) % c->size->width_inc;
-		c->height -= (c->height - basey) % c->size->height_inc;
-	}
-
-	if (c->size->flags & PMinSize) {
-		if (c->width < c->size->min_width) c->width = c->size->min_width;
-		if (c->height < c->size->min_height) c->height = c->size->min_height;
-	}
-
-	if (c->size->flags & PMaxSize) {
-		if (c->width > c->size->max_width) c->width = c->size->max_width;
-		if (c->height > c->size->max_height) c->height = c->size->max_height;
-	}
-
+	c->width -= (c->width - c->base_width) % c->width_inc;
+	c->height -= (c->height - c->base_height) % c->height_inc;
+	if (c->min_width && c->width < c->min_width) c->width = c->min_width;
+	if (c->min_height && c->height < c->min_height) c->height = c->min_height;
+	if (c->max_width && c->width > c->max_width) c->width = c->max_width;
+	if (c->max_height && c->height > c->max_height) c->height = c->max_height;
 	c->x = (x1 <= x2) ? x1 : x1 - c->width;
 	c->y = (y1 <= y2) ? y1 : y1 - c->height;
 }
@@ -377,8 +350,11 @@ void hide(Client *c) {
 		c->ignore_unmap += 2;
 		LOG_XDEBUG("screen:XUnmapWindow(parent); ");
 		XUnmapWindow(dpy, c->parent);
+		/* Unmapping parent should unmap reparented window too */
+		/*
 		LOG_XDEBUG("screen:XUnmapWindow(window); ");
 		XUnmapWindow(dpy, c->window);
+		*/
 		set_wm_state(c, IconicState);
 	}
 }
@@ -422,12 +398,6 @@ void next(void) {
 }
 
 #ifdef VWM
-#ifdef VDESK_BOTH
-void switch_vdesk(int v) {
-	spawn_vdesk(v, NULL);
-	vdesk = v;
-}
-#else
 void switch_vdesk(int v) {
 	Client *c;
 	int wdesk;
@@ -467,7 +437,6 @@ void switch_vdesk(int v) {
 	vdesk = v;
 	LOG_DEBUG("\tswitch_vdesk() : %d hidden, %d raised\n", hidden, raised);
 }
-#endif /* def VDESK_BOTH */
 #endif /* def VWM */
 
 ScreenInfo *find_screen(Window root) {

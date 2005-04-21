@@ -15,7 +15,7 @@ int 		num_screens;
 ScreenInfo	*screens;
 ScreenInfo	*current_screen;
 Client		*current = NULL;
-Window		initialising = None;
+volatile Window	initialising = None;
 XFontStruct	*font;
 Client		*head_client = NULL;
 Application	*head_app = NULL;
@@ -165,10 +165,6 @@ int main(int argc, char *argv[]) {
 				handle_configure_request(&ev.xconfigurerequest); break;
 			case MapRequest:
 				handle_map_request(&ev.xmaprequest); break;
-#ifdef VDESK
-			case ClientMessage:
-				handle_client_message(&ev.xclient); break;
-#endif
 #ifdef COLOURMAP
 			case ColormapNotify:
 				handle_colormap_change(&ev.xcolormap); break;

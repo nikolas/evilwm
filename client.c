@@ -46,6 +46,49 @@ void send_config(Client *c) {
 	XSendEvent(dpy, c->window, False, StructureNotifyMask, (XEvent *)&ce);
 }
 
+/* Support for 'gravitating' clients based on their original
+ * border width and configured window manager frame width. */
+void gravitate_client(Client *c, int sign) {
+	int d0 = sign * c->border;
+	int d1 = sign * c->old_border;
+	int d2 = sign * (2*c->old_border - c->border);
+	switch (c->win_gravity) {
+		case NorthGravity:
+			c->x += d1;
+			c->y += d0;
+			break;
+		case NorthEastGravity:
+			c->x += d2;
+			c->y += d0;
+			break;
+		case EastGravity:
+			c->x += d2;
+			c->y += d1;
+			break;
+		case SouthEastGravity:
+			c->x += d2;
+			c->y += d2;
+			break;
+		case SouthGravity:
+			c->x += d1;
+			c->y += d2;
+			break;
+		case SouthWestGravity:
+			c->x += d0;
+			c->y += d2;
+			break;
+		case WestGravity:
+			c->x += d0;
+			c->y += d1;
+			break;
+		case NorthWestGravity:
+		default:
+			c->x += d0;
+			c->y += d0;
+			break;
+	}
+}
+
 void select_client(Client *c) {
 #ifdef COLOURMAP
 	XInstallColormap(dpy, c->cmap);
@@ -70,10 +113,8 @@ void remove_client(Client *c) {
 	}
 
 	ungravitate(c);
-	/* Setting window's border to the frame width means windows don't
-	 * move around on WM exit.  OTOH, subsequent WMs might not reset them
-	 * to 0.  What's considered "correct"? */
-	XSetWindowBorderWidth(dpy, c->window, c->border);
+	/* Restore window's original border width */
+	XSetWindowBorderWidth(dpy, c->window, c->old_border);
 	XReparentWindow(dpy, c->window, c->screen->root, c->x, c->y);
 	if (c->parent)
 		XDestroyWindow(dpy, c->parent);
@@ -82,7 +123,6 @@ void remove_client(Client *c) {
 	else for (p = head_client; p && p->next; p = p->next)
 		if (p->next == c) p->next = c->next;
 
-	if (c->size) XFree(c->size);
 	if (current == c)
 		current = NULL;  /* an enter event should set this up again */
 	free(c);

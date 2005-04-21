@@ -11,14 +11,18 @@
 #ifdef MWM_HINTS
 static PropMwmHints *get_mwm_hints(Window);
 #endif
-static void init_position(Client *c);
+#ifdef DEBUG
+static char *map_state_string(int map_state);
+static char *gravity_string(int gravity);
+static void debug_wm_normal_hints(XSizeHints *size);
+#else
+# define debug_wm_normal_hints(s)
+#endif
+static void init_geometry(Client *c);
 static void reparent(Client *c);
 
 void make_new_client(Window w, ScreenInfo *s) {
 	Client *c;
-	XWindowAttributes attr;
-	long dummy;
-	XWMHints *hints;
 	char *name;
 	XClassHint *class;
 #ifdef MWM_HINTS
@@ -27,16 +31,13 @@ void make_new_client(Window w, ScreenInfo *s) {
 
 	XGrabServer(dpy);
 
-	c = malloc(sizeof(Client));
-	/* Don't crash the window manager, just fail the operation. */
-	if (!c) {
-		LOG_ERROR("out of memory in new_client; limping onward\n");
-		return;
-	}
-	/* We do this first of all as a test to see if the window actually
-	 * still exists by the time we've got to create a client structure
-	 * for it (sometimes they vanish too quickly or something, and lots
-	 * of pain ensues). */
+	/* First a bit of interaction with the error handler due to X's
+	 * tendancy to batch event notifications.  We set a global variable to
+	 * the id of the window we're initialising then do simple X call on
+	 * that window.  If an error is raised by this (and nothing else should
+	 * do so as we've grabbed the server), the error handler resets the
+	 * variable indicating the window has already disappeared, so we stop
+	 * trying to manage it. */
 	initialising = w;
 	XFetchName(dpy, w, &name);
 	/* If 'initialising' is now set to None, that means doing the
@@ -44,41 +45,27 @@ void make_new_client(Window w, ScreenInfo *s) {
 	 * we got a chance to grab the server. */
 	if (initialising == None) {
 		LOG_DEBUG("make_new_client() : XError occurred for initialising window - aborting...\n");
-		free(c);
 		XSync(dpy, False);
 		XUngrabServer(dpy);
 		return;
 	}
 	initialising = None;
+	LOG_DEBUG("make_new_client(): %s\n", name ? name : "Untitled");
+
+	c = malloc(sizeof(Client));
+	/* Don't crash the window manager, just fail the operation. */
+	if (!c) {
+		LOG_ERROR("out of memory in new_client; limping onward\n");
+		return;
+	}
 	c->next = head_client;
 	head_client = c;
 
-	/* initialise(c, w); */
 	c->screen = s;
 	c->window = w;
 	c->ignore_unmap = 0;
 
-	c->size = XAllocSizeHints();
-	LOG_XDEBUG("XGetWMNormalHints(); ");
-	XGetWMNormalHints(dpy, c->window, c->size, &dummy);
-	/* Jon Perkin reported a crash with an app called 'sunpci' which we
-	 * traced to getting divide-by-zeros because it sets PResizeInc
-	 * but then has increments as 0.  So we check for 0s here and set them
-	 * to sensible defaults. */
-	if (c->size->width_inc == 0)
-		c->size->width_inc = 1;
-	if (c->size->height_inc == 0)
-		c->size->height_inc = 1;
-
-	XGetWindowAttributes(dpy, c->window, &attr);
-
-	c->x = attr.x;
-	c->y = attr.y;
-	c->width = attr.width;
-	c->height = attr.height;
 	c->border = opt_bw;
-	c->oldw = c->oldh = 0;
-
 #ifdef MWM_HINTS
 	if ((mhints = get_mwm_hints(c->window))) {
 		if (mhints->flags & MWM_HINTS_DECORATIONS
@@ -101,12 +88,12 @@ void make_new_client(Window w, ScreenInfo *s) {
 		XFree(name);  /* But we want to free this anyway... */
 	}
 
-#ifdef COLOURMAP
-	c->cmap = attr.colormap;
-#endif
+	init_geometry(c);
+
 #ifdef VWM
 	c->vdesk = vdesk;
 #endif
+
 #ifdef DEBUG
 	{
 		Client *p;
@@ -116,24 +103,6 @@ void make_new_client(Window w, ScreenInfo *s) {
 		LOG_DEBUG("make_new_client() : new window %dx%d+%d+%d, wincount=%d\n", c->width, c->height, c->x, c->y, i);
 	}
 #endif
-
-	/* c->size = XAllocSizeHints();
-	XGetWMNormalHints(dpy, c->window, c->size, &dummy); */
-
-	if (attr.map_state == IsViewable) {
-		c->ignore_unmap++;
-	} else {
-		init_position(c);
-		if ((hints = XGetWMHints(dpy, w))) {
-			if (hints->flags & StateHint)
-				set_wm_state(c, hints->initial_state);
-			XFree(hints);
-		}
-	}
-
-	/* client is initialised */
-
-	gravitate(c);
 
 #ifdef COLOURMAP
 	XSelectInput(dpy, c->window, ColormapChangeMask | EnterWindowMask | PropertyChangeMask);
@@ -167,9 +136,9 @@ void make_new_client(Window w, ScreenInfo *s) {
 			if ((!a->res_name || (class->res_name && !strcmp(class->res_name, a->res_name)))
 					&& (!a->res_class || (class->res_class && !strcmp(class->res_class, a->res_class)))) {
 				if (a->geometry_mask & WidthValue)
-					c->width = a->width * ((c->size->flags & PResizeInc) ? c->size->width_inc : 1);
+					c->width = a->width * c->width_inc;
 				if (a->geometry_mask & HeightValue)
-					c->height = a->height * ((c->size->flags & PResizeInc) ? c->size->height_inc : 1);
+					c->height = a->height * c->height_inc;
 				if (a->geometry_mask & XValue) {
 					if (a->geometry_mask & XNegative)
 						c->x = a->x + DisplayWidth(dpy, s->screen)-c->width-c->border;
@@ -197,50 +166,78 @@ void make_new_client(Window w, ScreenInfo *s) {
 		XFree(class);
 	}
 
+	//send_config(c);
 #ifndef MOUSE
 	setmouse(c->window, c->width + c->border - 1,
 			c->height + c->border - 1);
 #endif
 }
 
-static void init_position(Client *c) {
-#ifdef MOUSE
-	int x, y;
+/* Calls XGetWindowAttributes, XGetWMHints and XGetWMNormalHints to determine
+ * window's initial geometry.
+ *
+ * XGetWindowAttributes 
+ */
+static void init_geometry(Client *c) {
+	CARD32 size_flags;
+	XWindowAttributes attr;
+	XWMHints *wm;
+	int reconfigure = 0;
+
+	/* Get current window attributes */
+	LOG_XDEBUG("XGetWindowAttributes()\n");
+	XGetWindowAttributes(dpy, c->window, &attr);
+	LOG_DEBUG("\t(%s) %dx%d+%d+%d, bw = %d\n", map_state_string(attr.map_state), attr.width, attr.height, attr.x, attr.y, attr.border_width);
+	c->old_border = attr.border_width;
+	c->oldw = c->oldh = 0;
+#ifdef COLOURMAP
+	c->cmap = attr.colormap;
 #endif
-	int xmax = DisplayWidth(dpy, c->screen->screen);
-	int ymax = DisplayHeight(dpy, c->screen->screen);
 
-	/*
-	if (c->size->flags & (/+PSize | +/USSize)) {
-		c->width = c->size->width;
-		c->height = c->size->height;
+	size_flags = get_wm_normal_hints(c);
+
+	if ((attr.width >= c->min_width) && (attr.height >= c->min_height)) {
+	//if (attr.map_state == IsViewable || (size_flags & (PSize | USSize))) {
+		c->width = attr.width;
+		c->height = attr.height;
+	} else {
+		c->width = c->min_width;
+		c->height = c->min_height;
+		reconfigure = 1;
 	}
-	*/
-
-	if (c->width < MINSIZE) c->width = MINSIZE;
-	if (c->height < MINSIZE) c->height = MINSIZE;
-	if (c->width > xmax) c->width = xmax;
-	if (c->height > ymax) c->height = ymax;
-
-	if (c->size->flags & (/*PPosition | */USPosition)) {
-		c->x = c->size->x;
-		c->y = c->size->y;
-		if (c->x < 0 || c->y < 0 || c->x > xmax || c->y > ymax)
-			c->x = c->y = c->border;
+	if ((attr.map_state == IsViewable)
+			|| (size_flags & (PPosition | USPosition))) {
+		c->x = attr.x;
+		c->y = attr.y;
 	} else {
 #ifdef MOUSE
+		int xmax = DisplayWidth(dpy, c->screen->screen);
+		int ymax = DisplayHeight(dpy, c->screen->screen);
+		int x, y;
 		get_mouse_position(&x, &y, c->screen->root);
 		c->x = (x * (xmax - c->border - c->width)) / xmax;
 		c->y = (y * (ymax - c->border - c->height)) / ymax;
 #else
-		c->x = c->y = 0;
+		c->x = c->y = c->border;
 #endif
+		reconfigure = 1;
 	}
-	/* reposition if maximised horizontally or vertically */
-	if (c->x == 0 && c->width == xmax)
-		c->x = -c->border;
-	if (c->y == 0 && c->height == ymax)
-		c->y = -c->border;
+
+	LOG_DEBUG("\twindow started as %dx%d +%d+%d\n", c->width, c->height, c->x, c->y);
+	if (attr.map_state == IsViewable) {
+		c->ignore_unmap++;
+	} else {
+		/* Initialise position if needed */
+		if (reconfigure) {
+			send_config(c);
+		}
+		if ((wm = XGetWMHints(dpy, c->window))) {
+			if (wm->flags & StateHint)
+				set_wm_state(c, wm->initial_state);
+			XFree(wm);
+		}
+	}
+	gravitate(c);
 }
 
 static void reparent(Client *c) {
@@ -258,8 +255,53 @@ static void reparent(Client *c) {
 	XAddToSaveSet(dpy, c->window);
 	XSetWindowBorderWidth(dpy, c->window, 0);
 	XReparentWindow(dpy, c->window, c->parent, c->border, c->border);
+}
 
-	send_config(c);
+/* Get WM_NORMAL_HINTS property */
+CARD32 get_wm_normal_hints(Client *c) {
+	XSizeHints *size;
+	CARD32 flags;
+	long dummy;
+	size = XAllocSizeHints();
+	LOG_XDEBUG("XGetWMNormalHints()\n");
+	XGetWMNormalHints(dpy, c->window, size, &dummy);
+	debug_wm_normal_hints(size);
+	flags = size->flags;
+	if (flags & PMinSize) {
+		c->min_width = size->min_width;
+		c->min_height = size->min_height;
+	} else {
+		c->min_width = c->min_height = 0;
+	}
+	if (flags & PMaxSize) {
+		c->max_width = size->max_width;
+		c->max_height = size->max_height;
+	} else {
+		c->max_width = c->max_height = 0;
+	}
+	if (flags & PBaseSize) {
+		c->base_width = size->base_width;
+		c->base_height = size->base_height;
+	} else {
+		c->base_width = c->min_width;
+		c->base_height = c->min_height;
+	}
+	c->width_inc = c->height_inc = 1;
+	if (flags & PResizeInc) {
+		c->width_inc = size->width_inc ? size->width_inc : 1;
+		c->height_inc = size->height_inc ? size->height_inc : 1;
+	}
+	if (!(flags & PMinSize)) {
+		c->min_width = c->base_width + c->width_inc;
+		c->min_height = c->base_height + c->height_inc;
+	}
+	if (flags & PWinGravity) {
+		c->win_gravity = size->win_gravity;
+	} else {
+		c->win_gravity = NorthWestGravity;
+	}
+	XFree(size);
+	return flags;
 }
 
 #ifdef MWM_HINTS
@@ -277,5 +319,78 @@ static PropMwmHints *get_mwm_hints(Window w) {
 		return (PropMwmHints *)data;
 	}
 	return NULL;
+}
+#endif
+
+#ifdef DEBUG
+static char *map_state_string(int map_state) {
+	const char *map_states[4] = {
+		"IsUnmapped",
+		"IsUnviewable",
+		"IsViewable",
+		"Unknown"
+	};
+	return ((unsigned int)map_state < 3)
+		? map_states[map_state]
+		: map_states[3];
+}
+
+static char *gravity_string(int gravity) {
+	const char *gravities[12] = {
+		"ForgetGravity",
+		"NorthWestGravity",
+		"NorthGravity",
+		"NorthEastGravity",
+		"WestGravity",
+		"CenterGravity",
+		"EastGravity",
+		"SouthWestGravity",
+		"SouthGravity",
+		"SouthEastGravity",
+		"StaticGravity",
+		"Unknown"
+	};
+	return ((unsigned int)gravity < 11) ? gravities[gravity] : gravities[11];
+}
+
+static void debug_wm_normal_hints(XSizeHints *size) {
+	if (size->flags & 15) {
+		LOG_XDEBUG("\t");
+		if (size->flags & USPosition) {
+			LOG_XDEBUG("USPosition ");
+		}
+		if (size->flags & USSize) {
+			LOG_XDEBUG("USSize ");
+		}
+		if (size->flags & PPosition) {
+			LOG_XDEBUG("PPosition ");
+		}
+		if (size->flags & PSize) {
+			LOG_XDEBUG("PSize");
+		}
+		LOG_XDEBUG("\n");
+	}
+	if (size->flags & PMinSize) {
+		LOG_XDEBUG("\tPMinSize: min_width = %d, min_height = %d\n", size->min_width, size->min_height);
+	}
+	if (size->flags & PMaxSize) {
+		LOG_XDEBUG("\tPMaxSize: max_width = %d, max_height = %d\n", size->max_width, size->max_height);
+	}
+	if (size->flags & PResizeInc) {
+		LOG_XDEBUG("\tPResizeInc: width_inc = %d, height_inc = %d\n",
+				size->width_inc, size->height_inc);
+	}
+	if (size->flags & PAspect) {
+		LOG_XDEBUG("\tPAspect: min_aspect = %d/%d, max_aspect = %d/%d\n",
+				size->min_aspect.x, size->min_aspect.y,
+				size->max_aspect.x, size->max_aspect.y);
+	}
+	if (size->flags & PBaseSize) {
+		LOG_XDEBUG("\tPBaseSize: base_width = %d, base_height = %d\n",
+				size->base_width, size->base_height);
+	}
+	if (size->flags & PWinGravity) {
+		LOG_XDEBUG("\tPWinGravity: %s\n", gravity_string(size->win_gravity));
+	}
 }
 #endif

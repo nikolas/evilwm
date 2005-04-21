@@ -5,10 +5,6 @@ BUILDING EVILWM
 
 2) Run 'make'
 
-OR, run 'make allinone' - this will cat all the source files into a
-single file for compilation, which gives the compiler more chance to
-inline some functions (read: faster, probably smaller in this case).
-
 3) Run 'make install'
 
 That's it.  The README file has information on starting evilwm.

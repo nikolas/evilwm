@@ -343,3 +343,11 @@ Old
 2005-04-04
 	Use strchr,strrchr instead of index,rindex.
 	Set border size to frame size when unmanaging window.
+
+2005-04-06
+	Return to properly implemented interpretation of win_gravity on
+	initial mapping of windows.
+	Restore window's original border width on WM exit.
+
+2005-04-20
+	Remove deprecated 'vdesk' external pager support.
