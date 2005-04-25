@@ -183,12 +183,14 @@ void set_shape(Client *c) {
 
 void client_update_current(Client *c, Client *newcurrent) {
 	if (c) {
+		unsigned long bpixel;
 #ifdef VWM
 		if (c->vdesk == STICKY)
-			XSetWindowBackground(dpy, c->parent, c == newcurrent ? c->screen->fc.pixel : c->screen->bg.pixel);
+			bpixel = c == newcurrent ? c->screen->fc.pixel : c->screen->bg.pixel;
 		else
 #endif
-			XSetWindowBackground(dpy, c->parent, c == newcurrent ? c->screen->fg.pixel : c->screen->bg.pixel);
+			bpixel = c == newcurrent ? c->screen->fg.pixel : c->screen->bg.pixel;
+		XSetWindowBackground(dpy, c->parent, bpixel);
 		XClearWindow(dpy, c->parent);
 	}
 	current = newcurrent;
