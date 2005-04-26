@@ -357,4 +357,4 @@ Old
 
 2005-04-25
 	Merging Larry Doolittle's patches: Stricter warning settings for gcc.
-
+	LD: Cast unused paramters to void.
