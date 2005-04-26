@@ -63,7 +63,7 @@ distname = evilwm-$(version)
 #DEFINES += -DXDEBUG	# show some X calls
 
 DEFINES += -DVERSION=\"$(version)\" $(DEBIAN)
-CFLAGS  += $(INCLUDES) $(DEFINES) -Os -Wall -std=c99 -D_XOPEN_SOURCE
+CFLAGS  += $(INCLUDES) $(DEFINES) -Os -Wall
 #CFLAGS  += $(INCLUDES) $(DEFINES) -g -Wall
 CFLAGS  += -W -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual -Wshadow -Waggregate-return -Wnested-externs -Winline -Wwrite-strings -Wundef -Wsign-compare -Wmissing-prototypes -Wredundant-decls
 LDFLAGS += $(LDPATH) $(LIBS)
