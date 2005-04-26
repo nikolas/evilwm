@@ -150,7 +150,14 @@ int main(int argc, char *argv[]) {
 static void *xmalloc(size_t size) {
 	void *ptr = malloc(size);
 	if (!ptr) {
-		LOG_ERROR("out of memory, looking for %d bytes\n", size);
+		/* C99 defines the 'z' printf modifier for variables of
+		 * type size_t.  Fall back to casting to unsigned long. */
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+		LOG_ERROR("out of memory, looking for %zu bytes\n", size);
+#else
+		LOG_ERROR("out of memory, looking for %lu bytes\n",
+				(unsigned long)size);
+#endif
 		exit(1);
 	}
 	return ptr;
