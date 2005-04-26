@@ -97,7 +97,7 @@ Old
 2001-02-21
 	Received code from Peter Bailey to implement Ctrl+Alt+[Left|Right]
 	vdesk switching.  Opinion around the office is that this is a Good
-	Thing, but not to let it cycle around (eg, from vdesk 8 to vdesk 1).
+	Thing, but not to let it cycle around (e.g., from vdesk 8 to vdesk 1).
 	So that's what I've put in.  Unfortunately reintroduces dependancy
 	on XK_1-XK_8 being contigious.
 
@@ -364,3 +364,10 @@ Old
 	Applied LD's patch to declare opt_term statically for now (intent
 	is to allow arguments to program specified with -term).
 	LD: Try to print ssize_t correctly and within strict standards.
+	LD: Add $(EXTRA_DEFINES) to Makefile.
+	LD: Improve punctuation in comments.
+	LD: Use long instead of CARD32 for argument to XChangeProperty()
+	due to odd X Consortium decision.
+	LD: Un-shadow variable p in remove_client debugging segment.
+	LD: Assign opt_term at compile time instead of malloc.
+	LD: Fuss with execvp casting and comments (edited for brevity by CA).

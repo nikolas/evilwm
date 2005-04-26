@@ -3,10 +3,10 @@
  * see README for license and other details. */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <signal.h>
 #include <X11/cursorfont.h>
-#include <stdio.h>
 #include "evilwm.h"
 #include "log.h"
 
@@ -78,8 +78,10 @@ int main(int argc, char *argv[]) {
 		else if (!strcmp(argv[i], "-term") && i+1<argc) {
 			opt_term[0] = argv[++i];
 			opt_term[1] = opt_term[0];
+#ifdef SNAP
 		} else if (!strcmp(argv[i], "-snap") && i+1<argc) {
 			opt_snap = atoi(argv[++i]);
+#endif
 		} else if (!strcmp(argv[i], "-app") && i+1<argc) {
 			Application *new = xmalloc(sizeof(Application));
 			char *tmp;
@@ -245,6 +247,10 @@ static void setup_display(void) {
 
 	/* now set up each screen in turn */
 	num_screens = ScreenCount(dpy);
+	if (num_screens < 0) {
+		LOG_ERROR("Can't count screens\n");
+		exit(1);
+	}
 	screens = xmalloc(num_screens * sizeof(ScreenInfo));
 	for (i = 0; i < (unsigned int)num_screens; i++) {
 		char *ds, *colon, *dot;

@@ -8,7 +8,6 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <stdio.h>
 #include "evilwm.h"
 #include "log.h"
 
@@ -21,8 +20,12 @@ void spawn(const char *const cmd[]) {
 	if (!(pid = fork())) {
 		setsid();
 		switch (fork()) {
-			/* explicitly hack around broken SUS execvp prototype */
-			case 0: execvp(cmd[0], (char *const *)&cmd[1]);
+			/* Expect compiler warnings because of half-broken SUS
+			 * execvp prototype:  "char *const argv[]" should have
+			 * been "const char *const argv[]", but the committee
+			 * favored legacy code over modern code, and modern
+			 * compilers bark at our extra const. (LD) */
+			case 0: execvp(cmd[0], cmd+1);
 			default: _exit(0);
 		}
 	}
@@ -59,13 +62,14 @@ int handle_xerror(Display *dsply, XErrorEvent *e) {
 		initialising = None;
 		return 0;
 	}
-	LOG_DEBUG("**ERK** handle_xerror() caught an XErrorEvent: %d\n", e->error_code);
+	LOG_DEBUG("**ERK** handle_xerror() caught an XErrorEvent: error_code=%d request_code=%d minor_code=%d\n",
+			e->error_code, e->request_code, e->minor_code);
 	/* if (e->error_code == BadAccess && e->resourceid == root) { */
 	if (e->error_code == BadAccess && e->request_code == X_ChangeWindowAttributes) {
 		LOG_ERROR("root window unavailable (maybe another wm is running?)\n");
 		exit(1);
 	}
-	LOG_XDEBUG("XError %x ", e->error_code);
+
 	/* Kludge around IE misbehaviour */
 	if (e->error_code == 0x8 && e->request_code == 0x0c && e->minor_code == 0x00) {
 		LOG_DEBUG("\thandle_xerror() : IE kludge - ignoring XError\n");

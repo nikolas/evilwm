@@ -5,7 +5,9 @@
 #ifndef __LOG_H__
 #define __LOG_H__
 
-#include <stdio.h>
+#if defined(STDIO) || defined(DEBUG) || defined(XDEBUG)
+# include <stdio.h>
+#endif
 
 #ifdef STDIO
 # define LOG_INFO(...) printf(__VA_ARGS__);

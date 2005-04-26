@@ -2,7 +2,6 @@
  * Copyright (C) 1999-2005 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <X11/Xatom.h>
 #include "evilwm.h"

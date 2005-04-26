@@ -1,5 +1,6 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
+#include <X11/Xmd.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 #ifdef SHAPE
@@ -11,6 +12,11 @@
 
 #include "keymap.h"
 
+/* sanity on options */
+#if defined(INFOBANNER_MOVERESIZE) && !defined(INFOBANNER)
+# define INFOBANNER
+#endif
+
 /* default settings */
 
 #define DEF_FONT	"variable"
@@ -19,7 +25,6 @@
 #define DEF_BW		1
 #define DEF_FC		"blue"
 #define SPACE		3
-#define MINSIZE		15
 #ifdef DEBIAN
 #define DEF_TERM	"x-terminal-emulator"
 #else
@@ -214,7 +219,6 @@ CARD32 get_wm_normal_hints(Client *c);
 /* screen.c */
 
 void drag(Client *c);
-void draw_outline(Client *c);
 void get_mouse_position(int *x, int *y, Window root);
 void moveresize(Client *c);
 void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2);
@@ -222,7 +226,7 @@ void maximise_vert(Client *c);
 void maximise_horiz(Client *c);
 void show_info(Client *c, KeySym key);
 void sweep(Client *c);
-void unhide(Client *c, int do_raise);
+void unhide(Client *c, int raise_win);
 void next(void);
 #ifdef VWM
 void hide(Client *c);

@@ -22,8 +22,12 @@ Client *find_client(Window w) {
 }
 
 void set_wm_state(Client *c, int state) {
-	CARD32 data[2];
-	data[0] = (CARD32)state;
+	/* Using "long" for the type of "data" looks wrong, but the
+	 * fine people in the X Consortium defined it this way
+	 * (even on 64-bit machines).
+	 */
+	long data[2];
+	data[0] = state;
 	data[1] = None;
 	XChangeProperty(dpy, c->window, xa_wm_state, xa_wm_state, 32,
 			PropModeReplace, (unsigned char *)data, 2);
@@ -128,9 +132,9 @@ void remove_client(Client *c) {
 	free(c);
 #ifdef DEBUG
 	{
-		Client *p;
+		Client *pp;
 		int i = 0;
-		for (p = head_client; p; p = p->next)
+		for (pp = head_client; pp; pp = pp->next)
 			i++;
 		LOG_DEBUG("\tremove_client() : free(), window count now %d\n", i);
 	}

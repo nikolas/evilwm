@@ -67,7 +67,7 @@ static void remove_info_window(void) {
 }
 #endif  /* INFOBANNER */
 
-void draw_outline(Client *c) {
+static void draw_outline(Client *c) {
 #ifndef INFOBANNER_MOVERESIZE
 	char buf[24];
 	int width_inc = c->width_inc, height_inc = c->height_inc;
@@ -360,9 +360,9 @@ void hide(Client *c) {
 }
 #endif
 
-void unhide(Client *c, int do_raise) {
+void unhide(Client *c, int raise_win) {
 	XMapWindow(dpy, c->window);
-	do_raise ? XMapRaised(dpy, c->parent) : XMapWindow(dpy, c->parent);
+	raise_win ? XMapRaised(dpy, c->parent) : XMapWindow(dpy, c->parent);
 	set_wm_state(c, NormalState);
 }
 

@@ -77,7 +77,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 		XFree(mhints);
 	}
 #endif
-	/* If we don't have MWM_HINTS (ie, lesstif) for a client to tell us
+	/* If we don't have MWM_HINTS (i.e., lesstif) for a client to tell us
 	 * it has no border, I include this *really blatant hack* to remove
 	 * the border from XMMS. */
 	if (name) {
