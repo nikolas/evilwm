@@ -155,7 +155,7 @@ extern const char	*opt_display;
 extern const char	*opt_font;
 extern const char	*opt_fg;
 extern const char	*opt_bg;
-extern const char	**opt_term;
+extern const char	*opt_term[3];
 extern int		opt_bw;
 #ifdef VWM
 extern const char	*opt_fc;

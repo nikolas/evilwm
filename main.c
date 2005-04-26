@@ -30,7 +30,7 @@ const char	*opt_display = "";
 const char	*opt_font = DEF_FONT;
 const char	*opt_fg = DEF_FG;
 const char	*opt_bg = DEF_BG;
-const char	**opt_term = NULL;
+const char	*opt_term[3] = { DEF_TERM, DEF_TERM, NULL };
 int		opt_bw = DEF_BW;
 #ifdef VWM
 const char	*opt_fc = DEF_FC;
@@ -77,10 +77,8 @@ int main(int argc, char *argv[]) {
 		else if (!strcmp(argv[i], "-bw") && i+1<argc)
 			opt_bw = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-term") && i+1<argc) {
-			opt_term = xmalloc(3 * sizeof(char *));
 			opt_term[0] = argv[++i];
 			opt_term[1] = opt_term[0];
-			opt_term[2] = NULL;
 		} else if (!strcmp(argv[i], "-snap") && i+1<argc) {
 			opt_snap = atoi(argv[++i]);
 		} else if (!strcmp(argv[i], "-app") && i+1<argc) {
@@ -134,12 +132,6 @@ int main(int argc, char *argv[]) {
 			LOG_INFO("\t[-bg background] [-bw borderwidth] [-snap num] [-V]\n");
 			exit(2);
 		}
-	}
-	if (!opt_term) {
-		opt_term = xmalloc(3 * sizeof(char *));
-		opt_term[0] = DEF_TERM;
-		opt_term[1] = opt_term[0];
-		opt_term[2] = NULL;
 	}
 
 	act.sa_handler = handle_signal;
