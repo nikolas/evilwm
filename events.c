@@ -8,7 +8,7 @@
 #include "evilwm.h"
 #include "log.h"
 
-void handle_key_event(XKeyEvent *e) {
+static void handle_key_event(XKeyEvent *e) {
 	Client *c = find_client(e->window);
 	KeySym key = XKeycodeToKeysym(dpy,e->keycode,0);
 
@@ -88,7 +88,7 @@ void handle_key_event(XKeyEvent *e) {
 }
 
 #ifdef MOUSE
-void handle_button_event(XButtonEvent *e) {
+static void handle_button_event(XButtonEvent *e) {
 	Client *c = find_client(e->window);
 
 	if (c && e->window != c->screen->root) {
@@ -104,7 +104,7 @@ void handle_button_event(XButtonEvent *e) {
 }
 #endif
 
-void handle_configure_request(XConfigureRequestEvent *e) {
+static void handle_configure_request(XConfigureRequestEvent *e) {
 	Client *c = find_client(e->window);
 	XWindowChanges wc;
 
@@ -141,7 +141,7 @@ void handle_configure_request(XConfigureRequestEvent *e) {
 	XConfigureWindow(dpy, e->window, e->value_mask, &wc);
 }
 
-void handle_map_request(XMapRequestEvent *e) {
+static void handle_map_request(XMapRequestEvent *e) {
 	Client *c = find_client(e->window);
 
 	if (c) {
@@ -158,7 +158,7 @@ void handle_map_request(XMapRequestEvent *e) {
 	}
 }
 
-void handle_unmap_event(XUnmapEvent *e) {
+static void handle_unmap_event(XUnmapEvent *e) {
 	Client *c = find_client(e->window);
 
 	if (c) {
@@ -167,7 +167,7 @@ void handle_unmap_event(XUnmapEvent *e) {
 	}
 }
 
-void handle_reparent_event(XReparentEvent *e) {
+static void handle_reparent_event(XReparentEvent *e) {
 	Client *c = find_client(e->window);
 	/* If an unmanaged window is reparented such that its new parent is
 	 * a root window and it is not in WithdrawnState, manage it */
@@ -185,7 +185,7 @@ void handle_reparent_event(XReparentEvent *e) {
 }
 
 #ifdef COLOURMAP
-void handle_colormap_change(XColormapEvent *e) {
+static void handle_colormap_change(XColormapEvent *e) {
 	Client *c = find_client(e->window);
 
 	if (c && e->new) {
@@ -195,7 +195,7 @@ void handle_colormap_change(XColormapEvent *e) {
 }
 #endif
 
-void handle_property_change(XPropertyEvent *e) {
+static void handle_property_change(XPropertyEvent *e) {
 	Client *c = find_client(e->window);
 
 	if (c) {
@@ -205,7 +205,7 @@ void handle_property_change(XPropertyEvent *e) {
 	}
 }
 
-void handle_enter_event(XCrossingEvent *e) {
+static void handle_enter_event(XCrossingEvent *e) {
 	Client *c;
 
 	current_screen = find_screen(e->root);
@@ -222,9 +222,47 @@ void handle_enter_event(XCrossingEvent *e) {
 }
 
 #ifdef SHAPE
-void handle_shape_event(XShapeEvent *e) {
+static void handle_shape_event(XShapeEvent *e) {
 	Client *c = find_client(e->window);
 	if (c)
 		set_shape(c);
 }
 #endif
+
+void event_main_loop(void) {
+	XEvent ev;
+	/* main event loop here */
+	for (;;) {
+		XNextEvent(dpy, &ev);
+		switch (ev.type) {
+			case KeyPress:
+				handle_key_event(&ev.xkey); break;
+#ifdef MOUSE
+			case ButtonPress:
+				handle_button_event(&ev.xbutton); break;
+#endif
+			case ConfigureRequest:
+				handle_configure_request(&ev.xconfigurerequest); break;
+			case MapRequest:
+				handle_map_request(&ev.xmaprequest); break;
+#ifdef COLOURMAP
+			case ColormapNotify:
+				handle_colormap_change(&ev.xcolormap); break;
+#endif
+			case EnterNotify:
+				handle_enter_event(&ev.xcrossing); break;
+			case PropertyNotify:
+				handle_property_change(&ev.xproperty); break;
+			case UnmapNotify:
+				handle_unmap_event(&ev.xunmap); break;
+			case ReparentNotify:
+				handle_reparent_event(&ev.xreparent); break;
+#ifdef SHAPE
+			default:
+				if (have_shape && ev.type == shape_event) {
+					handle_shape_event((XShapeEvent *)&ev);
+				}
+#endif
+		}
+	}
+}

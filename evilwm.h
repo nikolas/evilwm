@@ -189,20 +189,7 @@ void client_update_current(Client *c, Client *newcurrent);
 
 /* events.c */
 
-void handle_key_event(XKeyEvent *e);
-void handle_button_event(XButtonEvent *e);
-#ifdef COLOURMAP
-void handle_colormap_change(XColormapEvent *e);
-#endif
-void handle_configure_request(XConfigureRequestEvent *e);
-void handle_enter_event(XCrossingEvent *e);
-void handle_map_request(XMapRequestEvent *e);
-void handle_property_change(XPropertyEvent *e);
-void handle_unmap_event(XUnmapEvent *e);
-void handle_reparent_event(XReparentEvent *e);
-#ifdef SHAPE
-void handle_shape_event(XShapeEvent *e);
-#endif
+void event_main_loop(void);
 
 /* main.c */
 

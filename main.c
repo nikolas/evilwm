@@ -58,7 +58,6 @@ static unsigned int parse_modifiers(char *s);
 int main(int argc, char *argv[]) {
 	struct sigaction act;
 	int i;
-	XEvent ev;
 
 	for (i = 1; i < argc; i++) {
 		if (!strcmp(argv[i], "-fn") && i+1<argc)
@@ -143,40 +142,8 @@ int main(int argc, char *argv[]) {
 
 	setup_display();
 
-	/* main event loop here */
-	for (;;) {
-		XNextEvent(dpy, &ev);
-		switch (ev.type) {
-			case KeyPress:
-				handle_key_event(&ev.xkey); break;
-#ifdef MOUSE
-			case ButtonPress:
-				handle_button_event(&ev.xbutton); break;
-#endif
-			case ConfigureRequest:
-				handle_configure_request(&ev.xconfigurerequest); break;
-			case MapRequest:
-				handle_map_request(&ev.xmaprequest); break;
-#ifdef COLOURMAP
-			case ColormapNotify:
-				handle_colormap_change(&ev.xcolormap); break;
-#endif
-			case EnterNotify:
-				handle_enter_event(&ev.xcrossing); break;
-			case PropertyNotify:
-				handle_property_change(&ev.xproperty); break;
-			case UnmapNotify:
-				handle_unmap_event(&ev.xunmap); break;
-			case ReparentNotify:
-				handle_reparent_event(&ev.xreparent); break;
-#ifdef SHAPE
-			default:
-				if (have_shape && ev.type == shape_event) {
-					handle_shape_event((XShapeEvent *)&ev);
-				}
-#endif
-		}
-	}
+	event_main_loop();
+
 	return 1;
 }
 
