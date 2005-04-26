@@ -15,7 +15,7 @@
 #ifdef INFOBANNER
 Window info_window = None;
 
-void create_info_window(Client *c) {
+static void create_info_window(Client *c) {
 	char *name;
 	char buf[24];
 	int namew, iwinx, iwiny, iwinw, iwinh;
@@ -59,7 +59,7 @@ void create_info_window(Client *c) {
 		buf, strlen(buf));
 }
 
-void remove_info_window(void) {
+static void remove_info_window(void) {
 	LOG_DEBUG("remove_info_window() : Removing...\n");
 	if (info_window)
 		XDestroyWindow(dpy, info_window);
