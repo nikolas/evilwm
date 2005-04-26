@@ -316,7 +316,7 @@ static PropMwmHints *get_mwm_hints(Window w) {
 				&nitems, &bytes_after,
 				(unsigned char **)&data)
 			== Success && nitems >= PROP_MWM_HINTS_ELEMENTS) {
-		return (PropMwmHints *)data;
+		return data;
 	}
 	return NULL;
 }
