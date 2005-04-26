@@ -235,7 +235,7 @@ void maximise_vert(Client *c);
 void maximise_horiz(Client *c);
 void show_info(Client *c, KeySym key);
 void sweep(Client *c);
-void unhide(Client *c, int raise);
+void unhide(Client *c, int do_raise);
 void next(void);
 #ifdef VWM
 void hide(Client *c);

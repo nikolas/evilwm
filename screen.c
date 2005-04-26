@@ -360,9 +360,9 @@ void hide(Client *c) {
 }
 #endif
 
-void unhide(Client *c, int raise) {
+void unhide(Client *c, int do_raise) {
 	XMapWindow(dpy, c->window);
-	raise ? XMapRaised(dpy, c->parent) : XMapWindow(dpy, c->parent);
+	do_raise ? XMapRaised(dpy, c->parent) : XMapWindow(dpy, c->parent);
 	set_wm_state(c, NormalState);
 }
 
