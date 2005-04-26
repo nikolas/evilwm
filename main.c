@@ -247,7 +247,7 @@ static void setup_display(void) {
 	 * every combination of modifiers we can think of */
 	modmap = XGetModifierMapping(dpy);
 	for (i = 0; i < 8; i++) {
-		for (j = 0; j < modmap->max_keypermod; j++) {
+		for (j = 0; j < (unsigned int)modmap->max_keypermod; j++) {
 			if (modmap->modifiermap[i*modmap->max_keypermod+j] == XKeysymToKeycode(dpy, XK_Num_Lock)) {
 				numlockmask = (1<<i);
 				LOG_DEBUG("setup_display() : XK_Num_Lock is (1<<0x%02x)\n", i);
@@ -280,7 +280,7 @@ static void setup_display(void) {
 	/* now set up each screen in turn */
 	num_screens = ScreenCount(dpy);
 	screens = xmalloc(num_screens * sizeof(ScreenInfo));
-	for (i = 0; i < num_screens; i++) {
+	for (i = 0; i < (unsigned int)num_screens; i++) {
 		char *ds, *colon, *dot;
 		ds = DisplayString(dpy);
 		/* set up DISPLAY environment variable to use */
