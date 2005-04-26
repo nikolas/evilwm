@@ -207,19 +207,11 @@ void handle_property_change(XPropertyEvent *e) {
 
 void handle_enter_event(XCrossingEvent *e) {
 	Client *c;
-#ifdef VWM
-	int wdesk;
-#endif
 
 	current_screen = find_screen(e->root);
-	/* if (e->window == root && !current) {
-		XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
-		return;
-	} */
 	if ((c = find_client(e->window))) {
 #ifdef VWM
-		wdesk = c->vdesk;
-		if (wdesk != vdesk && wdesk != STICKY)
+		if (c->vdesk != vdesk && c->vdesk != STICKY)
 			return;
 #endif
 		select_client(c);
