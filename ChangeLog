@@ -354,3 +354,7 @@ Old
 
 2005-04-20
 	Remove deprecated 'vdesk' external pager support.
+
+2005-04-25
+	Merging Larry Doolittle's patches: Stricter warning settings for gcc.
+
