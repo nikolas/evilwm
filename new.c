@@ -11,9 +11,9 @@
 #ifdef MWM_HINTS
 static PropMwmHints *get_mwm_hints(Window);
 #endif
-#ifdef DEBUG
-static char *map_state_string(int map_state);
-static char *gravity_string(int gravity);
+#ifdef XDEBUG
+static const char *map_state_string(int map_state);
+static const char *gravity_string(int gravity);
 static void debug_wm_normal_hints(XSizeHints *size);
 #else
 # define debug_wm_normal_hints(s)
@@ -187,7 +187,7 @@ static void init_geometry(Client *c) {
 	/* Get current window attributes */
 	LOG_XDEBUG("XGetWindowAttributes()\n");
 	XGetWindowAttributes(dpy, c->window, &attr);
-	LOG_DEBUG("\t(%s) %dx%d+%d+%d, bw = %d\n", map_state_string(attr.map_state), attr.width, attr.height, attr.x, attr.y, attr.border_width);
+	LOG_XDEBUG("\t(%s) %dx%d+%d+%d, bw = %d\n", map_state_string(attr.map_state), attr.width, attr.height, attr.x, attr.y, attr.border_width);
 	c->old_border = attr.border_width;
 	c->oldw = c->oldh = 0;
 #ifdef COLOURMAP
@@ -322,8 +322,8 @@ static PropMwmHints *get_mwm_hints(Window w) {
 }
 #endif
 
-#ifdef DEBUG
-static char *map_state_string(int map_state) {
+#ifdef XDEBUG
+static const char *map_state_string(int map_state) {
 	const char *map_states[4] = {
 		"IsUnmapped",
 		"IsUnviewable",
@@ -335,7 +335,7 @@ static char *map_state_string(int map_state) {
 		: map_states[3];
 }
 
-static char *gravity_string(int gravity) {
+static const char *gravity_string(int gravity) {
 	const char *gravities[12] = {
 		"ForgetGravity",
 		"NorthWestGravity",
