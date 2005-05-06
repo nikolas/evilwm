@@ -174,19 +174,15 @@ static int send_xmessage(Window w, Atom a, long x) {
 
 #ifdef SHAPE
 void set_shape(Client *c) {
-	Bool boundingShaped;
-	int i;  unsigned int u;  Bool b;  /* dummies */
+	int n, order;
+	XRectangle *rect;
 
 	if (!have_shape) return;
-	/* Logic to decide if we have a shaped window cribbed from fvwm-2.5.10.
-	 * Previous method (more than one rectangle returned from
-	 * XShapeGetRectangles) worked _most_ of the time. */
-	XShapeSelectInput(dpy, c->window, ShapeNotifyMask);
-	if (XShapeQueryExtents(dpy, c->window, &boundingShaped,
-			&i, &i, &u, &u, &b, &i, &i, &u, &u) && boundingShaped) {
+	rect = XShapeGetRectangles(dpy, c->window, ShapeBounding, &n, &order);
+	if (n > 1)
 		XShapeCombineShape(dpy, c->parent, ShapeBounding, c->border,
 				c->border, c->window, ShapeBounding, ShapeSet);
-	}
+	XFree((void *)rect);
 }
 #endif
 

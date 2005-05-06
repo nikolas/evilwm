@@ -360,7 +360,6 @@ Old
 	LD: Cast unused paramters to void.
 
 2005-04-26
-	LD: Replace logic to decide if we have a shaped window.
 	Applied LD's patch to declare opt_term statically for now (intent
 	is to allow arguments to program specified with -term).
 	LD: Try to print ssize_t correctly and within strict standards.
