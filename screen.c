@@ -347,14 +347,9 @@ void maximise_vert(Client *c) {
 #ifdef HAS_HIDE
 void hide(Client *c) {
 	if (c) {
-		c->ignore_unmap += 2;
+		c->ignore_unmap++;
 		LOG_XDEBUG("screen:XUnmapWindow(parent); ");
 		XUnmapWindow(dpy, c->parent);
-		/* Unmapping parent should unmap reparented window too */
-		/*
-		LOG_XDEBUG("screen:XUnmapWindow(window); ");
-		XUnmapWindow(dpy, c->window);
-		*/
 		set_wm_state(c, IconicState);
 	}
 }
