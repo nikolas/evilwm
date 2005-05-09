@@ -8,10 +8,6 @@
 #include "evilwm.h"
 #include "log.h"
 
-#ifdef VWM
-# define HAS_HIDE 1
-#endif
-
 #ifdef INFOBANNER
 Window info_window = None;
 
@@ -344,7 +340,7 @@ void maximise_vert(Client *c) {
 	}
 }
 
-#ifdef HAS_HIDE
+#ifdef VWM
 void hide(Client *c) {
 	if (c) {
 		c->ignore_unmap++;
