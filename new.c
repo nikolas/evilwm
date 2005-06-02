@@ -206,7 +206,7 @@ static void init_geometry(Client *c) {
 		reconfigure = 1;
 	}
 	if ((attr.map_state == IsViewable)
-			|| (size_flags & (PPosition | USPosition))) {
+			|| (size_flags & (/*PPosition |*/ USPosition))) {
 		c->x = attr.x;
 		c->y = attr.y;
 	} else {

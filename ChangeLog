@@ -370,3 +370,7 @@ Old
 	LD: Un-shadow variable p in remove_client debugging segment.
 	LD: Assign opt_term at compile time instead of malloc.
 	LD: Fuss with execvp casting and comments (edited for brevity by CA).
+
+2005-06-02
+	Ignore PPosition during window placement (back to old behaviour of
+	positioning window under pointer unless user-specified).
