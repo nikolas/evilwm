@@ -60,15 +60,15 @@ DEFINES += -DDEBUG	# miscellaneous debugging
 
 # ----- You shouldn't need to change anything under this line ------ #
 
-version = 0.99.18pre6
+version = 0.99.18
 
 distname = evilwm-$(version)
 
 DEFINES += -DXDEBUG	# show some X calls
 
 DEFINES += -DVERSION=\"$(version)\" $(DEBIAN)
-#CFLAGS  += $(INCLUDES) $(DEFINES) -Os -Wall
-CFLAGS  += $(INCLUDES) $(DEFINES) -O2 -g -Wall
+CFLAGS  += $(INCLUDES) $(DEFINES) -Os -Wall
+#CFLAGS  += $(INCLUDES) $(DEFINES) -g -Wall
 CFLAGS  += -W -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual -Wshadow -Waggregate-return -Wnested-externs -Winline -Wwrite-strings -Wundef -Wsign-compare -Wmissing-prototypes -Wredundant-decls
 LDFLAGS += $(LDPATH) $(LIBS)
 
