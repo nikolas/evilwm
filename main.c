@@ -42,7 +42,6 @@ int		opt_snap = 0;
 #ifdef SHAPE
 int		have_shape, shape_event;
 #endif
-int		quitting = 0;
 #ifdef MWM_HINTS
 Atom		mwm_hints;
 #endif
@@ -193,6 +192,7 @@ static void setup_display(void) {
 		exit(1);
 	}
 	XSetErrorHandler(handle_xerror);
+	/* XSynchronize(dpy, True); */
 
 	xa_wm_state = XInternAtom(dpy, "WM_STATE", False);
 	xa_wm_change_state = XInternAtom(dpy, "WM_CHANGE_STATE", False);
@@ -242,7 +242,10 @@ static void setup_display(void) {
 
 	/* SHAPE extension? */
 #ifdef SHAPE
-	have_shape = XShapeQueryExtension(dpy, &shape_event, &i);
+	{
+		int e_dummy;
+		have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy);
+	}
 #endif
 
 	/* now set up each screen in turn */
@@ -281,13 +284,11 @@ static void setup_display(void) {
 		screens[i].invert_gc = XCreateGC(dpy, screens[i].root, GCFunction | GCSubwindowMode | GCLineWidth | GCFont, &gv);
 
 		XChangeWindowAttributes(dpy, screens[i].root, CWEventMask, &attr);
-		/* Unfortunately grabbing AnyKey under Solaris seems not to work */
-		/* XGrabKey(dpy, AnyKey, ControlMask|Mod1Mask, root, True, GrabModeAsync, GrabModeAsync); */
-		/* So now I grab each and every one. */
-
+		/* Grab key combinations we're interested in */
 		for (keysym = keys_to_grab; *keysym; keysym++) {
 			grab_keysym(screens[i].root, grabmask1, *keysym);
 		}
+		grab_keysym(screens[i].root, grabmask1 ^ ShiftMask, KEY_KILL);
 		grab_keysym(screens[i].root, grabmask2, KEY_NEXT);
 
 		/* scan all the windows on this screen */

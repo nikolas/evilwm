@@ -64,6 +64,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	c->screen = s;
 	c->window = w;
 	c->ignore_unmap = 0;
+	c->remove = 0;
 
 	c->border = opt_bw;
 #ifdef MWM_HINTS
@@ -166,10 +167,9 @@ void make_new_client(Window w, ScreenInfo *s) {
 		XFree(class);
 	}
 
-	//send_config(c);
+	/* send_config(c); */
 #ifndef MOUSE
-	setmouse(c->window, c->width + c->border - 1,
-			c->height + c->border - 1);
+	set_mouse_corner(c);
 #endif
 }
 
@@ -197,7 +197,7 @@ static void init_geometry(Client *c) {
 	size_flags = get_wm_normal_hints(c);
 
 	if ((attr.width >= c->min_width) && (attr.height >= c->min_height)) {
-	//if (attr.map_state == IsViewable || (size_flags & (PSize | USSize))) {
+	/* if (attr.map_state == IsViewable || (size_flags & (PSize | USSize))) { */
 		c->width = attr.width;
 		c->height = attr.height;
 	} else {

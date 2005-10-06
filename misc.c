@@ -11,6 +11,9 @@
 #include "evilwm.h"
 #include "log.h"
 
+int need_client_tidy = 0;
+int ignore_xerror = 0;
+
 /* Now do this by fork()ing twice so we don't have to worry about SIGCHLDs */
 void spawn(const char *const cmd[]) {
 	pid_t pid;
@@ -38,7 +41,6 @@ void handle_signal(int signo) {
 	int i;
 	/* SIGCHLD check no longer necessary */
 	/* Quit Nicely */
-	quitting = 1;
 	while(head_client) remove_client(head_client);
 	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
 	if (font) XFreeFont(dpy, font);
@@ -53,8 +55,13 @@ void handle_signal(int signo) {
 
 int handle_xerror(Display *dsply, XErrorEvent *e) {
 	(void)dsply;  /* unused */
-	Client *c = find_client(e->resourceid);
+	Client *c;
 
+	if (ignore_xerror) {
+		LOG_DEBUG("handle_xerror() ignored an XErrorEvent: %d\n", e->error_code);
+		return 0;
+	}
+	c = find_client(e->resourceid);
 	/* If this error actually occurred while setting up the new
 	 * window, best let make_new_client() know not to bother */
 	if (initialising != None && e->resourceid == initialising) {
@@ -77,16 +84,10 @@ int handle_xerror(Display *dsply, XErrorEvent *e) {
 	}
 
 	if (c) {
-		LOG_DEBUG("\thandle_xerror() : calling remove_client()\n");
-		remove_client(c);
+		LOG_DEBUG("\thandle_xerror() : flagging client for removal\n");
+		c->remove = 1;
+		need_client_tidy = 1;
 	}
-	return 0;
-}
-
-int ignore_xerror(Display *dsply, XErrorEvent *e) {
-	(void)dsply;  /* unused */
-	(void)e;  /* unused unless debugging */
-	LOG_DEBUG("ignore_xerror() caught an XErrorEvent: %d\n", e->error_code);
 	return 0;
 }
 

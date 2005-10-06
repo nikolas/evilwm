@@ -49,27 +49,27 @@
 	(XGrabPointer(dpy, w, False, mask, GrabModeAsync, GrabModeAsync, \
 	None, curs, CurrentTime) == GrabSuccess)
 #define grab_keysym(w, mask, keysym) \
-	XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), mask, w, True, \
+	XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), (mask), w, True, \
 			GrabModeAsync, GrabModeAsync); \
-	XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), LockMask|mask, w, True, \
+	XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), LockMask|(mask), w, True, \
 			GrabModeAsync, GrabModeAsync); \
 	if (numlockmask) { \
-		XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), numlockmask|mask, \
+		XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), numlockmask|(mask), \
 				w, True, GrabModeAsync, GrabModeAsync); \
 		XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), \
-				numlockmask|LockMask|mask, w, True, \
+				numlockmask|LockMask|(mask), w, True, \
 				GrabModeAsync, GrabModeAsync); \
 	}
 #define grab_button(w, mask, button) \
-	XGrabButton(dpy, button, mask, w, False, ButtonMask, \
+	XGrabButton(dpy, button, (mask), w, False, ButtonMask, \
 			GrabModeAsync, GrabModeSync, None, None); \
-	XGrabButton(dpy, button, LockMask|mask, w, False, ButtonMask, \
+	XGrabButton(dpy, button, LockMask|(mask), w, False, ButtonMask, \
 			GrabModeAsync, GrabModeSync, None, None); \
 	if (numlockmask) { \
-		XGrabButton(dpy, button, numlockmask|mask, w, False, \
+		XGrabButton(dpy, button, numlockmask|(mask), w, False, \
 				ButtonMask, GrabModeAsync, GrabModeSync, \
 				None, None); \
-		XGrabButton(dpy, button, numlockmask|LockMask|mask, w, False, \
+		XGrabButton(dpy, button, numlockmask|LockMask|(mask), w, False, \
 				ButtonMask, GrabModeAsync, GrabModeSync, \
 				None, None); \
 	}
@@ -123,6 +123,10 @@ struct Client {
 #ifdef VWM
 	int		vdesk;
 #endif /* def VWM */
+#ifdef SHAPE
+	int		bounding_shaped;
+#endif
+	int		remove;  /* set when client needs to be removed */
 };
 
 typedef struct Application Application;
@@ -172,7 +176,6 @@ extern int		opt_snap;
 #ifdef SHAPE
 extern int		have_shape, shape_event;
 #endif
-extern int		quitting;
 #ifdef MWM_HINTS
 extern Atom		mwm_hints;
 #endif
@@ -201,9 +204,12 @@ void event_main_loop(void);
 int main(int argc, char *argv[]);
 void scan_windows(void);
 
+/* misc.c */
+
+extern int need_client_tidy;
+extern int ignore_xerror;
 /* void do_event_loop(void); */
 int handle_xerror(Display *dsply, XErrorEvent *e);
-int ignore_xerror(Display *dsply, XErrorEvent *e);
 void dump_clients(void);
 void spawn(const char *const cmd[]);
 void handle_signal(int signo);
@@ -227,6 +233,7 @@ void maximise_horiz(Client *c);
 void show_info(Client *c, KeySym key);
 void sweep(Client *c);
 void unhide(Client *c, int raise_win);
+void set_mouse_corner(Client *c);
 void next(void);
 #ifdef VWM
 void hide(Client *c);

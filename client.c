@@ -104,22 +104,27 @@ void select_client(Client *c) {
 
 void remove_client(Client *c) {
 	Client *p;
+	XWindowAttributes attr;
 
 	LOG_DEBUG("remove_client() : Removing...\n");
 
-	XGrabServer(dpy);
-	XSetErrorHandler(ignore_xerror);
+	XSync(dpy, False);
+	ignore_xerror = 1;
 
-	if (!quitting) {
+	XGetWindowAttributes(dpy, c->window, &attr);
+
+	if (c->remove) {
 		LOG_DEBUG("\tremove_client() : setting WithdrawnState\n");
 		set_wm_state(c, WithdrawnState);
 		XRemoveFromSaveSet(dpy, c->window);
 	}
+	if (!c->remove || attr.map_state == WithdrawnState) {
+		/* Should only do this when window manager is shutting down */
+		ungravitate(c);
+		XReparentWindow(dpy, c->window, c->screen->root, c->x, c->y);
+		XSetWindowBorderWidth(dpy, c->window, c->old_border);
+	}
 
-	ungravitate(c);
-	/* Restore window's original border width */
-	XSetWindowBorderWidth(dpy, c->window, c->old_border);
-	XReparentWindow(dpy, c->window, c->screen->root, c->x, c->y);
 	if (c->parent)
 		XDestroyWindow(dpy, c->parent);
 
@@ -141,8 +146,7 @@ void remove_client(Client *c) {
 #endif
 
 	XSync(dpy, False);
-	XSetErrorHandler(handle_xerror);
-	XUngrabServer(dpy);
+	ignore_xerror = 0;
 }
 
 void send_wm_delete(Client *c) {
@@ -174,15 +178,19 @@ static int send_xmessage(Window w, Atom a, long x) {
 
 #ifdef SHAPE
 void set_shape(Client *c) {
-	int n, order;
-	XRectangle *rect;
+	int i, b;  unsigned int u;  /* dummies */
 
 	if (!have_shape) return;
-	rect = XShapeGetRectangles(dpy, c->window, ShapeBounding, &n, &order);
-	if (n > 1)
+	/* Logic to decide if we have a shaped window cribbed from fvwm-2.5.10.
+	 * Previous method (more than one rectangle returned from
+	 * XShapeGetRectangles) worked _most_ of the time. */
+	XShapeSelectInput(dpy, c->window, ShapeNotifyMask);
+	if (XShapeQueryExtents(dpy, c->window, &(c->bounding_shaped), &i, &i,
+				&u, &u, &b, &i, &i, &u, &u) && c->bounding_shaped) {
+		LOG_DEBUG("%d shape extents\n", c->bounding_shaped);
 		XShapeCombineShape(dpy, c->parent, ShapeBounding, c->border,
 				c->border, c->window, ShapeBounding, ShapeSet);
-	XFree((void *)rect);
+	}
 }
 #endif
 

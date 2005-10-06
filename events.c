@@ -15,32 +15,44 @@ static void handle_key_event(XKeyEvent *e) {
 		c = current;
 	if (c) {
 		switch (key) {
-		/* Sorry about all these if (0)s, but they actually
-		 * *do* do something useful... */
 		case KEY_LEFT:
-			c->x -= 16; if (0)
+			c->x -= 16;
+			goto move_client;
 		case KEY_DOWN:
-			c->y += 16; if (0)
+			c->y += 16;
+			goto move_client;
 		case KEY_UP:
-			c->y -= 16; if (0)
+			c->y -= 16;
+			goto move_client;
 		case KEY_RIGHT:
-			c->x += 16; if (0)
+			c->x += 16;
+			goto move_client;
 		case KEY_TOPLEFT:
-			{ c->x = c->border; c->y = c->border; } if (0)
+			c->x = c->border;
+			c->y = c->border;
+			goto move_client;
 		case KEY_TOPRIGHT:
-			{ c->x = DisplayWidth(dpy, c->screen->screen)-c->width-c->border; c->y = c->border; } if (0)
+			c->x = DisplayWidth(dpy, c->screen->screen)
+				- c->width-c->border;
+			c->y = c->border;
+			goto move_client;
 		case KEY_BOTTOMLEFT:
-			{ c->x = c->border; c->y = DisplayHeight(dpy, c->screen->screen)-c->height-c->border; } if (0)
+			c->x = c->border;
+			c->y = DisplayHeight(dpy, c->screen->screen)
+				- c->height-c->border;
+			goto move_client;
 		case KEY_BOTTOMRIGHT:
-			{ c->x = DisplayWidth(dpy, c->screen->screen)-c->width-c->border; c->y = DisplayHeight(dpy, c->screen->screen)-c->height-c->border; }
-			moveresize(c);
-			setmouse(c->window, c->width + c->border - 1,
-					c->height + c->border - 1);
-			/* Need to think about this - see note about shaped
-			 * windows in TODO */
-			break;
+			c->x = DisplayWidth(dpy, c->screen->screen)
+				- c->width-c->border;
+			c->y = DisplayHeight(dpy, c->screen->screen)
+				- c->height-c->border;
+			goto move_client;
 		case KEY_KILL:
-			send_wm_delete(c); break;
+			if (e->state & ShiftMask)
+				XKillClient(dpy, c->window);
+			else
+				send_wm_delete(c);
+			break;
 		case KEY_LOWER: case KEY_ALTLOWER:
 			XLowerWindow(dpy, c->parent);
 			break;
@@ -51,10 +63,7 @@ static void handle_key_event(XKeyEvent *e) {
 			maximise_horiz(c);
 		case KEY_MAXVERT:
 			maximise_vert(c);
-			moveresize(c);
-			setmouse(c->window, c->width + c->border - 1,
-					c->height + c->border - 1);
-			break;
+			goto move_client;
 #ifdef VWM
 		case KEY_FIX:
 			c->vdesk = c->vdesk == STICKY ? vdesk : STICKY;
@@ -65,7 +74,8 @@ static void handle_key_event(XKeyEvent *e) {
 	}
 	switch(key) {
 		case KEY_NEW:
-			spawn(opt_term); break;
+			spawn(opt_term);
+			break;
 		case KEY_NEXT:
 			next();
 			break;
@@ -84,6 +94,11 @@ static void handle_key_event(XKeyEvent *e) {
 			break;
 #endif
 	}
+	return;
+move_client:
+	moveresize(c);
+	set_mouse_corner(c);
+	return;
 }
 
 #ifdef MOUSE
@@ -161,17 +176,25 @@ static void handle_unmap_event(XUnmapEvent *e) {
 	Client *c = find_client(e->window);
 
 	if (c) {
-		if (c->ignore_unmap) c->ignore_unmap--;
-		else remove_client(c);
+		if (c->ignore_unmap) {
+			c->ignore_unmap--;
+		} else {
+			LOG_DEBUG("handle_unmap_event(): flagging client for removal\n");
+			c->remove = 1;
+			need_client_tidy = 1;
+		}
 	}
 }
 
 static void handle_reparent_event(XReparentEvent *e) {
-	Client *c = find_client(e->window);
+	Client *c;
+	ScreenInfo *s = find_screen(e->parent);
 	/* If an unmanaged window is reparented such that its new parent is
 	 * a root window and it is not in WithdrawnState, manage it */
+	if (e->override_redirect == True)
+		return;
+	c = find_client(e->window);
 	if (!c) {
-		ScreenInfo *s = find_screen(e->parent);
 		if (s) {
 			XWindowAttributes attr;
 			XGetWindowAttributes(dpy, e->window, &attr);
@@ -262,6 +285,14 @@ void event_main_loop(void) {
 					handle_shape_event((XShapeEvent *)&ev);
 				}
 #endif
+		}
+		if (need_client_tidy) {
+			Client *c, *nc;
+			for (c = head_client; c; c = nc) {
+				nc = c->next;
+				if (c->remove)
+					remove_client(c);
+			}
 		}
 	}
 }

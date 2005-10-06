@@ -60,7 +60,7 @@ DEFINES += -DDEBUG	# miscellaneous debugging
 
 # ----- You shouldn't need to change anything under this line ------ #
 
-version = 0.99.18
+version = 0.99.19pre1
 
 distname = evilwm-$(version)
 

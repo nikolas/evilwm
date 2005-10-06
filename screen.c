@@ -11,13 +11,25 @@
 #ifdef INFOBANNER
 Window info_window = None;
 
+static void create_info_window(Client *c);
+static void update_info_window(Client *c);
+static void remove_info_window(void);
+
 static void create_info_window(Client *c) {
+	info_window = XCreateSimpleWindow(dpy, c->screen->root, -4, -4, 2, 2,
+			0, c->screen->fg.pixel, c->screen->fg.pixel);
+	XMapRaised(dpy, info_window);
+	update_info_window(c);
+}
+
+static void update_info_window(Client *c) {
 	char *name;
-	char buf[24];
+	char buf[27];
 	int namew, iwinx, iwiny, iwinw, iwinh;
 	int width_inc = c->width_inc, height_inc = c->height_inc;
 
-	LOG_DEBUG("create_info_window() : Creating...\n");
+	if (!info_window)
+		return;
 	snprintf(buf, sizeof(buf), "%dx%d+%d+%d", (c->width-c->base_width)/width_inc,
 		(c->height-c->base_height)/height_inc, c->x, c->y);
 	iwinw = XTextWidth(font, buf, strlen(buf)) + 2;
@@ -39,24 +51,18 @@ static void create_info_window(Client *c) {
 		iwiny = DisplayHeight(dpy, c->screen->screen) - iwinh;
 	if (iwiny < 0)
 		iwiny = 0;
-	if (info_window)
-		XDestroyWindow(dpy, info_window);
-	info_window = XCreateSimpleWindow(dpy, c->screen->root, iwinx, iwiny, iwinw, iwinh,
-			0, c->screen->fg.pixel, c->screen->fg.pixel);
-	XMapRaised(dpy, info_window);
+	XMoveResizeWindow(dpy, info_window, iwinx, iwiny, iwinw, iwinh);
+	XClearWindow(dpy, info_window);
 	if (name) {
 		XDrawString(dpy, info_window, c->screen->invert_gc,
-			1, iwinh / 2 - 1,
-			name, strlen(name));
+				1, iwinh / 2 - 1, name, strlen(name));
 		XFree(name);
 	}
-	XDrawString(dpy, info_window, c->screen->invert_gc,
-		1, iwinh - 1,
-		buf, strlen(buf));
+	XDrawString(dpy, info_window, c->screen->invert_gc, 1, iwinh - 1,
+			buf, strlen(buf));
 }
 
 static void remove_info_window(void) {
-	LOG_DEBUG("remove_info_window() : Removing...\n");
 	if (info_window)
 		XDestroyWindow(dpy, info_window);
 	info_window = None;
@@ -65,9 +71,9 @@ static void remove_info_window(void) {
 
 static void draw_outline(Client *c) {
 #ifndef INFOBANNER_MOVERESIZE
-	char buf[24];
+	char buf[27];
 	int width_inc = c->width_inc, height_inc = c->height_inc;
-#endif  /* ndef INFOBANNER */
+#endif  /* ndef INFOBANNER_MOVERESIZE */
 
 	XDrawRectangle(dpy, c->screen->root, c->screen->invert_gc,
 		c->x - c->border, c->y - c->border,
@@ -80,7 +86,7 @@ static void draw_outline(Client *c) {
 		c->x + c->width - XTextWidth(font, buf, strlen(buf)) - SPACE,
 		c->y + c->height - SPACE,
 		buf, strlen(buf));
-#endif  /* ndef INFOBANNER */
+#endif  /* ndef INFOBANNER_MOVERESIZE */
 }
 
 #ifdef MOUSE
@@ -128,14 +134,11 @@ void sweep(Client *c) {
 			case MotionNotify:
 				draw_outline(c); /* clear */
 				XUngrabServer(dpy);
-#ifdef INFOBANNER_MOVERESIZE
-				remove_info_window();
-#endif
 				recalculate_sweep(c, old_cx, old_cy, ev.xmotion.x, ev.xmotion.y);
-				XSync(dpy, False);
 #ifdef INFOBANNER_MOVERESIZE
-				create_info_window(c);
+				update_info_window(c);
 #endif
+				XSync(dpy, False);
 				XGrabServer(dpy);
 				draw_outline(c);
 				break;
@@ -232,7 +235,6 @@ void drag(Client *c) {
 	int x1, y1;
 	int old_cx = c->x;
 	int old_cy = c->y;
-	int reallymove = 0;
 
 	if (!grab_pointer(c->screen->root, MouseMask, move_curs)) return;
 	XRaiseWindow(dpy, c->parent);
@@ -252,9 +254,6 @@ void drag(Client *c) {
 				draw_outline(c); /* clear */
 				XUngrabServer(dpy);
 #endif
-#ifdef INFOBANNER_MOVERESIZE
-				remove_info_window();
-#endif
 				c->x = old_cx + (ev.xmotion.x - x1);
 				c->y = old_cy + (ev.xmotion.y - y1);
 #ifdef SNAP
@@ -262,21 +261,17 @@ void drag(Client *c) {
 					snap_client(c);
 #endif
 
-				if ((abs(c->x - old_cx)>5) || (abs(c->y - old_cy)>5))
-					reallymove = 1;
 #ifdef INFOBANNER_MOVERESIZE
-				create_info_window(c);
+				update_info_window(c);
 #endif
 #ifndef SOLIDDRAG
 				XSync(dpy, False);
 				XGrabServer(dpy);
 				draw_outline(c);
 #else
-				if (reallymove) {
-					XMoveWindow(dpy, c->parent, c->x - c->border,
+				XMoveWindow(dpy, c->parent, c->x - c->border,
 						c->y - c->border);
-					send_config(c);
-				}
+				send_config(c);
 #endif 
 				break;
 			case ButtonRelease:
@@ -289,10 +284,10 @@ void drag(Client *c) {
 #endif
 				XUngrabPointer(dpy, CurrentTime);
 #ifndef SOLIDDRAG
-				if (!reallymove) {
-					c->x = old_cx;
-					c->y = old_cy;
-				}
+				//if (!reallymove) {
+					//c->x = old_cx;
+					//c->y = old_cy;
+				//}
 				moveresize(c);
 #endif
 				return;
@@ -310,6 +305,7 @@ void moveresize(Client *c) {
 			c->height + (c->border*2));
 	XMoveResizeWindow(dpy, c->window, c->border, c->border,
 			c->width, c->height);
+	send_config(c);
 }
 
 void maximise_horiz(Client *c) {
@@ -357,6 +353,34 @@ void unhide(Client *c, int raise_win) {
 	set_wm_state(c, NormalState);
 }
 
+void set_mouse_corner(Client *c) {
+	int use_x=0, use_y=0;
+#ifdef SHAPE
+	if (c->bounding_shaped) {
+		int i, n_rect, order, maxdiag=0;
+		XRectangle *r = XShapeGetRectangles(dpy, c->window, ShapeBounding,
+				&n_rect, &order);
+		LOG_DEBUG("XShapeGetRectangles: n=%d  r=%p\n", n_rect, r);
+		for (i=0; i<n_rect; i++) {
+			int diag = r[i].x+r[i].width+r[i].y+r[i].width+r[i].height;
+			if (diag > maxdiag) {
+				maxdiag = diag;
+				use_x = r[i].x+r[i].width;
+				use_y = r[i].y+r[i].height;
+			}
+		}
+		XFree(r);
+	} else {
+#endif
+		use_x = c->width  + c->border;
+		use_y = c->height + c->border;
+#ifdef SHAPE
+	}
+#endif
+	LOG_DEBUG("set_mouse_corner: %d %d\n", use_x-1, use_y-1);
+	setmouse(c->window, use_x-1, use_y-1);
+}
+
 void next(void) {
 	Client *newc = current;
 	do {
@@ -382,10 +406,11 @@ void next(void) {
 	unhide(newc, RAISE);
 	select_client(newc);
 	setmouse(newc->window, 0, 0);
-	setmouse(newc->window, newc->width + newc->border - 1,
-		newc->height + newc->border - 1);
+	//setmouse(newc->window, newc->width + newc->border - 1,
+		//newc->height + newc->border - 1);
 	/* Need to think about this - see note about shaped
 	 * windows in TODO */
+	set_mouse_corner(newc);
 }
 
 #ifdef VWM
@@ -419,7 +444,7 @@ void switch_vdesk(int v) {
 #endif
 #ifdef VWM_WARP
 			if (!warped) {
-				setmouse(c->window, c->width, c->height);
+				set_mouse_corner(c);
 				warped = 1;
 			}
 #endif

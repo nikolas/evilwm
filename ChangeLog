@@ -374,3 +374,14 @@ Old
 2005-06-02
 	Ignore PPosition during window placement (back to old behaviour of
 	positioning window under pointer unless user-specified).
+
+2005-10-06
+	Info window movement made a bit more sensible.
+	Don't remove clients from within error handler, instead flag for
+	removal.
+	While removing client, only reparent to root if window is withdrawn
+	or window manager is shutting down (fixes xpdf-in-firefox bug).
+	Window close key with shift held will XKillClient().
+	LD: Replace logic to decide if we have a shaped window (cribbed from
+	fvwm-2.5.10).
+	LD: Warp mouse pointer to a visible point in shaped windows.
