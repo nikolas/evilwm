@@ -10,40 +10,40 @@
 #include "evilwm.h"
 #include "log.h"
 
-Display		*dpy;
-int 		num_screens;
-ScreenInfo	*screens;
-ScreenInfo	*current_screen;
-Client		*current = NULL;
-volatile Window	initialising = None;
-XFontStruct	*font;
-Client		*head_client = NULL;
-Application	*head_app = NULL;
-Atom		xa_wm_state;
-Atom		xa_wm_change_state;
-Atom		xa_wm_protos;
-Atom		xa_wm_delete;
-Atom		xa_wm_cmapwins;
-Cursor		move_curs;
-Cursor		resize_curs;
-const char	*opt_display = "";
-const char	*opt_font = DEF_FONT;
-const char	*opt_fg = DEF_FG;
-const char	*opt_bg = DEF_BG;
-const char	*opt_term[3] = { DEF_TERM, DEF_TERM, NULL };
-int		opt_bw = DEF_BW;
+Display         *dpy;
+int             num_screens;
+ScreenInfo      *screens;
+ScreenInfo      *current_screen;
+Client          *current = NULL;
+volatile Window initialising = None;
+XFontStruct     *font;
+Client          *head_client = NULL;
+Application     *head_app = NULL;
+Atom            xa_wm_state;
+Atom            xa_wm_change_state;
+Atom            xa_wm_protos;
+Atom            xa_wm_delete;
+Atom            xa_wm_cmapwins;
+Cursor          move_curs;
+Cursor          resize_curs;
+const char      *opt_display = "";
+const char      *opt_font = DEF_FONT;
+const char      *opt_fg = DEF_FG;
+const char      *opt_bg = DEF_BG;
+const char      *opt_term[3] = { DEF_TERM, DEF_TERM, NULL };
+int             opt_bw = DEF_BW;
 #ifdef VWM
-const char	*opt_fc = DEF_FC;
-int		vdesk = KEY_TO_VDESK(XK_1);
+const char      *opt_fc = DEF_FC;
+int             vdesk = KEY_TO_VDESK(XK_1);
 #endif
 #ifdef SNAP
-int		opt_snap = 0;
+int             opt_snap = 0;
 #endif
 #ifdef SHAPE
-int		have_shape, shape_event;
+int             have_shape, shape_event;
 #endif
 #ifdef MWM_HINTS
-Atom		mwm_hints;
+Atom            mwm_hints;
 #endif
 unsigned int numlockmask = 0;
 static unsigned int grabmask1 = ControlMask|Mod1Mask;
