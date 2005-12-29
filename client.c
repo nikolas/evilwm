@@ -104,27 +104,21 @@ void select_client(Client *c) {
 
 void remove_client(Client *c) {
 	Client *p;
-	XWindowAttributes attr;
 
 	LOG_DEBUG("remove_client() : Removing...\n");
 
-	XSync(dpy, False);
+	XGrabServer(dpy);
 	ignore_xerror = 1;
-
-	XGetWindowAttributes(dpy, c->window, &attr);
 
 	if (c->remove) {
 		LOG_DEBUG("\tremove_client() : setting WithdrawnState\n");
 		set_wm_state(c, WithdrawnState);
-		XRemoveFromSaveSet(dpy, c->window);
-	}
-	if (!c->remove || attr.map_state == WithdrawnState) {
-		/* Should only do this when window manager is shutting down */
-		ungravitate(c);
-		XReparentWindow(dpy, c->window, c->screen->root, c->x, c->y);
-		XSetWindowBorderWidth(dpy, c->window, c->old_border);
 	}
 
+	ungravitate(c);
+	XReparentWindow(dpy, c->window, c->screen->root, c->x, c->y);
+	XSetWindowBorderWidth(dpy, c->window, c->old_border);
+	XRemoveFromSaveSet(dpy, c->window);
 	if (c->parent)
 		XDestroyWindow(dpy, c->parent);
 
@@ -145,8 +139,10 @@ void remove_client(Client *c) {
 	}
 #endif
 
+	XUngrabServer(dpy);
 	XSync(dpy, False);
 	ignore_xerror = 0;
+	LOG_DEBUG("remove_client() returning\n");
 }
 
 void send_wm_delete(Client *c) {
