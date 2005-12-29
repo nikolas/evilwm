@@ -77,12 +77,6 @@ int handle_xerror(Display *dsply, XErrorEvent *e) {
 		exit(1);
 	}
 
-	/* Kludge around IE misbehaviour */
-	if (e->error_code == 0x8 && e->request_code == 0x0c && e->minor_code == 0x00) {
-		LOG_DEBUG("\thandle_xerror() : IE kludge - ignoring XError\n");
-		return 0;
-	}
-
 	if (c) {
 		LOG_DEBUG("\thandle_xerror() : flagging client for removal\n");
 		c->remove = 1;
