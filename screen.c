@@ -284,10 +284,6 @@ void drag(Client *c) {
 #endif
 				XUngrabPointer(dpy, CurrentTime);
 #ifndef SOLIDDRAG
-				//if (!reallymove) {
-					//c->x = old_cx;
-					//c->y = old_cy;
-				//}
 				moveresize(c);
 #endif
 				return;
@@ -406,8 +402,6 @@ void next(void) {
 	unhide(newc, RAISE);
 	select_client(newc);
 	setmouse(newc->window, 0, 0);
-	//setmouse(newc->window, newc->width + newc->border - 1,
-		//newc->height + newc->border - 1);
 	/* Need to think about this - see note about shaped
 	 * windows in TODO */
 	set_mouse_corner(newc);
