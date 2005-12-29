@@ -40,6 +40,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	 * trying to manage it. */
 	initialising = w;
 	XFetchName(dpy, w, &name);
+	XSync(dpy, False);
 	/* If 'initialising' is now set to None, that means doing the
 	 * XFetchName raised BadWindow - the window has been removed before
 	 * we got a chance to grab the server. */
