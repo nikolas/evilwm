@@ -186,26 +186,6 @@ static void handle_unmap_event(XUnmapEvent *e) {
 	}
 }
 
-static void handle_reparent_event(XReparentEvent *e) {
-	Client *c;
-	ScreenInfo *s = find_screen(e->parent);
-	/* If an unmanaged window is reparented such that its new parent is
-	 * a root window and it is not in WithdrawnState, manage it */
-	if (e->override_redirect == True)
-		return;
-	c = find_client(e->window);
-	if (!c) {
-		if (s) {
-			XWindowAttributes attr;
-			XGetWindowAttributes(dpy, e->window, &attr);
-			if (attr.map_state != WithdrawnState) {
-				LOG_DEBUG("handle_reparent_event(): window reparented to root - making client\n");
-				make_new_client(e->window, s);
-			}
-		}
-	}
-}
-
 #ifdef COLOURMAP
 static void handle_colormap_change(XColormapEvent *e) {
 	Client *c = find_client(e->window);
@@ -277,8 +257,6 @@ void event_main_loop(void) {
 				handle_property_change(&ev.xproperty); break;
 			case UnmapNotify:
 				handle_unmap_event(&ev.xunmap); break;
-			case ReparentNotify:
-				handle_reparent_event(&ev.xreparent); break;
 #ifdef SHAPE
 			default:
 				if (have_shape && ev.type == shape_event) {
