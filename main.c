@@ -128,9 +128,17 @@ int main(int argc, char *argv[]) {
 			exit(0);
 #endif
 		} else {
-			LOG_INFO("usage: evilwm [-display display] [-term termprog] [-fg foreground]\n");
-			LOG_INFO("\t[-bg background] [-bw borderwidth] [-snap num] [-V]\n");
-			exit(2);
+			LOG_INFO("usage: evilwm [-display display] [-term termprog] [-fg foreground]");
+#ifdef VWM
+			LOG_INFO(" [-fc fixed]");
+#endif
+			LOG_INFO("\n              [-bg background] [-bw borderwidth] [-snap num]\n");
+			LOG_INFO("              [-mask1 modifiers] [-mask2 modifiers]");
+#ifdef VWM
+			LOG_INFO("\n              [-app name/class] [-g geometry] [-v vdesk]");
+#endif
+			LOG_INFO(" [-V]\n");
+			exit((!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))?0:1);
 		}
 	}
 
