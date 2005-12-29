@@ -4,16 +4,5 @@ What I'd like to do some time...
 
 * New windows tile as well as possible.
 
-* Seems like some applications (notably audiocontrol) bring themselves
-  to the front whenever mapped.  This breaks the simple approach to
-  keeping stacking order on changing desktop.  So probably have to do
-  the structure reordering thing.
-
 * Think of some good way of adding controllable window resizing beyond the
   fullscreen/vertical maximise toggles.
-
-* Alt+tabbing to shaped windows, or using keyboard controls to move them where
-  the pointer ends up in a transparent area causes an enter event to get sent
-  to any window then under the pointer, and thus get selected.  Alt+tabbing
-  can be fixed by just not warping the pointer.  Moving with keyboard is more
-  tricky.
