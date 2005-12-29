@@ -56,7 +56,7 @@ DEFINES += -DCOLOURMAP
 #DEFINES += -DKEY_KILL=XK_q
 
 # Print whatever debugging messages I've left in this release.
-DEFINES += -DDEBUG	# miscellaneous debugging
+#DEFINES += -DDEBUG	# miscellaneous debugging
 
 # ----- You shouldn't need to change anything under this line ------ #
 
@@ -64,7 +64,7 @@ version = 0.99.19pre2
 
 distname = evilwm-$(version)
 
-DEFINES += -DXDEBUG	# show some X calls
+#DEFINES += -DXDEBUG	# show some X calls
 
 DEFINES += -DVERSION=\"$(version)\" $(DEBIAN)
 CFLAGS  += $(INCLUDES) $(DEFINES) -Os -Wall
