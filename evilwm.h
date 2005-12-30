@@ -210,7 +210,6 @@ extern int need_client_tidy;
 extern int ignore_xerror;
 /* void do_event_loop(void); */
 int handle_xerror(Display *dsply, XErrorEvent *e);
-void dump_clients(void);
 void spawn(const char *const cmd[]);
 void handle_signal(int signo);
 #ifdef DEBUG
