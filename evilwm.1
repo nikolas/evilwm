@@ -7,9 +7,11 @@ evilwm \- Minimalist Window Manager for X
 .B ] [ \-term
 .I termprog
 .B ] [ \-fg
-.I foreground
+.I foreground colour
+.B ] [ \-fc
+.I fixed colour
 .B ] [ \-bg
-.I background
+.I background colour
 .B ] [ \-bw
 .I borderwidth
 .B ] [ \-snap
@@ -89,9 +91,11 @@ specifies the X display to run on.
 .IP "\-term termprog"
 specifies an alternative program to run when spawning a new terminal (defaults
 to xterm, or x\-terminal\-emulator in Debian).
-.IP "\-fg foreground"
+.IP "\-fg foreground colour"
 frame colour of currently active window.
-.IP "\-bg background"
+.IP "\-fc fixed colour"
+frame colour of active fixed windows.
+.IP "\-bg background colour"
 frame colour of inactive windows.
 .IP "\-bw borderwidth"
 width of window borders in pixels.

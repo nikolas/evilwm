@@ -385,3 +385,6 @@ Old
 	LD: Replace logic to decide if we have a shaped window (cribbed from
 	fvwm-2.5.10).
 	LD: Warp mouse pointer to a visible point in shaped windows.
+
+2005-12-29
+	Documentation updates.
