@@ -3,7 +3,6 @@
  * see README for license and other details. */
 
 #include <stdlib.h>
-#include <X11/Xatom.h>
 #include "evilwm.h"
 #include "log.h"
 
