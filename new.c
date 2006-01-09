@@ -8,6 +8,12 @@
 #include "evilwm.h"
 #include "log.h"
 
+#define MAXIMUM_PROPERTY_LENGTH 4096
+
+static void init_geometry(Client *c);
+static void reparent(Client *c);
+static void *get_property(Window w, Atom property, Atom req_type,
+		long *nitems_return);
 static PropMwmHints *get_mwm_hints(Window);
 #ifdef XDEBUG
 static const char *map_state_string(int map_state);
@@ -16,8 +22,6 @@ static void debug_wm_normal_hints(XSizeHints *size);
 #else
 # define debug_wm_normal_hints(s)
 #endif
-static void init_geometry(Client *c);
-static void reparent(Client *c);
 
 void make_new_client(Window w, ScreenInfo *s) {
 	Client *c;
@@ -291,18 +295,32 @@ CARD32 get_wm_normal_hints(Client *c) {
 	return flags;
 }
 
-static PropMwmHints *get_mwm_hints(Window w) {
+static void *get_property(Window w, Atom property, Atom req_type,
+		long *nitems_return) {
 	Atom actual_type;
 	int actual_format;
-	unsigned long nitems, bytes_after;
-	PropMwmHints *data;
-	if (XGetWindowProperty(dpy, w, mwm_hints, 0L,
-				(long)PROP_MWM_HINTS_ELEMENTS, False,
-				mwm_hints, &actual_type, &actual_format,
-				&nitems, &bytes_after,
-				(unsigned char **)&data)
-			== Success && nitems >= PROP_MWM_HINTS_ELEMENTS) {
-		return data;
+	unsigned long bytes_after;
+	unsigned char *prop;
+	if (XGetWindowProperty(dpy, w, property,
+				0L, MAXIMUM_PROPERTY_LENGTH / 4, False,
+				req_type, &actual_type, &actual_format,
+				nitems_return, &bytes_after, &prop)
+			== Success) {
+		if (actual_type == req_type)
+			return (void *)prop;
+		XFree(prop);
+	}
+	return NULL;
+}
+
+static PropMwmHints *get_mwm_hints(Window w) {
+	unsigned long nitems;
+	PropMwmHints *prop;
+	if ( (prop = get_property(w, mwm_hints, mwm_hints, &nitems)) ) {
+		if (nitems >= PROP_MWM_HINTS_ELEMENTS) {
+			return prop;
+		}
+		XFree(prop);
 	}
 	return NULL;
 }
