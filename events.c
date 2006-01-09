@@ -66,8 +66,7 @@ static void handle_key_event(XKeyEvent *e) {
 			goto move_client;
 #ifdef VWM
 		case KEY_FIX:
-			c->vdesk = c->vdesk == STICKY ? vdesk : STICKY;
-			client_update_current(c, current);
+			fix_client(c);
 			break;
 #endif
 		}
