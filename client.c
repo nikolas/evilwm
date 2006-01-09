@@ -102,10 +102,12 @@ void select_client(Client *c) {
 	XSetInputFocus(dpy, c->window, RevertToPointerRoot, CurrentTime);
 }
 
+#ifdef VWM
 void fix_client(Client *c) {
 	c->vdesk = c->vdesk == STICKY ? vdesk : STICKY;
 	client_update_current(c, current);
 }
+#endif
 
 void remove_client(Client *c) {
 	Client *p;

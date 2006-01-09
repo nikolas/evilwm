@@ -194,7 +194,9 @@ Client *find_client(Window w);
 int wm_state(Client *c);
 void gravitate_client(Client *c, int sign);
 void select_client(Client *c);
+#ifdef VWM
 void fix_client(Client *c);
+#endif
 void remove_client(Client *c);
 void send_config(Client *c);
 void send_wm_delete(Client *c, int kill_client);
