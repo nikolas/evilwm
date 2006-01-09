@@ -349,34 +349,6 @@ void unhide(Client *c, int raise_win) {
 	set_wm_state(c, NormalState);
 }
 
-void set_mouse_corner(Client *c) {
-	int use_x=0, use_y=0;
-#ifdef SHAPE
-	if (c->bounding_shaped) {
-		int i, n_rect, order, maxdiag=0;
-		XRectangle *r = XShapeGetRectangles(dpy, c->window, ShapeBounding,
-				&n_rect, &order);
-		LOG_DEBUG("XShapeGetRectangles: n=%d  r=%p\n", n_rect, r);
-		for (i=0; i<n_rect; i++) {
-			int diag = r[i].x+r[i].width+r[i].y+r[i].width+r[i].height;
-			if (diag > maxdiag) {
-				maxdiag = diag;
-				use_x = r[i].x+r[i].width;
-				use_y = r[i].y+r[i].height;
-			}
-		}
-		XFree(r);
-	} else {
-#endif
-		use_x = c->width  + c->border;
-		use_y = c->height + c->border;
-#ifdef SHAPE
-	}
-#endif
-	LOG_DEBUG("set_mouse_corner: %d %d\n", use_x-1, use_y-1);
-	setmouse(c->window, use_x-1, use_y-1);
-}
-
 void next(void) {
 	Client *newc = current;
 	do {
@@ -402,9 +374,9 @@ void next(void) {
 	unhide(newc, RAISE);
 	select_client(newc);
 	setmouse(newc->window, 0, 0);
-	/* Need to think about this - see note about shaped
-	 * windows in TODO */
-	set_mouse_corner(newc);
+	setmouse(newc->window, newc->width + newc->border - 1,
+			newc->height + newc->border - 1);
+	discard_enter_events();
 }
 
 #ifdef VWM

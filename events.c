@@ -92,7 +92,9 @@ static void handle_key_event(XKeyEvent *e) {
 	return;
 move_client:
 	moveresize(c);
-	set_mouse_corner(c);
+	setmouse(c->window, c->width + c->border - 1,
+			c->height + c->border - 1);
+	discard_enter_events();
 	return;
 }
 

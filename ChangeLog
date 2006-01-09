@@ -398,3 +398,5 @@ Old
 	structure information as is necessary to interpret Motif hints.
 	Added fix_client() function.
 	Bundle XKillClient option into send_wm_delete()
+	Discard enter events on window move, etc.; simpler than searching
+	through shape extents.

@@ -92,6 +92,12 @@ typedef struct {
 #define remove_sticky(c) c->vdesk = vdesk
 #define toggle_sticky(c) c->vdesk = is_sticky(c) ? vdesk : STICKY
 
+#define discard_enter_events() do { \
+		XEvent dummy; \
+		XSync(dpy, False); \
+		while (XCheckMaskEvent(dpy, EnterWindowMask, &dummy)); \
+	} while (0)
+
 /* screen structure */
 
 typedef struct ScreenInfo ScreenInfo;
@@ -247,7 +253,6 @@ void maximise_horiz(Client *c);
 void show_info(Client *c, KeySym key);
 void sweep(Client *c);
 void unhide(Client *c, int raise_win);
-void set_mouse_corner(Client *c);
 void next(void);
 #ifdef VWM
 void hide(Client *c);
