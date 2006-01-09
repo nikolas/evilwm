@@ -82,10 +82,6 @@ void make_new_client(Window w, ScreenInfo *s) {
 
 	init_geometry(c);
 
-#ifdef VWM
-	c->vdesk = vdesk;
-#endif
-
 #ifdef DEBUG
 	{
 		Client *p;
@@ -146,9 +142,6 @@ void make_new_client(Window w, ScreenInfo *s) {
 				moveresize(c);
 #ifdef VWM
 				if (a->vdesk != -1) c->vdesk = a->vdesk;
-				if (vdesk != c->vdesk && c->vdesk != STICKY) {
-					hide(c);
-				}
 #endif
 			}
 			a = a->next;
@@ -158,10 +151,15 @@ void make_new_client(Window w, ScreenInfo *s) {
 		XFree(class);
 	}
 
-	/* send_config(c); */
+#ifdef VWM
+	if (vdesk != c->vdesk && c->vdesk != STICKY) {
+		hide(c);
+	} else
+#endif
 #ifndef MOUSE
 	set_mouse_corner(c);
 #endif
+	;
 }
 
 /* Calls XGetWindowAttributes, XGetWMHints and XGetWMNormalHints to determine
@@ -174,6 +172,10 @@ static void init_geometry(Client *c) {
 	XWindowAttributes attr;
 	XWMHints *wm;
 	int reconfigure = 0;
+
+#ifdef VWM
+	c->vdesk = vdesk;
+#endif
 
 	/* Get current window attributes */
 	LOG_XDEBUG("XGetWindowAttributes()\n");
