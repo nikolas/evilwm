@@ -397,3 +397,4 @@ Old
 	Removed dependency on Motif header files: supply just as much hint
 	structure information as is necessary to interpret Motif hints.
 	Added fix_client() function.
+	Bundle XKillClient option into send_wm_delete()

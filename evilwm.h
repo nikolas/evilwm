@@ -197,7 +197,7 @@ void select_client(Client *c);
 void fix_client(Client *c);
 void remove_client(Client *c);
 void send_config(Client *c);
-void send_wm_delete(Client *c);
+void send_wm_delete(Client *c, int kill_client);
 void set_wm_state(Client *c, int state);
 void set_shape(Client *c);
 void client_update_current(Client *c, Client *newcurrent);

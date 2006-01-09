@@ -48,10 +48,7 @@ static void handle_key_event(XKeyEvent *e) {
 				- c->height-c->border;
 			goto move_client;
 		case KEY_KILL:
-			if (e->state & ShiftMask)
-				XKillClient(dpy, c->window);
-			else
-				send_wm_delete(c);
+			send_wm_delete(c, e->state & ShiftMask);
 			break;
 		case KEY_LOWER: case KEY_ALTLOWER:
 			XLowerWindow(dpy, c->parent);

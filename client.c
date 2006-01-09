@@ -150,18 +150,20 @@ void remove_client(Client *c) {
 	LOG_DEBUG("remove_client() returning\n");
 }
 
-void send_wm_delete(Client *c) {
+void send_wm_delete(Client *c, int kill_client) {
 	int i, n, found = 0;
 	Atom *protocols;
 
-	if (c) {
-		if (XGetWMProtocols(dpy, c->window, &protocols, &n)) {
-			for (i=0; i<n; i++) if (protocols[i] == xa_wm_delete) found++;
-			XFree(protocols);
-		}
-		if (found) send_xmessage(c->window, xa_wm_protos, xa_wm_delete);
-		else XKillClient(dpy, c->window);
+	if (!kill_client && XGetWMProtocols(dpy, c->window, &protocols, &n)) {
+		for (i = 0; i < n; i++)
+			if (protocols[i] == xa_wm_delete)
+				found++;
+		XFree(protocols);
 	}
+	if (found)
+		send_xmessage(c->window, xa_wm_protos, xa_wm_delete);
+	else
+		XKillClient(dpy, c->window);
 }
 
 static int send_xmessage(Window w, Atom a, long x) {
