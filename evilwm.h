@@ -6,11 +6,20 @@
 #ifdef SHAPE
 #include <X11/extensions/shape.h>
 #endif
-#ifdef MWM_HINTS
-#include <Xm/MwmUtil.h>
-#endif
 
 #include "keymap.h"
+
+/* Required for interpreting MWM hints: */
+#define _XA_MWM_HINTS           "_MOTIF_WM_HINTS"
+#define PROP_MWM_HINTS_ELEMENTS 3
+#define MWM_HINTS_DECORATIONS   (1L << 1)
+#define MWM_DECOR_ALL           (1L << 0)
+#define MWM_DECOR_BORDER        (1L << 1)
+typedef struct {
+	unsigned long flags;
+	unsigned long functions;
+	unsigned long decorations;
+} PropMwmHints;
 
 /* sanity on options */
 #if defined(INFOBANNER_MOVERESIZE) && !defined(INFOBANNER)
@@ -176,9 +185,7 @@ extern int		opt_snap;
 #ifdef SHAPE
 extern int		have_shape, shape_event;
 #endif
-#ifdef MWM_HINTS
 extern Atom		mwm_hints;
-#endif
 extern unsigned int numlockmask;
 extern unsigned int grabmask2;
 

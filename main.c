@@ -42,9 +42,7 @@ int             opt_snap = 0;
 #ifdef SHAPE
 int             have_shape, shape_event;
 #endif
-#ifdef MWM_HINTS
 Atom            mwm_hints;
-#endif
 unsigned int numlockmask = 0;
 static unsigned int grabmask1 = ControlMask|Mod1Mask;
 /* This one is used for per-client mousebutton grabs, so global: */
@@ -209,9 +207,7 @@ static void setup_display(void) {
 #ifdef COLOURMAP
 	xa_wm_cmapwins = XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
 #endif
-#ifdef MWM_HINTS
 	mwm_hints = XInternAtom(dpy, _XA_MWM_HINTS, False);
-#endif
 
 	font = XLoadQueryFont(dpy, opt_font);
 	if (!font) font = XLoadQueryFont(dpy, DEF_FONT);

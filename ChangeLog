@@ -374,6 +374,7 @@ Old
 2005-06-02
 	Ignore PPosition during window placement (back to old behaviour of
 	positioning window under pointer unless user-specified).
+	Released 0.99.18.
 
 2005-10-06
 	Info window movement made a bit more sensible.
@@ -388,3 +389,6 @@ Old
 
 2005-12-29
 	Documentation updates.
+
+2005-12-30
+	Released 0.99.19.

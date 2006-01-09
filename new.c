@@ -8,9 +8,7 @@
 #include "evilwm.h"
 #include "log.h"
 
-#ifdef MWM_HINTS
 static PropMwmHints *get_mwm_hints(Window);
-#endif
 #ifdef XDEBUG
 static const char *map_state_string(int map_state);
 static const char *gravity_string(int gravity);
@@ -25,9 +23,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	Client *c;
 	char *name;
 	XClassHint *class;
-#ifdef MWM_HINTS
 	PropMwmHints *mhints;
-#endif
 
 	XGrabServer(dpy);
 
@@ -68,7 +64,6 @@ void make_new_client(Window w, ScreenInfo *s) {
 	c->remove = 0;
 
 	c->border = opt_bw;
-#ifdef MWM_HINTS
 	if ((mhints = get_mwm_hints(c->window))) {
 		if (mhints->flags & MWM_HINTS_DECORATIONS
 				&& !(mhints->decorations & MWM_DECOR_ALL)) {
@@ -78,17 +73,8 @@ void make_new_client(Window w, ScreenInfo *s) {
 		}
 		XFree(mhints);
 	}
-#endif
-	/* If we don't have MWM_HINTS (i.e., lesstif) for a client to tell us
-	 * it has no border, I include this *really blatant hack* to remove
-	 * the border from XMMS. */
-	if (name) {
-#ifndef MWM_HINTS
-		if (!strncmp("XMMS", name, 4))
-			c->border = 0;
-#endif
-		XFree(name);  /* But we want to free this anyway... */
-	}
+	if (name)
+		XFree(name);
 
 	init_geometry(c);
 
@@ -305,7 +291,6 @@ CARD32 get_wm_normal_hints(Client *c) {
 	return flags;
 }
 
-#ifdef MWM_HINTS
 static PropMwmHints *get_mwm_hints(Window w) {
 	Atom actual_type;
 	int actual_format;
@@ -321,7 +306,6 @@ static PropMwmHints *get_mwm_hints(Window w) {
 	}
 	return NULL;
 }
-#endif
 
 #ifdef XDEBUG
 static const char *map_state_string(int map_state) {
