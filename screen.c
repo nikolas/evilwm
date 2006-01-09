@@ -411,9 +411,6 @@ void next(void) {
 void switch_vdesk(int v) {
 	Client *c;
 	int wdesk;
-#ifdef VWM_WARP
-	int warped = 0;
-#endif
 #ifdef DEBUG
 	int hidden = 0, raised = 0;
 #endif
@@ -435,12 +432,6 @@ void switch_vdesk(int v) {
 			unhide(c, NO_RAISE);
 #ifdef DEBUG
 			raised++;
-#endif
-#ifdef VWM_WARP
-			if (!warped) {
-				set_mouse_corner(c);
-				warped = 1;
-			}
 #endif
 		}
 	}
