@@ -28,62 +28,61 @@ typedef struct {
 
 /* default settings */
 
-#define DEF_FONT	"variable"
-#define DEF_FG		"goldenrod"
-#define DEF_BG		"grey50"
-#define DEF_BW		1
-#define DEF_FC		"blue"
-#define SPACE		3
+#define DEF_FONT        "variable"
+#define DEF_FG          "goldenrod"
+#define DEF_BG          "grey50"
+#define DEF_BW          1
+#define DEF_FC          "blue"
+#define SPACE           3
 #ifdef DEBIAN
-#define DEF_TERM	"x-terminal-emulator"
+#define DEF_TERM        "x-terminal-emulator"
 #else
-#define DEF_TERM	"xterm"
+#define DEF_TERM        "xterm"
 #endif
 
 /* readability stuff */
 
-#define STICKY 0	/* Desktop number for sticky clients */
+#define STICKY 0        /* Desktop number for sticky clients */
 #define KEY_TO_VDESK( key ) ( ( key ) - XK_1 + 1 )
 
-#define RAISE		1
-#define NO_RAISE	0	/* for unhide() */
+#define RAISE           1
+#define NO_RAISE        0       /* for unhide() */
 
 /* some coding shorthand */
 
-#define ChildMask	(SubstructureRedirectMask|SubstructureNotifyMask)
-#define ButtonMask	(ButtonPressMask|ButtonReleaseMask)
-#define MouseMask	(ButtonMask|PointerMotionMask)
+#define ChildMask       (SubstructureRedirectMask|SubstructureNotifyMask)
+#define ButtonMask      (ButtonPressMask|ButtonReleaseMask)
+#define MouseMask       (ButtonMask|PointerMotionMask)
 
 #define grab_pointer(w, mask, curs) \
 	(XGrabPointer(dpy, w, False, mask, GrabModeAsync, GrabModeAsync, \
 	None, curs, CurrentTime) == GrabSuccess)
 #define grab_keysym(w, mask, keysym) \
 	XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), (mask), w, True, \
-			GrabModeAsync, GrabModeAsync); \
+	         GrabModeAsync, GrabModeAsync); \
 	XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), LockMask|(mask), w, True, \
-			GrabModeAsync, GrabModeAsync); \
+	         GrabModeAsync, GrabModeAsync); \
 	if (numlockmask) { \
 		XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), numlockmask|(mask), \
-				w, True, GrabModeAsync, GrabModeAsync); \
+		         w, True, GrabModeAsync, GrabModeAsync); \
 		XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), \
-				numlockmask|LockMask|(mask), w, True, \
-				GrabModeAsync, GrabModeAsync); \
+	                 numlockmask|LockMask|(mask), w, True, \
+	                 GrabModeAsync, GrabModeAsync); \
 	}
 #define grab_button(w, mask, button) \
 	XGrabButton(dpy, button, (mask), w, False, ButtonMask, \
-			GrabModeAsync, GrabModeSync, None, None); \
+	            GrabModeAsync, GrabModeSync, None, None); \
 	XGrabButton(dpy, button, LockMask|(mask), w, False, ButtonMask, \
-			GrabModeAsync, GrabModeSync, None, None); \
+	            GrabModeAsync, GrabModeSync, None, None); \
 	if (numlockmask) { \
 		XGrabButton(dpy, button, numlockmask|(mask), w, False, \
-				ButtonMask, GrabModeAsync, GrabModeSync, \
-				None, None); \
+		            ButtonMask, GrabModeAsync, GrabModeSync, \
+		            None, None); \
 		XGrabButton(dpy, button, numlockmask|LockMask|(mask), w, False, \
-				ButtonMask, GrabModeAsync, GrabModeSync, \
-				None, None); \
+		            ButtonMask, GrabModeAsync, GrabModeSync, \
+		            None, None); \
 	}
-#define setmouse(w, x, y) \
-	XWarpPointer(dpy, None, w, 0, 0, 0, 0, x, y)
+#define setmouse(w, x, y) XWarpPointer(dpy, None, w, 0, 0, 0, 0, x, y)
 #define gravitate(c) gravitate_client(c, 1)
 #define ungravitate(c) gravitate_client(c, -1)
 
@@ -109,33 +108,33 @@ struct ScreenInfo {
 typedef struct Client Client;
 
 struct Client {
-	Client	*next;
-	Window	window;
-	Window	parent;
-	ScreenInfo	*screen;
+	Client  *next;
+	Window  window;
+	Window  parent;
+	ScreenInfo      *screen;
 
 #ifdef COLOURMAP
-	Colormap	cmap;
+	Colormap        cmap;
 #endif
-	int		ignore_unmap;
+	int             ignore_unmap;
 
-	int		x, y, width, height;
-	int		border;
-	int		oldx, oldy, oldw, oldh;  /* used when maximising */
+	int             x, y, width, height;
+	int             border;
+	int             oldx, oldy, oldw, oldh;  /* used when maximising */
 
-	int		min_width, min_height;
-	int		max_width, max_height;
-	int		width_inc, height_inc;
-	int		base_width, base_height;
-	int		win_gravity;
-	int		old_border;
+	int             min_width, min_height;
+	int             max_width, max_height;
+	int             width_inc, height_inc;
+	int             base_width, base_height;
+	int             win_gravity;
+	int             old_border;
 #ifdef VWM
-	int		vdesk;
+	int             vdesk;
 #endif /* def VWM */
 #ifdef SHAPE
-	int		bounding_shaped;
+	int             bounding_shaped;
 #endif
-	int		remove;  /* set when client needs to be removed */
+	int             remove;  /* set when client needs to be removed */
 };
 
 typedef struct Application Application;
@@ -153,39 +152,39 @@ struct Application {
 
 /* declarations for global variables in main.c */
 
-extern Display		*dpy;
-extern int		num_screens;
-extern ScreenInfo	*screens;
-extern ScreenInfo	*current_screen;
-extern Client		*current;
-extern volatile Window	initialising;
-extern XFontStruct	*font;
-extern Client		*head_client;
-extern Application	*head_app;
-extern Atom		xa_wm_state;
-extern Atom		xa_wm_change_state;
-extern Atom		xa_wm_protos;
-extern Atom		xa_wm_delete;
-extern Atom		xa_wm_cmapwins;
-extern Cursor		move_curs;
-extern Cursor		resize_curs;
-extern const char	*opt_display;
-extern const char	*opt_font;
-extern const char	*opt_fg;
-extern const char	*opt_bg;
-extern const char	*opt_term[3];
-extern int		opt_bw;
+extern Display          *dpy;
+extern int              num_screens;
+extern ScreenInfo       *screens;
+extern ScreenInfo       *current_screen;
+extern Client           *current;
+extern volatile Window  initialising;
+extern XFontStruct      *font;
+extern Client           *head_client;
+extern Application      *head_app;
+extern Atom             xa_wm_state;
+extern Atom             xa_wm_change_state;
+extern Atom             xa_wm_protos;
+extern Atom             xa_wm_delete;
+extern Atom             xa_wm_cmapwins;
+extern Cursor           move_curs;
+extern Cursor           resize_curs;
+extern const char       *opt_display;
+extern const char       *opt_font;
+extern const char       *opt_fg;
+extern const char       *opt_bg;
+extern const char       *opt_term[3];
+extern int              opt_bw;
 #ifdef VWM
-extern const char	*opt_fc;
-extern int		vdesk;
+extern const char       *opt_fc;
+extern int              vdesk;
 #endif
 #ifdef SNAP
-extern int		opt_snap;
+extern int              opt_snap;
 #endif
 #ifdef SHAPE
-extern int		have_shape, shape_event;
+extern int              have_shape, shape_event;
 #endif
-extern Atom		mwm_hints;
+extern Atom             mwm_hints;
 extern unsigned int numlockmask;
 extern unsigned int grabmask2;
 
