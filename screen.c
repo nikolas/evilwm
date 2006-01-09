@@ -382,7 +382,6 @@ void next(void) {
 #ifdef VWM
 void switch_vdesk(int v) {
 	Client *c;
-	int wdesk;
 #ifdef DEBUG
 	int hidden = 0, raised = 0;
 #endif
@@ -394,13 +393,12 @@ void switch_vdesk(int v) {
 	}
 	LOG_DEBUG("switch_vdesk() : Switching to desk %d\n", v);
 	for (c = head_client; c; c = c->next) {
-		wdesk = c->vdesk;
-		if (wdesk == vdesk) {
+		if (c->vdesk == vdesk) {
 			hide(c);
 #ifdef DEBUG
 			hidden++;
 #endif
-		} else if (wdesk == v) {
+		} else if (c->vdesk == v) {
 			unhide(c, NO_RAISE);
 #ifdef DEBUG
 			raised++;
