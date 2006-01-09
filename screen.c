@@ -206,7 +206,7 @@ static void snap_client(Client *c) {
 	for (ci = head_client; ci; ci = ci->next) {
 		if (ci != c
 #ifdef VWM
-				&& (ci->vdesk == vdesk || ci->vdesk == STICKY)
+				&& (ci->vdesk == vdesk || is_sticky(ci))
 #endif
 				) {
 			if (ci->y - ci->border - c->border - c->height - c->y <= opt_snap && c->y - c->border - ci->border - ci->height - ci->y <= opt_snap) {
@@ -393,7 +393,7 @@ void next(void) {
 			return;
 	}
 #ifdef VWM
-	while (newc->vdesk != vdesk && newc->vdesk != STICKY);
+	while (newc->vdesk != vdesk && !is_sticky(newc));
 #else
 	while (0);
 #endif
@@ -420,7 +420,7 @@ void switch_vdesk(int v) {
 
 	if (v == vdesk)
 		return;
-	if (current && current->vdesk != STICKY) {
+	if (current && !is_sticky(current)) {
 		client_update_current(current, NULL);
 	}
 	LOG_DEBUG("switch_vdesk() : Switching to desk %d\n", v);

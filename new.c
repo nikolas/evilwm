@@ -152,7 +152,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	}
 
 #ifdef VWM
-	if (vdesk != c->vdesk && c->vdesk != STICKY) {
+	if (vdesk != c->vdesk && !is_sticky(c)) {
 		hide(c);
 	} else
 #endif

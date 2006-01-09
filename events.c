@@ -209,7 +209,7 @@ static void handle_enter_event(XCrossingEvent *e) {
 	current_screen = find_screen(e->root);
 	if ((c = find_client(e->window))) {
 #ifdef VWM
-		if (c->vdesk != vdesk && c->vdesk != STICKY)
+		if (c->vdesk != vdesk && !is_sticky(c))
 			return;
 #endif
 		select_client(c);

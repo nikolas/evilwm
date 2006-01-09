@@ -104,7 +104,7 @@ void select_client(Client *c) {
 
 #ifdef VWM
 void fix_client(Client *c) {
-	c->vdesk = c->vdesk == STICKY ? vdesk : STICKY;
+	toggle_sticky(c);
 	client_update_current(c, current);
 }
 #endif
@@ -203,7 +203,7 @@ void client_update_current(Client *c, Client *newcurrent) {
 	if (c) {
 		unsigned long bpixel;
 #ifdef VWM
-		if (c->vdesk == STICKY)
+		if (is_sticky(c))
 			bpixel = c == newcurrent ? c->screen->fc.pixel : c->screen->bg.pixel;
 		else
 #endif

@@ -86,6 +86,11 @@ typedef struct {
 #define gravitate(c) gravitate_client(c, 1)
 #define ungravitate(c) gravitate_client(c, -1)
 
+#define is_sticky(c) (c->vdesk == STICKY)
+#define add_sticky(c) c->vdesk = STICKY
+#define remove_sticky(c) c->vdesk = vdesk
+#define toggle_sticky(c) c->vdesk = is_sticky(c) ? vdesk : STICKY
+
 /* screen structure */
 
 typedef struct ScreenInfo ScreenInfo;
