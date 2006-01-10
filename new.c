@@ -173,7 +173,7 @@ void make_new_client(Window w, ScreenInfo *s) {
  * XGetWindowAttributes 
  */
 static void init_geometry(Client *c) {
-	CARD32 size_flags;
+	long size_flags;
 	XWindowAttributes attr;
 	XWMHints *wm;
 	int reconfigure = 0;
@@ -256,9 +256,9 @@ static void reparent(Client *c) {
 }
 
 /* Get WM_NORMAL_HINTS property */
-CARD32 get_wm_normal_hints(Client *c) {
+long get_wm_normal_hints(Client *c) {
 	XSizeHints *size;
-	CARD32 flags;
+	long flags;
 	long dummy;
 	size = XAllocSizeHints();
 	LOG_XDEBUG("XGetWMNormalHints()\n");

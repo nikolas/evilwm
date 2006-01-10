@@ -243,7 +243,7 @@ void show_event(XEvent e);
 /* new.c */
 
 void make_new_client(Window w, ScreenInfo *s);
-CARD32 get_wm_normal_hints(Client *c);
+long get_wm_normal_hints(Client *c);
 
 /* screen.c */
 
