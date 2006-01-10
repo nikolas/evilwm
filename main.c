@@ -126,12 +126,13 @@ int main(int argc, char *argv[]) {
 			exit(0);
 #endif
 		} else {
-			LOG_INFO("usage: evilwm [-display display] [-term termprog] [-fg foreground]");
+			LOG_INFO("usage: evilwm [-display display] [-term termprog] [-fn fontname]\n");
+			LOG_INFO("              [-fg foreground]");
 #ifdef VWM
 			LOG_INFO(" [-fc fixed]");
 #endif
-			LOG_INFO("\n              [-bg background] [-bw borderwidth] [-snap num]\n");
-			LOG_INFO("              [-mask1 modifiers] [-mask2 modifiers]");
+			LOG_INFO(" [-bg background] [-bw borderwidth]\n");
+			LOG_INFO("              [-snap num] [-mask1 modifiers] [-mask2 modifiers]");
 #ifdef VWM
 			LOG_INFO("\n              [-app name/class] [-g geometry] [-v vdesk]");
 #endif
@@ -211,6 +212,10 @@ static void setup_display(void) {
 
 	font = XLoadQueryFont(dpy, opt_font);
 	if (!font) font = XLoadQueryFont(dpy, DEF_FONT);
+	if (!font) {
+		LOG_ERROR("couldn't find a font to use: try starting with -fn fontname\n");
+		exit(1);
+	}
 
 	move_curs = XCreateFontCursor(dpy, XC_fleur);
 	resize_curs = XCreateFontCursor(dpy, XC_plus);

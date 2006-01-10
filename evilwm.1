@@ -1,4 +1,4 @@
-.TH evilwm 1 "December 30, 2005" "" ""
+.TH evilwm 1 "January 10, 2006" "" ""
 .SH NAME
 evilwm \- Minimalist Window Manager for X
 .SH SYNOPSIS
@@ -6,6 +6,8 @@ evilwm \- Minimalist Window Manager for X
 .I display
 .B ] [ \-term
 .I termprog
+.B ] [ \-fn
+.I fontname
 .B ] [ \-fg
 .I foreground colour
 .B ] [ \-fc
@@ -91,6 +93,8 @@ specifies the X display to run on.
 .IP "\-term termprog"
 specifies an alternative program to run when spawning a new terminal (defaults
 to xterm, or x\-terminal\-emulator in Debian).
+.IP "\-fn fontname"
+specify a font to use when resizing or displaying window titles.
 .IP "\-fg foreground colour"
 frame colour of currently active window.
 .IP "\-fc fixed colour"
