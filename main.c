@@ -235,7 +235,7 @@ static void setup_display(void) {
 	gv.font = font->fid;
 
 	/* set up root window attributes - same for each screen */
-	attr.event_mask = ChildMask | PropertyChangeMask | EnterWindowMask
+	attr.event_mask = ChildMask | EnterWindowMask
 #ifdef COLOURMAP
 		| ColormapChangeMask
 #endif
