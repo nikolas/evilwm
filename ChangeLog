@@ -400,3 +400,7 @@ Old
 	Bundle XKillClient option into send_wm_delete()
 	Discard enter events on window move, etc.; simpler than searching
 	through shape extents.
+
+2006-01-10
+	Collapse maximise_vert() and maximise_horiz() into single
+	maximise_client() that can handle any combination.

@@ -56,10 +56,11 @@ static void handle_key_event(XKeyEvent *e) {
 			show_info(c, key);
 			break;
 		case KEY_MAX:
-			maximise_horiz(c);
+			maximise_client(c, MAXIMISE_HORZ|MAXIMISE_VERT);
+			break;
 		case KEY_MAXVERT:
-			maximise_vert(c);
-			goto move_client;
+			maximise_client(c, MAXIMISE_VERT);
+			break;
 #ifdef VWM
 		case KEY_FIX:
 			fix_client(c);

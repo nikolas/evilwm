@@ -22,6 +22,9 @@ typedef struct {
 	unsigned long decorations;
 } PropMwmHints;
 
+#define MAXIMISE_HORZ        (1<<0)
+#define MAXIMISE_VERT        (1<<1)
+
 /* sanity on options */
 #if defined(INFOBANNER_MOVERESIZE) && !defined(INFOBANNER)
 # define INFOBANNER
@@ -248,8 +251,7 @@ void drag(Client *c);
 void get_mouse_position(int *x, int *y, Window root);
 void moveresize(Client *c);
 void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2);
-void maximise_vert(Client *c);
-void maximise_horiz(Client *c);
+void maximise_client(Client *c, int hv);
 void show_info(Client *c, KeySym key);
 void sweep(Client *c);
 void unhide(Client *c, int raise_win);

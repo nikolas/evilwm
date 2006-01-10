@@ -304,32 +304,34 @@ void moveresize(Client *c) {
 	send_config(c);
 }
 
-void maximise_horiz(Client *c) {
-	LOG_DEBUG("SCREEN: maximise_horiz()\n");
-	if (c->oldw) {
-		c->x = c->oldx;
-		c->width = c->oldw;
-		c->oldw = 0;
-	} else {
-		c->oldx = c->x;
-		c->oldw = c->width;
-		recalculate_sweep(c, 0, c->y, DisplayWidth(dpy, c->screen->screen),
-				c->y + c->height);
+void maximise_client(Client *c, int hv) {
+	if (hv & MAXIMISE_HORZ) {
+		if (c->oldw) {
+			c->x = c->oldx;
+			c->width = c->oldw;
+			c->oldw = 0;
+		} else {
+			c->oldx = c->x;
+			c->oldw = c->width;
+			c->x = 0;
+			c->width = DisplayWidth(dpy, c->screen->screen);
+		}
 	}
-}
-
-void maximise_vert(Client *c) {
-	LOG_DEBUG("SCREEN: maximise_vert()\n");
-	if (c->oldh) {
-		c->y = c->oldy;
-		c->height = c->oldh;
-		c->oldh = 0;
-	} else {
-		c->oldy = c->y;
-		c->oldh = c->height;
-		recalculate_sweep(c, c->x, 0, c->x + c->width,
-				DisplayHeight(dpy, c->screen->screen));
+	if (hv & MAXIMISE_VERT) {
+		if (c->oldh) {
+			c->y = c->oldy;
+			c->height = c->oldh;
+			c->oldh = 0;
+		} else {
+			c->oldy = c->y;
+			c->oldh = c->height;
+			c->y = 0;
+			c->height = DisplayHeight(dpy, c->screen->screen);
+		}
 	}
+	recalculate_sweep(c, c->x, c->y, c->x + c->width, c->y + c->height);
+	moveresize(c);
+	discard_enter_events();
 }
 
 #ifdef VWM
