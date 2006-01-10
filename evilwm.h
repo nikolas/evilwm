@@ -67,8 +67,8 @@ typedef struct {
 		XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), numlockmask|(mask), \
 		         w, True, GrabModeAsync, GrabModeAsync); \
 		XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), \
-	                 numlockmask|LockMask|(mask), w, True, \
-	                 GrabModeAsync, GrabModeAsync); \
+		         numlockmask|LockMask|(mask), w, True, \
+		         GrabModeAsync, GrabModeAsync); \
 	}
 #define grab_button(w, mask, button) \
 	XGrabButton(dpy, button, (mask), w, False, ButtonMask, \
