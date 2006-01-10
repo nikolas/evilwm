@@ -61,7 +61,6 @@ int handle_xerror(Display *dsply, XErrorEvent *e) {
 		LOG_DEBUG("handle_xerror() ignored an XErrorEvent: %d\n", e->error_code);
 		return 0;
 	}
-	c = find_client(e->resourceid);
 	/* If this error actually occurred while setting up the new
 	 * window, best let make_new_client() know not to bother */
 	if (initialising != None && e->resourceid == initialising) {
@@ -77,6 +76,7 @@ int handle_xerror(Display *dsply, XErrorEvent *e) {
 		exit(1);
 	}
 
+	c = find_client(e->resourceid);
 	if (c) {
 		LOG_DEBUG("\thandle_xerror() : flagging client for removal\n");
 		c->remove = 1;
