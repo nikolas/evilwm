@@ -142,6 +142,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 				moveresize(c);
 #ifdef VWM
 				if (a->vdesk != -1) c->vdesk = a->vdesk;
+				c->sticky = a->sticky;
 #endif
 			}
 			a = a->next;
@@ -180,6 +181,7 @@ static void init_geometry(Client *c) {
 
 #ifdef VWM
 	c->vdesk = vdesk;
+	remove_sticky(c);
 #endif
 
 	/* Get current window attributes */

@@ -46,8 +46,7 @@ typedef struct {
 
 /* readability stuff */
 
-#define STICKY 0        /* Desktop number for sticky clients */
-#define KEY_TO_VDESK( key ) ( ( key ) - XK_1 + 1 )
+#define KEY_TO_VDESK(key) ((key) - XK_1)
 
 #define RAISE           1
 #define NO_RAISE        0       /* for unhide() */
@@ -90,10 +89,10 @@ typedef struct {
 #define gravitate(c) gravitate_client(c, 1)
 #define ungravitate(c) gravitate_client(c, -1)
 
-#define is_sticky(c) (c->vdesk == STICKY)
-#define add_sticky(c) c->vdesk = STICKY
-#define remove_sticky(c) c->vdesk = vdesk
-#define toggle_sticky(c) c->vdesk = is_sticky(c) ? vdesk : STICKY
+#define is_sticky(c) (c->sticky)
+#define add_sticky(c) c->sticky = 1
+#define remove_sticky(c) c->sticky = 0
+#define toggle_sticky(c) c->sticky = !c->sticky
 
 #define discard_enter_events() do { \
 		XEvent dummy; \
@@ -145,6 +144,7 @@ struct Client {
 	int             old_border;
 #ifdef VWM
 	int             vdesk;
+	int             sticky;
 #endif /* def VWM */
 #ifdef SHAPE
 	int             bounding_shaped;
@@ -161,6 +161,7 @@ struct Application {
 	unsigned int width, height;
 #ifdef VWM
 	int vdesk;
+	int sticky;
 #endif
 	Application *next;
 };

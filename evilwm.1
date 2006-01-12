@@ -1,4 +1,4 @@
-.TH evilwm 1 "January 10, 2006" "" ""
+.TH evilwm 1 "January 12, 2006" "" ""
 .SH NAME
 evilwm \- Minimalist Window Manager for X
 .SH SYNOPSIS
@@ -28,7 +28,7 @@ evilwm \- Minimalist Window Manager for X
 .I geometry
 .B ] [ \-v
 .I vdesk
-.B ]
+.B ] [ \-s
 .B ]... [ \-V ]
 .SH DESCRIPTION
 .B evilwm
@@ -122,7 +122,7 @@ use the
 tool with the
 .I \-l
 option).  Subsequent
-.I \-g
+.I \-g, \-s
 and
 .I \-v
 options will apply to this match.
@@ -133,7 +133,8 @@ the last
 .IP "\-v vdesk"
 specify a default virtual desktop for applications matching the last
 .I \-app.
-Use 0 for vdesk to set window as sticky.
+.IP "\-s"
+specify that application is to start with a sticky client window.
 .IP "\-V"
 print version number.
 .SH BUGS

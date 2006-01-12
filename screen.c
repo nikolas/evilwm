@@ -395,6 +395,9 @@ void switch_vdesk(int v) {
 	}
 	LOG_DEBUG("switch_vdesk() : Switching to desk %d\n", v);
 	for (c = head_client; c; c = c->next) {
+		if (is_sticky(c) && c->vdesk != v) {
+			c->vdesk = v;
+		}
 		if (c->vdesk == vdesk) {
 			hide(c);
 #ifdef DEBUG

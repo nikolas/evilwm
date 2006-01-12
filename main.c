@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) {
 			new->geometry_mask = 0;
 #ifdef VWM
 			new->vdesk = -1;
+			new->sticky = 0;
 #endif
 			if ((tmp = strchr(argv[i], '/'))) {
 				*(tmp++) = 0;
@@ -113,6 +114,9 @@ int main(int argc, char *argv[]) {
 			i++;
 			if (head_app)
 				head_app->vdesk = atoi(argv[i]);
+		} else if (!strcmp(argv[i], "-s")) {
+			if (head_app)
+				head_app->sticky = 1;
 #endif
 		} else if (!strcmp(argv[i], "-mask1") && i+1<argc) {
 			i++;
@@ -134,7 +138,7 @@ int main(int argc, char *argv[]) {
 			LOG_INFO(" [-bg background] [-bw borderwidth]\n");
 			LOG_INFO("              [-snap num] [-mask1 modifiers] [-mask2 modifiers]");
 #ifdef VWM
-			LOG_INFO("\n              [-app name/class] [-g geometry] [-v vdesk]");
+			LOG_INFO("\n              [-app name/class] [-g geometry] [-v vdesk] [-s]");
 #endif
 			LOG_INFO(" [-V]\n");
 			exit((!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))?0:1);
