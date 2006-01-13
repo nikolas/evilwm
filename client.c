@@ -193,8 +193,8 @@ void set_shape(Client *c) {
 	if (XShapeQueryExtents(dpy, c->window, &(c->bounding_shaped), &i, &i,
 				&u, &u, &b, &i, &i, &u, &u) && c->bounding_shaped) {
 		LOG_DEBUG("%d shape extents\n", c->bounding_shaped);
-		XShapeCombineShape(dpy, c->parent, ShapeBounding, c->border,
-				c->border, c->window, ShapeBounding, ShapeSet);
+		XShapeCombineShape(dpy, c->parent, ShapeBounding, 0, 0,
+				c->window, ShapeBounding, ShapeSet);
 	}
 }
 #endif
@@ -208,8 +208,7 @@ void client_update_current(Client *c, Client *newcurrent) {
 		else
 #endif
 			bpixel = c == newcurrent ? c->screen->fg.pixel : c->screen->bg.pixel;
-		XSetWindowBackground(dpy, c->parent, bpixel);
-		XClearWindow(dpy, c->parent);
+		XSetWindowBorder(dpy, c->parent, bpixel);
 	}
 	current = newcurrent;
 }

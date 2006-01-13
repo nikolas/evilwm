@@ -405,3 +405,7 @@ Old
 	Collapse maximise_vert() and maximise_horiz() into single
 	maximise_client() that can handle any combination.
 	CARD32 also seemingly not appropriate for flags field of XSizeHints.
+
+2006-01-13
+	Switch to using a window border for frame's colour, don't touch
+	frame background.  This allows aterm's "fast transparency" to work.

@@ -296,11 +296,9 @@ void drag(Client *c) {
 
 void moveresize(Client *c) {
 	XRaiseWindow(dpy, c->parent);
-	XMoveResizeWindow(dpy, c->parent, c->x - c->border,
-			c->y - c->border, c->width + (c->border*2),
-			c->height + (c->border*2));
-	XMoveResizeWindow(dpy, c->window, c->border, c->border,
+	XMoveResizeWindow(dpy, c->parent, c->x - c->border, c->y - c->border,
 			c->width, c->height);
+	XMoveResizeWindow(dpy, c->window, 0, 0, c->width, c->height);
 	send_config(c);
 }
 

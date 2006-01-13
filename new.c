@@ -243,18 +243,18 @@ static void init_geometry(Client *c) {
 static void reparent(Client *c) {
 	XSetWindowAttributes p_attr;
 
+	p_attr.border_pixel = c->screen->bg.pixel;
 	p_attr.override_redirect = True;
-	p_attr.background_pixel = c->screen->bg.pixel;
 	p_attr.event_mask = ChildMask | ButtonPressMask | ExposureMask | EnterWindowMask;
 	c->parent = XCreateWindow(dpy, c->screen->root, c->x-c->border, c->y-c->border,
-		c->width+(c->border*2), c->height + (c->border*2), 0,
+		c->width, c->height, c->border,
 		DefaultDepth(dpy, c->screen->screen), CopyFromParent,
 		DefaultVisual(dpy, c->screen->screen),
-		CWOverrideRedirect | CWBackPixel | CWEventMask, &p_attr);
+		CWOverrideRedirect | CWBorderPixel | CWEventMask, &p_attr);
 
 	XAddToSaveSet(dpy, c->window);
 	XSetWindowBorderWidth(dpy, c->window, 0);
-	XReparentWindow(dpy, c->window, c->parent, c->border, c->border);
+	XReparentWindow(dpy, c->window, c->parent, 0, 0);
 }
 
 /* Get WM_NORMAL_HINTS property */
