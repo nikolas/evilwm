@@ -51,6 +51,8 @@ void make_new_client(Window w, ScreenInfo *s) {
 	}
 	initialising = None;
 	LOG_DEBUG("make_new_client(): %s\n", name ? name : "Untitled");
+	if (name)
+		XFree(name);
 
 	c = malloc(sizeof(Client));
 	/* Don't crash the window manager, just fail the operation. */
@@ -66,6 +68,11 @@ void make_new_client(Window w, ScreenInfo *s) {
 	c->ignore_unmap = 0;
 	c->remove = 0;
 
+	/* Ungrab the X server as soon as possible. Now that the client is
+	 * malloc()ed and attached to the list, it is safe for any subsequent
+	 * X calls to raise an X error and thus flag it for removal. */
+	XUngrabServer(dpy);
+
 	c->border = opt_bw;
 	if ((mhints = get_mwm_hints(c->window))) {
 		if ((mhints->flags & MWM_HINTS_DECORATIONS)
@@ -75,8 +82,6 @@ void make_new_client(Window w, ScreenInfo *s) {
 		}
 		XFree(mhints);
 	}
-	if (name)
-		XFree(name);
 
 	init_geometry(c);
 
@@ -97,9 +102,6 @@ void make_new_client(Window w, ScreenInfo *s) {
 #endif
 
 	reparent(c);
-
-	XSync(dpy, False);
-	XUngrabServer(dpy);
 
 #ifdef SHAPE
 	if (have_shape) {
