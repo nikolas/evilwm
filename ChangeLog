@@ -411,3 +411,4 @@ Old
 	frame background.  This allows aterm's "fast transparency" to work.
 	Only map a window when managing it if it's supposed to be visible,
 	instead of mapping then immediately unmapping.
+	Released 0.99.20.
