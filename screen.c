@@ -334,17 +334,16 @@ void maximise_client(Client *c, int hv) {
 
 #ifdef VWM
 void hide(Client *c) {
-	if (c) {
-		c->ignore_unmap++;
-		LOG_XDEBUG("screen:XUnmapWindow(parent); ");
-		XUnmapWindow(dpy, c->parent);
-		set_wm_state(c, IconicState);
-	}
+	/* This will generate an unmap event.  Tell event handler
+	 * to ignore it. */
+	c->ignore_unmap++;
+	LOG_XDEBUG("screen:XUnmapWindow(parent); ");
+	XUnmapWindow(dpy, c->parent);
+	set_wm_state(c, IconicState);
 }
 #endif
 
 void unhide(Client *c, int raise_win) {
-	XMapWindow(dpy, c->window);
 	raise_win ? XMapRaised(dpy, c->parent) : XMapWindow(dpy, c->parent);
 	set_wm_state(c, NormalState);
 }
@@ -391,7 +390,7 @@ void switch_vdesk(int v) {
 	if (current && !is_sticky(current)) {
 		client_update_current(current, NULL);
 	}
-	LOG_DEBUG("switch_vdesk() : Switching to desk %d\n", v);
+	LOG_DEBUG("switch_vdesk(): Switching to desk %d", v);
 	for (c = head_client; c; c = c->next) {
 		if (is_sticky(c) && c->vdesk != v) {
 			c->vdesk = v;
@@ -409,7 +408,7 @@ void switch_vdesk(int v) {
 		}
 	}
 	vdesk = v;
-	LOG_DEBUG("\tswitch_vdesk() : %d hidden, %d raised\n", hidden, raised);
+	LOG_DEBUG(" (%d hidden, %d raised)\n", hidden, raised);
 }
 #endif /* def VWM */
 

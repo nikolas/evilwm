@@ -46,7 +46,6 @@ void make_new_client(Window w, ScreenInfo *s) {
 	 * we got a chance to grab the server. */
 	if (initialising == None) {
 		LOG_DEBUG("make_new_client() : XError occurred for initialising window - aborting...\n");
-		XSync(dpy, False);
 		XUngrabServer(dpy);
 		return;
 	}
@@ -69,11 +68,10 @@ void make_new_client(Window w, ScreenInfo *s) {
 
 	c->border = opt_bw;
 	if ((mhints = get_mwm_hints(c->window))) {
-		if (mhints->flags & MWM_HINTS_DECORATIONS
-				&& !(mhints->decorations & MWM_DECOR_ALL)) {
-			if (!(mhints->decorations & MWM_DECOR_BORDER)) {
-				c->border = 0;
-			}
+		if ((mhints->flags & MWM_HINTS_DECORATIONS)
+				&& !(mhints->decorations & MWM_DECOR_ALL)
+				&& !(mhints->decorations & MWM_DECOR_BORDER)) {
+			c->border = 0;
 		}
 		XFree(mhints);
 	}
@@ -177,8 +175,6 @@ void make_new_client(Window w, ScreenInfo *s) {
 static void init_geometry(Client *c) {
 	long size_flags;
 	XWindowAttributes attr;
-	XWMHints *wm;
-	int reconfigure = 0;
 
 #ifdef VWM
 	c->vdesk = vdesk;
@@ -204,7 +200,7 @@ static void init_geometry(Client *c) {
 	} else {
 		c->width = c->min_width;
 		c->height = c->min_height;
-		reconfigure = 1;
+		send_config(c);
 	}
 	if ((attr.map_state == IsViewable)
 			|| (size_flags & (/*PPosition |*/ USPosition))) {
@@ -221,22 +217,13 @@ static void init_geometry(Client *c) {
 #else
 		c->x = c->y = c->border;
 #endif
-		reconfigure = 1;
+		send_config(c);
 	}
 
 	LOG_DEBUG("\twindow started as %dx%d +%d+%d\n", c->width, c->height, c->x, c->y);
 	if (attr.map_state == IsViewable) {
+		/* The reparent that is to come would trigger an unmap event */
 		c->ignore_unmap++;
-	} else {
-		/* Initialise position if needed */
-		if (reconfigure) {
-			send_config(c);
-		}
-		if ((wm = XGetWMHints(dpy, c->window))) {
-			if (wm->flags & StateHint)
-				set_wm_state(c, wm->initial_state);
-			XFree(wm);
-		}
 	}
 	gravitate(c);
 }

@@ -173,14 +173,18 @@ static void handle_map_request(XMapRequestEvent *e) {
 static void handle_unmap_event(XUnmapEvent *e) {
 	Client *c = find_client(e->window);
 
+	LOG_DEBUG("handle_unmap_event(): ");
 	if (c) {
 		if (c->ignore_unmap) {
 			c->ignore_unmap--;
+			LOG_DEBUG("ignored (%d ignores remaining)\n", c->ignore_unmap);
 		} else {
-			LOG_DEBUG("handle_unmap_event(): flagging client for removal\n");
+			LOG_DEBUG("flagging client for removal\n");
 			c->remove = 1;
 			need_client_tidy = 1;
 		}
+	} else {
+		LOG_DEBUG("unknown client!\n");
 	}
 }
 

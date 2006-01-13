@@ -117,6 +117,10 @@ void remove_client(Client *c) {
 	XGrabServer(dpy);
 	ignore_xerror = 1;
 
+	/* ICCCM 4.1.3.1
+	 * "When the window is withdrawn, the window manager will either
+	 *  change the state field's value to WithdrawnState or it will
+	 *  remove the WM_STATE property entirely." */
 	if (c->remove) {
 		LOG_DEBUG("\tremove_client() : setting WithdrawnState\n");
 		set_wm_state(c, WithdrawnState);
