@@ -100,10 +100,6 @@ void make_new_client(Window w, ScreenInfo *s) {
 
 	reparent(c);
 
-	XMapWindow(dpy, c->window);
-	XMapRaised(dpy, c->parent);
-	set_wm_state(c, NormalState);
-
 	XSync(dpy, False);
 	XUngrabServer(dpy);
 
@@ -152,20 +148,25 @@ void make_new_client(Window w, ScreenInfo *s) {
 		XFree(class);
 	}
 
+	/* Only map the window frame (and thus the window) if it's supposed
+	 * to be visible on this virtual desktop. */
 #ifdef VWM
-	if (vdesk != c->vdesk && !is_sticky(c)) {
-		hide(c);
-	} else
+	if (vdesk == c->vdesk || is_sticky(c))
 #endif
-#ifndef MOUSE
 	{
+		unhide(c, RAISE);
+#ifndef MOUSE
 		select_client(c);
 		setmouse(c->window, c->width + c->border - 1,
 				c->height + c->border - 1);
 		discard_enter_events();
+#endif
+	}
+#ifdef VWM
+	else {
+		set_wm_state(c, IconicState);
 	}
 #endif
-	;
 }
 
 /* Calls XGetWindowAttributes, XGetWMHints and XGetWMNormalHints to determine
@@ -255,6 +256,7 @@ static void reparent(Client *c) {
 	XAddToSaveSet(dpy, c->window);
 	XSetWindowBorderWidth(dpy, c->window, 0);
 	XReparentWindow(dpy, c->window, c->parent, 0, 0);
+	XMapWindow(dpy, c->window);
 }
 
 /* Get WM_NORMAL_HINTS property */

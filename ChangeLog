@@ -409,3 +409,5 @@ Old
 2006-01-13
 	Switch to using a window border for frame's colour, don't touch
 	frame background.  This allows aterm's "fast transparency" to work.
+	Only map a window when managing it if it's supposed to be visible,
+	instead of mapping then immediately unmapping.
