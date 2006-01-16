@@ -32,7 +32,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	XGrabServer(dpy);
 
 	/* First a bit of interaction with the error handler due to X's
-	 * tendancy to batch event notifications.  We set a global variable to
+	 * tendency to batch event notifications.  We set a global variable to
 	 * the id of the window we're initialising then do simple X call on
 	 * that window.  If an error is raised by this (and nothing else should
 	 * do so as we've grabbed the server), the error handler resets the

@@ -23,10 +23,6 @@ DEFINES += -DINFOBANNER
 # make things very SLOW!
 #DEFINES += -DINFOBANNER_MOVERESIZE
 
-# Use Motif hints to find if a window should be borderless.
-# To use this option, you need to have the Motif development files installed.
-DEFINES += -DMWM_HINTS
-
 # To support virtual desktops, uncomment the following line.
 DEFINES += -DVWM
 

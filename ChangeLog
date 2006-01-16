@@ -98,8 +98,8 @@ Old
 	Received code from Peter Bailey to implement Ctrl+Alt+[Left|Right]
 	vdesk switching.  Opinion around the office is that this is a Good
 	Thing, but not to let it cycle around (e.g., from vdesk 8 to vdesk 1).
-	So that's what I've put in.  Unfortunately reintroduces dependancy
-	on XK_1-XK_8 being contigious.
+	So that's what I've put in.  Unfortunately reintroduces dependency
+	on XK_1-XK_8 being contiguous.
 
 2001-05-24
 	Received a patch from Dave Holland to fix the ordering problem with
@@ -138,13 +138,13 @@ Old
 	Added support for vdesk - an external virtual desktop manager
 	that works by iconifying windows and mapping them back again.
  
-2002-01-24 (vatten@users.souceforge.net)
+2002-01-24 (vatten@users.sourceforge.net)
 	Added support for the combination of vdesk and the internal
 	virtual desktop manager.
 
 2002-01-25
 	Move all the key bindings out into a separate include file and
-	add a line in Makefile to override KILL key (for cygwin).
+	add a line in Makefile to override KILL key (for Cygwin).
 
 2002-02-28
 	Released 0.99.4.
@@ -170,7 +170,7 @@ Old
 2002-03-26
 	Wait until pointer has moved at least 6 pixels before starting to
 	move a window - hopefully will mostly eliminate my nicely aligned
-	windows becoming silghtly crooked just because I raised one.
+	windows becoming slightly crooked just because I raised one.
 
 2002-08-19
 	Released 0.99.7.
@@ -357,7 +357,7 @@ Old
 
 2005-04-25
 	Merging Larry Doolittle's patches: Stricter warning settings for gcc.
-	LD: Cast unused paramters to void.
+	LD: Cast unused parameters to void.
 
 2005-04-26
 	Applied LD's patch to declare opt_term statically for now (intent
@@ -412,3 +412,6 @@ Old
 	Only map a window when managing it if it's supposed to be visible,
 	instead of mapping then immediately unmapping.
 	Released 0.99.20.
+
+2006-01-16
+	Various documentation fixes from Larry Doolittle.
