@@ -122,6 +122,8 @@ static void handle_configure_request(XConfigureRequestEvent *e) {
 
 	wc.sibling = e->above;
 	wc.stack_mode = e->detail;
+	wc.width = e->width;
+	wc.height = e->height;
 	if (c) {
 		ungravitate(c);
 		if (e->value_mask & CWWidth) c->width = e->width;
@@ -138,17 +140,13 @@ static void handle_configure_request(XConfigureRequestEvent *e) {
 
 		wc.x = c->x - c->border;
 		wc.y = c->y - c->border;
-		wc.width = c->width + (c->border*2);
-		wc.height = c->height + (c->border*2);
 		wc.border_width = 0;
 		XConfigureWindow(dpy, c->parent, e->value_mask, &wc);
 		send_config(c);
 	}
 
-	wc.x = c ? c->border : e->x;
-	wc.y = c ? c->border : e->y;
-	wc.width = e->width;
-	wc.height = e->height;
+	wc.x = c ? 0 : e->x;
+	wc.y = c ? 0 : e->y;
 	XConfigureWindow(dpy, e->window, e->value_mask, &wc);
 	LOG_DEBUG("handle_configure_request() : window configured to %dx%d+%d+%d\n", wc.width, wc.height, wc.x, wc.y);
 }
