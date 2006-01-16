@@ -418,3 +418,4 @@ Old
 	LD: new.c: nitems_return in get_property() should be unsigned.
 	LD: screen.c: draw_outline() is only needed if mouse support or no
 	info banner support is compiled in.
+	ButtonPress notifications shouldn't be needed on root windows: removed.

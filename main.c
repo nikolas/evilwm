@@ -244,14 +244,11 @@ static void setup_display(void) {
 	gv.font = font->fid;
 
 	/* set up root window attributes - same for each screen */
-	attr.event_mask = ChildMask | EnterWindowMask
 #ifdef COLOURMAP
-		| ColormapChangeMask
+	attr.event_mask = ChildMask | EnterWindowMask | ColormapChangeMask;
+#else
+	attr.event_mask = ChildMask | EnterWindowMask;
 #endif
-#ifdef MOUSE
-		| ButtonMask
-#endif
-		;
 
 	/* SHAPE extension? */
 #ifdef SHAPE

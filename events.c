@@ -103,7 +103,7 @@ move_client:
 static void handle_button_event(XButtonEvent *e) {
 	Client *c = find_client(e->window);
 
-	if (c && e->window != c->screen->root) {
+	if (c) {
 		switch (e->button) {
 			case Button1:
 				drag(c); break;
