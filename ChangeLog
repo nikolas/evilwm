@@ -415,3 +415,6 @@ Old
 
 2006-01-16
 	Various documentation fixes from Larry Doolittle.
+	LD: new.c: nitems_return in get_property() should be unsigned.
+	LD: screen.c: draw_outline() is only needed if mouse support or no
+	info banner support is compiled in.

@@ -13,7 +13,7 @@
 static void init_geometry(Client *c);
 static void reparent(Client *c);
 static void *get_property(Window w, Atom property, Atom req_type,
-		long *nitems_return);
+		unsigned long *nitems_return);
 static PropMwmHints *get_mwm_hints(Window);
 #ifdef XDEBUG
 static const char *map_state_string(int map_state);
@@ -296,7 +296,7 @@ long get_wm_normal_hints(Client *c) {
 }
 
 static void *get_property(Window w, Atom property, Atom req_type,
-		long *nitems_return) {
+		unsigned long *nitems_return) {
 	Atom actual_type;
 	int actual_format;
 	unsigned long bytes_after;

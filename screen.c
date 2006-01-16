@@ -69,6 +69,7 @@ static void remove_info_window(void) {
 }
 #endif  /* INFOBANNER */
 
+#if defined(MOUSE) || !defined(INFOBANNER)
 static void draw_outline(Client *c) {
 #ifndef INFOBANNER_MOVERESIZE
 	char buf[27];
@@ -88,6 +89,7 @@ static void draw_outline(Client *c) {
 		buf, strlen(buf));
 #endif  /* ndef INFOBANNER_MOVERESIZE */
 }
+#endif
 
 #ifdef MOUSE
 void get_mouse_position(int *x, int *y, Window root) {
