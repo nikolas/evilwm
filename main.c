@@ -20,7 +20,6 @@ XFontStruct     *font;
 Client          *head_client = NULL;
 Application     *head_app = NULL;
 Atom            xa_wm_state;
-Atom            xa_wm_change_state;
 Atom            xa_wm_protos;
 Atom            xa_wm_delete;
 Atom            xa_wm_cmapwins;
@@ -206,7 +205,6 @@ static void setup_display(void) {
 	/* XSynchronize(dpy, True); */
 
 	xa_wm_state = XInternAtom(dpy, "WM_STATE", False);
-	xa_wm_change_state = XInternAtom(dpy, "WM_CHANGE_STATE", False);
 	xa_wm_protos = XInternAtom(dpy, "WM_PROTOCOLS", False);
 	xa_wm_delete = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 #ifdef COLOURMAP

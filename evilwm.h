@@ -178,7 +178,6 @@ extern XFontStruct      *font;
 extern Client           *head_client;
 extern Application      *head_app;
 extern Atom             xa_wm_state;
-extern Atom             xa_wm_change_state;
 extern Atom             xa_wm_protos;
 extern Atom             xa_wm_delete;
 extern Atom             xa_wm_cmapwins;
