@@ -56,7 +56,7 @@ DEFINES += -DCOLOURMAP
 
 # ----- You shouldn't need to change anything under this line ------ #
 
-version = 0.99.21
+version = 0.99.22
 
 distname = evilwm-$(version)
 
