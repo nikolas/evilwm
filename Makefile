@@ -72,27 +72,22 @@ HEADERS  = evilwm.h log.h
 SRCS     = client.c events.c main.c misc.c new.c screen.c
 OBJS     = $(SRCS:.c=.o)
 
+.PHONY: all install dist debuild clean
+
 all: evilwm
 
 evilwm: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS)
 
-#allinone:
-#	cat evilwm.h $(SRCS) | sed 's/^#include.*evilwm.*$$//' > allinone.c
-#	$(CC) $(CFLAGS) -o evilwm allinone.c $(LDFLAGS)
-#	rm allinone.c
-
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $<
 
-doinstall:
+install: evilwm
 	if [ -f evilwm.exe ]; then mv evilwm.exe evilwm; fi
 	mkdir -p $(prefix)/bin $(prefix)/share/man/man1
 	install -s evilwm $(prefix)/bin
 	install evilwm.1 $(prefix)/share/man/man1
 	#gzip -9 $(prefix)/share/man/man1/evilwm.1
-
-install: doinstall
 
 dist:
 	darcs dist --dist-name $(distname)
