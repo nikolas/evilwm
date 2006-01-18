@@ -421,3 +421,6 @@ Old
 	ButtonPress notifications shouldn't be needed on root windows: removed.
 	events.c: Fix positioning error in handle_configure_request().
 	Released 0.99.21.
+
+2006-01-18
+	EWMH hints added so vdesk/sticky states persist across wm change.

@@ -19,10 +19,6 @@ volatile Window initialising = None;
 XFontStruct     *font;
 Client          *head_client = NULL;
 Application     *head_app = NULL;
-Atom            xa_wm_state;
-Atom            xa_wm_protos;
-Atom            xa_wm_delete;
-Atom            xa_wm_cmapwins;
 Cursor          move_curs;
 Cursor          resize_curs;
 const char      *opt_display = "";
@@ -41,11 +37,22 @@ int             opt_snap = 0;
 #ifdef SHAPE
 int             have_shape, shape_event;
 #endif
-Atom            mwm_hints;
 unsigned int numlockmask = 0;
 static unsigned int grabmask1 = ControlMask|Mod1Mask;
 /* This one is used for per-client mousebutton grabs, so global: */
 unsigned int grabmask2 = Mod1Mask;
+
+/* Standard X protocol atoms */
+Atom xa_wm_state;
+Atom xa_wm_protos;
+Atom xa_wm_delete;
+Atom xa_wm_cmapwins;
+/* Motif atoms */
+Atom mwm_hints;
+/* EWMH atoms */
+Atom xa_net_wm_desktop;
+Atom xa_net_wm_state;
+Atom xa_net_wm_state_sticky;
 
 static void setup_display(void);
 static void *xmalloc(size_t size);
@@ -205,13 +212,19 @@ static void setup_display(void) {
 	XSetErrorHandler(handle_xerror);
 	/* XSynchronize(dpy, True); */
 
+	/* Standard X protocol atoms */
 	xa_wm_state = XInternAtom(dpy, "WM_STATE", False);
 	xa_wm_protos = XInternAtom(dpy, "WM_PROTOCOLS", False);
 	xa_wm_delete = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 #ifdef COLOURMAP
 	xa_wm_cmapwins = XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
 #endif
+	/* Motif atoms */
 	mwm_hints = XInternAtom(dpy, _XA_MWM_HINTS, False);
+	/* EWMH atoms */
+	xa_net_wm_desktop = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
+	xa_net_wm_state = XInternAtom(dpy, "_NET_WM_STATE", False);
+	xa_net_wm_state_sticky = XInternAtom(dpy, "_NET_WM_STATE_STICKY", False);
 
 	font = XLoadQueryFont(dpy, opt_font);
 	if (!font) font = XLoadQueryFont(dpy, DEF_FONT);

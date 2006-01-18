@@ -106,6 +106,7 @@ void select_client(Client *c) {
 void fix_client(Client *c) {
 	toggle_sticky(c);
 	client_update_current(c, current);
+	update_net_wm_state(c);
 }
 #endif
 
@@ -120,10 +121,17 @@ void remove_client(Client *c) {
 	/* ICCCM 4.1.3.1
 	 * "When the window is withdrawn, the window manager will either
 	 *  change the state field's value to WithdrawnState or it will
-	 *  remove the WM_STATE property entirely." */
+	 *  remove the WM_STATE property entirely."
+	 * EWMH 1.3
+	 * "The Window Manager should remove the property whenever a
+	 *  window is withdrawn but it should leave the property in
+	 *  place when it is shutting down." (both _NET_WM_DESKTOP and
+	 *  _NET_WM_STATE) */
 	if (c->remove) {
 		LOG_DEBUG("\tremove_client() : setting WithdrawnState\n");
 		set_wm_state(c, WithdrawnState);
+		XDeleteProperty(dpy, c->window, xa_net_wm_desktop);
+		XDeleteProperty(dpy, c->window, xa_net_wm_state);
 	}
 
 	ungravitate(c);

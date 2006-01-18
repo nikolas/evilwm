@@ -178,10 +178,6 @@ extern volatile Window  initialising;
 extern XFontStruct      *font;
 extern Client           *head_client;
 extern Application      *head_app;
-extern Atom             xa_wm_state;
-extern Atom             xa_wm_protos;
-extern Atom             xa_wm_delete;
-extern Atom             xa_wm_cmapwins;
 extern Cursor           move_curs;
 extern Cursor           resize_curs;
 extern const char       *opt_display;
@@ -200,9 +196,20 @@ extern int              opt_snap;
 #ifdef SHAPE
 extern int              have_shape, shape_event;
 #endif
-extern Atom             mwm_hints;
 extern unsigned int numlockmask;
 extern unsigned int grabmask2;
+
+/* Standard X protocol atoms */
+extern Atom             xa_wm_state;
+extern Atom             xa_wm_protos;
+extern Atom             xa_wm_delete;
+extern Atom             xa_wm_cmapwins;
+/* Motif atoms */
+extern Atom             mwm_hints;
+/* EWMH atoms */
+extern Atom xa_net_wm_desktop;
+extern Atom xa_net_wm_state;
+extern Atom xa_net_wm_state_sticky;
 
 /* client.c */
 
@@ -262,3 +269,8 @@ void hide(Client *c);
 void switch_vdesk(int v);
 #endif /* def VWM */
 ScreenInfo *find_screen(Window root);
+
+/* ewmh.c */
+
+void update_net_wm_desktop(Client *c);
+void update_net_wm_state(Client *c);

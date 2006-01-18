@@ -396,6 +396,7 @@ void switch_vdesk(int v) {
 	for (c = head_client; c; c = c->next) {
 		if (is_sticky(c) && c->vdesk != v) {
 			c->vdesk = v;
+			update_net_wm_desktop(c);
 		}
 		if (c->vdesk == vdesk) {
 			hide(c);

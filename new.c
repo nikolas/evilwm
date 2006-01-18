@@ -167,6 +167,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 		set_wm_state(c, IconicState);
 	}
 #endif
+	update_net_wm_desktop(c);
 }
 
 /* Calls XGetWindowAttributes, XGetWMHints and XGetWMNormalHints to determine
@@ -177,10 +178,25 @@ void make_new_client(Window w, ScreenInfo *s) {
 static void init_geometry(Client *c) {
 	long size_flags;
 	XWindowAttributes attr;
+	unsigned long nitems, i;
+	unsigned long *lprop;
+	Atom *aprop;
 
 #ifdef VWM
 	c->vdesk = vdesk;
+	if ( (lprop = get_property(c->window, xa_net_wm_desktop, XA_CARDINAL, &nitems)) ) {
+		if (nitems && valid_vdesk(lprop[0]))
+			c->vdesk = lprop[0];
+		XFree(lprop);
+	}
 	remove_sticky(c);
+	if ( (aprop = get_property(c->window, xa_net_wm_state, XA_ATOM, &nitems)) ) {
+		for (i = 0; i < nitems; i++) {
+			if (aprop[i] == xa_net_wm_state_sticky)
+				add_sticky(c);
+		}
+		XFree(aprop);
+	}
 #endif
 
 	/* Get current window attributes */
