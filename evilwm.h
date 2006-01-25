@@ -272,5 +272,7 @@ ScreenInfo *find_screen(Window root);
 
 /* ewmh.c */
 
+#ifdef VWM
 void update_net_wm_desktop(Client *c);
 void update_net_wm_state(Client *c);
+#endif

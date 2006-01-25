@@ -166,8 +166,8 @@ void make_new_client(Window w, ScreenInfo *s) {
 	else {
 		set_wm_state(c, IconicState);
 	}
-#endif
 	update_net_wm_desktop(c);
+#endif
 }
 
 /* Calls XGetWindowAttributes, XGetWMHints and XGetWMNormalHints to determine
@@ -178,9 +178,11 @@ void make_new_client(Window w, ScreenInfo *s) {
 static void init_geometry(Client *c) {
 	long size_flags;
 	XWindowAttributes attr;
+#ifdef VWM
 	unsigned long nitems, i;
 	unsigned long *lprop;
 	Atom *aprop;
+#endif
 
 #ifdef VWM
 	c->vdesk = vdesk;
