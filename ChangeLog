@@ -424,3 +424,7 @@ Old
 
 2006-01-18
 	EWMH hints added so vdesk/sticky states persist across wm change.
+
+2006-01-25
+	Alt+Tab behaviour modified to be more in line with what most people
+	expect (single Alt+Tab goes back to previously selected window).

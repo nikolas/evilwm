@@ -6,6 +6,20 @@
 #include "evilwm.h"
 #include "log.h"
 
+static void current_to_head(void) {
+	Client *c;
+	if (current && current != head_client) {
+		for (c = head_client; c; c = c->next) {
+			if (c->next == current) {
+				c->next = current->next;
+				current->next = head_client;
+				head_client = current;
+				break;
+			}
+		}
+	}
+}
+
 static void handle_key_event(XKeyEvent *e) {
 	Client *c = find_client(e->window);
 	KeySym key = XKeycodeToKeysym(dpy,e->keycode,0);
@@ -74,6 +88,16 @@ static void handle_key_event(XKeyEvent *e) {
 			break;
 		case KEY_NEXT:
 			next();
+			if (XGrabKeyboard(dpy, e->root, False, GrabModeAsync, GrabModeAsync, CurrentTime) == GrabSuccess) {
+				XEvent ev;
+				do {
+					XMaskEvent(dpy, KeyPressMask|KeyReleaseMask, &ev);
+					if (ev.type == KeyPress && XKeycodeToKeysym(dpy,ev.xkey.keycode,0) == KEY_NEXT)
+						next();
+				} while (ev.type == KeyPress || XKeycodeToKeysym(dpy,ev.xkey.keycode,0) == KEY_NEXT);
+				XUngrabKeyboard(dpy, CurrentTime);
+			}
+			current_to_head();
 			break;
 #ifdef VWM
 		case XK_1: case XK_2: case XK_3: case XK_4:
@@ -217,6 +241,7 @@ static void handle_enter_event(XCrossingEvent *e) {
 			return;
 #endif
 		select_client(c);
+		current_to_head();
 #ifdef MOUSE
 		grab_button(c->parent, grabmask2, AnyButton);
 #endif
