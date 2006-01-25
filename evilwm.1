@@ -1,4 +1,4 @@
-.TH evilwm 1 "January 18, 2006" "" ""
+.TH evilwm 1 "January 25, 2006" "" ""
 .SH NAME
 evilwm \- Minimalist Window Manager for X
 .SH SYNOPSIS
@@ -22,6 +22,8 @@ evilwm \- Minimalist Window Manager for X
 .I modifiers
 .B ] [ \-mask2
 .I modifiers
+.B ] [ \-altmask
+.I modifier
 .B ] [ [ \-app
 .I name/class
 .B [ \-g
@@ -56,11 +58,12 @@ pressing a key. Available functions are:
 .IP Return
 Spawn new terminal.
 .IP Escape
-Delete current window.
+Delete current window.  Hold Shift as well to force kill a client.
 .IP Insert
 Lower current window.
 .IP "H, J, K, L"
-Move window left, down, up or right (16 pixels).
+Move window left, down, up or right (16 pixels).  Holding Shift resizes the
+window instead.
 .IP "Y, U, B, N"
 Move window to top-left, top-right, bottom-left or
 bottom-right of screen.
@@ -107,14 +110,17 @@ width of window borders in pixels.
 enable snap-to-border support.  num gives the proximity in pixels to snap to.
 .IP "\-mask1 modifiers"
 .IP "\-mask2 modifiers"
+.IP "\-altmask modifier"
 override the default keyboard modifiers used to grab keys for window manager
 functionality.
 .I mask1
 is used for most keyboard controls (default: control+alt), and
 .I mask2
-is used for mouse button controls and cycling windows (default: alt).  Modifiers
-may be separated with + signs.  Valid modifiers are shift, lock, control, alt,
-mod1, mod2, mod3, mod4, mod5.
+is used for mouse button controls and cycling windows (default: alt).
+.I altmask
+is used to modify the behaviour of certain controls (default: shift).
+Modifiers may be separated with + signs.  Valid modifiers are shift, lock,
+control, alt, mod1, mod2, mod3, mod4, mod5.
 .IP "\-app name/class"
 match an application by instance name and class (for help in finding these,
 use the

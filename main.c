@@ -41,6 +41,7 @@ unsigned int numlockmask = 0;
 static unsigned int grabmask1 = ControlMask|Mod1Mask;
 /* This one is used for per-client mousebutton grabs, so global: */
 unsigned int grabmask2 = Mod1Mask;
+unsigned int altmask = ShiftMask;
 
 /* Standard X protocol atoms */
 Atom xa_wm_state;
@@ -131,6 +132,9 @@ int main(int argc, char *argv[]) {
 		} else if (!strcmp(argv[i], "-mask2") && i+1<argc) {
 			i++;
 			grabmask2 = parse_modifiers(argv[i]);
+		} else if (!strcmp(argv[i], "-altmask") && i+1<argc) {
+			i++;
+			altmask = parse_modifiers(argv[i]);
 #ifdef STDIO
 		} else if (!strcmp(argv[i], "-V")) {
 			LOG_INFO("evilwm version " VERSION "\n");
@@ -143,9 +147,10 @@ int main(int argc, char *argv[]) {
 			LOG_INFO(" [-fc fixed]");
 #endif
 			LOG_INFO(" [-bg background] [-bw borderwidth]\n");
-			LOG_INFO("              [-snap num] [-mask1 modifiers] [-mask2 modifiers]");
+			LOG_INFO("              [-mask1 modifiers] [-mask2 modifiers] [-altmask modifiers]\n");
+			LOG_INFO("              [-snap num]");
 #ifdef VWM
-			LOG_INFO("\n              [-app name/class] [-g geometry] [-v vdesk] [-s]");
+			LOG_INFO(" [-app name/class] [-g geometry] [-v vdesk] [-s]");
 #endif
 			LOG_INFO(" [-V]\n");
 			exit((!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))?0:1);
@@ -198,6 +203,9 @@ static void setup_display(void) {
 		XK_1, XK_2, XK_3, XK_4, XK_5, XK_6, XK_7, XK_8,
 #endif
 		0
+	};
+	KeySym alt_keys_to_grab[] = {
+		KEY_KILL, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP
 	};
 	/* used in scanning windows (XQueryTree) */
 	unsigned int i, j, nwins;
@@ -310,7 +318,9 @@ static void setup_display(void) {
 		for (keysym = keys_to_grab; *keysym; keysym++) {
 			grab_keysym(screens[i].root, grabmask1, *keysym);
 		}
-		grab_keysym(screens[i].root, grabmask1 ^ ShiftMask, KEY_KILL);
+		for (keysym = alt_keys_to_grab; *keysym; keysym++) {
+			grab_keysym(screens[i].root, grabmask1 | altmask, *keysym);
+		}
 		grab_keysym(screens[i].root, grabmask2, KEY_NEXT);
 
 		/* scan all the windows on this screen */

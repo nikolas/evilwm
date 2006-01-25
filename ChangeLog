@@ -334,7 +334,7 @@ Old
 	options (each apply to the last -app defined).
 
 2005-03-20
-	Add -mask1 and mask2 switches to override default modifier grabs.
+	Add -mask1 and -mask2 switches to override default modifier grabs.
 
 2005-03-29
 	Tidy client_update_current using Larry Doolittle's patch.
@@ -428,3 +428,6 @@ Old
 2006-01-25
 	Alt+Tab behaviour modified to be more in line with what most people
 	expect (single Alt+Tab goes back to previously selected window).
+	Added -altmask to override Shift as default control behaviour change
+	key.
+	Added resizing with Ctrl+Alt+Shift+[HJKL].

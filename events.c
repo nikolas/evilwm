@@ -27,18 +27,40 @@ static void handle_key_event(XKeyEvent *e) {
 	if (!c)
 		c = current;
 	if (c) {
+		int width_inc = (c->width_inc > 1) ? c->width_inc : 16;
+		int height_inc = (c->height_inc > 1) ? c->height_inc : 16;
 		switch (key) {
 		case KEY_LEFT:
-			c->x -= 16;
+			if (e->state & altmask) {
+				if ((c->width - width_inc) >= c->min_width)
+					c->width -= width_inc;
+			} else {
+				c->x -= 16;
+			}
 			goto move_client;
 		case KEY_DOWN:
-			c->y += 16;
+			if (e->state & altmask) {
+				if (!c->max_height || (c->height + height_inc) <= c->max_height)
+					c->height += height_inc;
+			} else {
+				c->y += 16;
+			}
 			goto move_client;
 		case KEY_UP:
-			c->y -= 16;
+			if (e->state & altmask) {
+				if ((c->height - height_inc) >= c->min_height)
+					c->height -= height_inc;
+			} else {
+				c->y -= 16;
+			}
 			goto move_client;
 		case KEY_RIGHT:
-			c->x += 16;
+			if (e->state & altmask) {
+				if (!c->max_width || (c->width + width_inc) <= c->max_width)
+					c->width += width_inc;
+			} else {
+				c->x += 16;
+			}
 			goto move_client;
 		case KEY_TOPLEFT:
 			c->x = c->border;
@@ -61,7 +83,7 @@ static void handle_key_event(XKeyEvent *e) {
 				- c->height-c->border;
 			goto move_client;
 		case KEY_KILL:
-			send_wm_delete(c, e->state & ShiftMask);
+			send_wm_delete(c, e->state & altmask);
 			break;
 		case KEY_LOWER: case KEY_ALTLOWER:
 			XLowerWindow(dpy, c->parent);

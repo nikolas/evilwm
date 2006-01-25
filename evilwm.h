@@ -198,6 +198,7 @@ extern int              have_shape, shape_event;
 #endif
 extern unsigned int numlockmask;
 extern unsigned int grabmask2;
+extern unsigned int altmask;
 
 /* Standard X protocol atoms */
 extern Atom             xa_wm_state;
