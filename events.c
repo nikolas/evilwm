@@ -186,9 +186,10 @@ static void handle_configure_request(XConfigureRequestEvent *e) {
 
 		wc.x = c->x - c->border;
 		wc.y = c->y - c->border;
-		wc.border_width = 0;
+		wc.border_width = c->border;
 		XConfigureWindow(dpy, c->parent, e->value_mask, &wc);
 		send_config(c);
+		wc.border_width = 0;
 	}
 
 	wc.x = c ? 0 : e->x;
