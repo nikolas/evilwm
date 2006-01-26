@@ -431,3 +431,6 @@ Old
 	Added -altmask to override Shift as default control behaviour change
 	key.
 	Added resizing with Ctrl+Alt+Shift+[HJKL].
+
+2006-01-26
+	Released 0.99.22.
