@@ -3,6 +3,3 @@ What I'd like to do some time...
 * Fullscreen toggle needs to account for Xinerama.
 
 * New windows tile as well as possible.
-
-* Think of some good way of adding controllable window resizing beyond the
-  fullscreen/vertical maximise toggles.
