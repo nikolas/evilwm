@@ -1,4 +1,4 @@
-.TH evilwm 1 "January 25, 2006" "" ""
+.TH evilwm 1 "February  6, 2006" "" ""
 .SH NAME
 evilwm \- Minimalist Window Manager for X
 .SH SYNOPSIS
@@ -124,10 +124,10 @@ control, alt, mod1, mod2, mod3, mod4, mod5.
 .IP "\-app name/class"
 match an application by instance name and class (for help in finding these,
 use the
-.BR xlsclients
-tool with the
-.I \-l
-option).  Subsequent
+.BR xprop
+tool to extract the
+.I WM_CLASS
+property).  Subsequent
 .I \-g, \-s
 and
 .I \-v
@@ -154,4 +154,4 @@ aewm was written by Decklin Foster <fosterd@hartwick.edu>.
 9wm was written by David Hogan <dhog@cs.su.oz.au>.
 .SH "SEE ALSO"
 .BR xterm (1),
-.BR xlsclients (1)
+.BR xprop (1)
