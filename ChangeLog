@@ -436,5 +436,5 @@ Old
 	Released 0.99.22.
 
 2006-02-06
-	Fixed -v option parsing.
+	Fixed -v option parsing (thanks to Robert Blacquiere for notice).
 	Released 0.99.23.
