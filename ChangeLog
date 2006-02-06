@@ -434,3 +434,6 @@ Old
 
 2006-01-26
 	Released 0.99.22.
+
+2006-02-06
+	Fixed -v option parsing.

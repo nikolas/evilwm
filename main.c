@@ -118,8 +118,7 @@ int main(int argc, char *argv[]) {
 					&head_app->width, &head_app->height);
 #ifdef VWM
 		} else if (!strcmp(argv[i], "-v") && i+1<argc) {
-			int v = atoi(argv[i]);
-			i++;
+			int v = atoi(argv[++i]);
 			if (head_app && valid_vdesk(v))
 				head_app->vdesk = v;
 		} else if (!strcmp(argv[i], "-s")) {
