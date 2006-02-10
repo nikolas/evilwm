@@ -108,7 +108,6 @@ typedef struct ScreenInfo ScreenInfo;
 struct ScreenInfo {
 	int screen;
 	Window root;
-	Colormap def_cmap;
 	GC invert_gc;
 #ifdef VWM
 	XColor fg, bg, fc;

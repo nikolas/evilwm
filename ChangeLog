@@ -189,9 +189,9 @@ Old
 2002-09-25
 	When removing a window, map it before destroying its parent (the
 	border).  This should stop things disappearing if you quit evilwm
-	while using virtual desktops.  (Thanks to Paul Whittaker)
+	while using virtual desktops (thanks to Paul Whittaker).
 	Changed default font to 'variable' which should exist even if
-	'lucidasans-10' doesn't.  (Thanks to Paul Whittaker and Dan Field)
+	'lucidasans-10' doesn't (thanks to Paul Whittaker and Dan Field).
 
 2002-09-27
 	Fix non-soliddrags (broken since 2002-03-26 edit, it seems).
@@ -436,5 +436,8 @@ Old
 	Released 0.99.22.
 
 2006-02-06
-	Fixed -v option parsing (thanks to Robert Blacquiere for notice).
+	Fixed -v option parsing (thanks to Robert Blacquiere).
 	Released 0.99.23.
+
+2006-02-07
+	Remove unused def_cmap field from ScreenInfo struct.
