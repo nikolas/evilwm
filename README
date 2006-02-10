@@ -12,7 +12,7 @@ FEATURES
  * No window decorations apart from a simple 1 pixel border.
  * No icons.
  * Good keyboard control, including repositioning and maximise toggles.
- * Solid window drags (compile time option - may be slow on old machines).
+ * Solid window drags (optional - may be slow on old machines).
  * Virtual desktops.
  * Small binary size (even with everything turned on).
 

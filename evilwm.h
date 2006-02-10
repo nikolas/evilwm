@@ -192,6 +192,11 @@ extern int              vdesk;
 #ifdef SNAP
 extern int              opt_snap;
 #endif
+#ifdef SOLIDDRAG
+extern int              solid_drag;
+#else
+# define solid_drag (0)
+#endif
 #ifdef SHAPE
 extern int              have_shape, shape_event;
 #endif

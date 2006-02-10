@@ -244,18 +244,18 @@ void drag(Client *c) {
 #ifdef INFOBANNER_MOVERESIZE
 	create_info_window(c);
 #endif
-#ifndef SOLIDDRAG
-	XGrabServer(dpy);
-	draw_outline(c);
-#endif 
+	if (!solid_drag) {
+		XGrabServer(dpy);
+		draw_outline(c);
+	}
 	for (;;) {
 		XMaskEvent(dpy, MouseMask, &ev);
 		switch (ev.type) {
 			case MotionNotify:
-#ifndef SOLIDDRAG
-				draw_outline(c); /* clear */
-				XUngrabServer(dpy);
-#endif
+				if (!solid_drag) {
+					draw_outline(c); /* clear */
+					XUngrabServer(dpy);
+				}
 				c->x = old_cx + (ev.xmotion.x - x1);
 				c->y = old_cy + (ev.xmotion.y - y1);
 #ifdef SNAP
@@ -266,28 +266,29 @@ void drag(Client *c) {
 #ifdef INFOBANNER_MOVERESIZE
 				update_info_window(c);
 #endif
-#ifndef SOLIDDRAG
-				XSync(dpy, False);
-				XGrabServer(dpy);
-				draw_outline(c);
-#else
-				XMoveWindow(dpy, c->parent, c->x - c->border,
-						c->y - c->border);
-				send_config(c);
-#endif 
+				if (!solid_drag) {
+					XSync(dpy, False);
+					XGrabServer(dpy);
+					draw_outline(c);
+				} else {
+					XMoveWindow(dpy, c->parent,
+							c->x - c->border,
+							c->y - c->border);
+					send_config(c);
+				}
 				break;
 			case ButtonRelease:
-#ifndef SOLIDDRAG
-				draw_outline(c); /* clear */
-				XUngrabServer(dpy);
-#endif
+				if (!solid_drag) {
+					draw_outline(c); /* clear */
+					XUngrabServer(dpy);
+				}
 #ifdef INFOBANNER_MOVERESIZE
 				remove_info_window();
 #endif
 				XUngrabPointer(dpy, CurrentTime);
-#ifndef SOLIDDRAG
-				moveresize(c);
-#endif
+				if (!solid_drag) {
+					moveresize(c);
+				}
 				return;
 			default:
 				break;

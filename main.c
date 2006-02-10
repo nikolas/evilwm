@@ -34,6 +34,9 @@ int             vdesk = KEY_TO_VDESK(XK_1);
 #ifdef SNAP
 int             opt_snap = 0;
 #endif
+#ifdef SOLIDDRAG
+int             solid_drag = 1;  /* use solid drag by default */
+#endif
 #ifdef SHAPE
 int             have_shape, shape_event;
 #endif
@@ -134,6 +137,10 @@ int main(int argc, char *argv[]) {
 		} else if (!strcmp(argv[i], "-altmask") && i+1<argc) {
 			i++;
 			altmask = parse_modifiers(argv[i]);
+#ifdef SOLIDDRAG
+		} else if (!strcmp(argv[i], "-nosoliddrag")) {
+			solid_drag = 0;
+#endif
 #ifdef STDIO
 		} else if (!strcmp(argv[i], "-V")) {
 			LOG_INFO("evilwm version " VERSION "\n");
@@ -150,6 +157,9 @@ int main(int argc, char *argv[]) {
 			LOG_INFO("              [-snap num]");
 #ifdef VWM
 			LOG_INFO(" [-app name/class] [-g geometry] [-v vdesk] [-s]");
+#endif
+#ifdef SOLIDDRAG
+			LOG_INFO("\n              [-nosoliddrag]");
 #endif
 			LOG_INFO(" [-V]\n");
 			exit((!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))?0:1);

@@ -441,3 +441,6 @@ Old
 
 2006-02-07
 	Remove unused def_cmap field from ScreenInfo struct.
+
+2006-02-10
+	Added -nosoliddrag option (thanks to Erik Auerswald).
