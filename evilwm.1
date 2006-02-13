@@ -1,4 +1,4 @@
-.TH evilwm 1 "February  6, 2006" "" ""
+.TH evilwm 1 "February 13, 2006" "" ""
 .SH NAME
 evilwm \- Minimalist Window Manager for X
 .SH SYNOPSIS
@@ -30,8 +30,9 @@ evilwm \- Minimalist Window Manager for X
 .I geometry
 .B ] [ \-v
 .I vdesk
-.B ] [ \-s
-.B ] ]... [ \-V ]
+.B ] [ \-s ] ]...
+.B [ \-nosoliddrag ]
+.B [ \-V ]
 .SH DESCRIPTION
 .B evilwm
 is a minimalist window manager based on aewm, extended to feature
@@ -142,6 +143,8 @@ specify a default virtual desktop for applications matching the last
 Note that desktops are numbered from 0.
 .IP "\-s"
 specify that application is to start with a sticky client window.
+.IP "\-nosoliddrag"
+draw a window outline while moving or resizing.
 .IP "\-V"
 print version number.
 .SH BUGS
