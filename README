@@ -35,7 +35,7 @@ file:
 -----CUT HERE-----
 [ -f $HOME/.Xdefaults ] && xrdb $HOME/.Xdefaults
 xsetroot -solid \#400040 -cursor_name top_left_arrow
-/usr/bin/evilwm &
+/usr/bin/evilwm -snap 10 &
 exec xclock -digital -padding 2 -g -0+0
 -----CUT HERE-----
 
@@ -52,30 +52,31 @@ You can use the mouse to manipulate windows either by click/dragging
 the 1 pixel border, or by holding down Alt and doing so anywhere in the
 client window.  The controls are:
 
-Button 1	Move window
-Button 2	Resize window
-Button 3	Lower window
+Button 1	Move window.
+Button 2	Resize window.
+Button 3	Lower window.
 
 Most keyboard controls are used by holding down Control and Alt, then
 pressing a key.  Available functions are:
 
-Return		Spawn new xterm
-Escape		Delete current window
-Insert		Lower current window
-H, J, K, L	Move window left, down, up or right (16 pixels)
+Return		Spawn new xterm.
+Escape		Delete current window.
+Insert		Lower current window.
+H, J, K, L	Move window left, down, up or right (16 pixels).
+		Holding Shift resizes the window instead.
 Y, U, B, N	Move window to top-left, top-right, bottom-left or
-		bottom-right of screen
-I		Show information about current window
-Equals		Maximise current window vertically (toggle)
-X		Maximise current window (toggle)
+		bottom-right of screen.
+I		Show information about current window.
+Equals		Maximise current window vertically (toggle).
+X		Maximise current window (toggle).
 
 If compiled with virtual desktop support, these functions are also
 available:
 
-F		Fix or unfix window (toggle its 'sticky' status)
-1 - 8		Switch virtual desktop
-Left		Previous virtual desktop
-Right		Next virtual desktop
+F		Fix or unfix window (toggle its 'sticky' status).
+1 - 8		Switch virtual desktop.
+Left		Previous virtual desktop.
+Right		Next virtual desktop.
 
 In addition to the above, Alt+Tab can be used to cycle through windows
 on screen.
