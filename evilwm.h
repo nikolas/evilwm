@@ -61,18 +61,6 @@ typedef struct {
 #define grab_pointer(w, mask, curs) \
 	(XGrabPointer(dpy, w, False, mask, GrabModeAsync, GrabModeAsync, \
 	None, curs, CurrentTime) == GrabSuccess)
-#define grab_keysym(w, mask, keysym) \
-	XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), (mask), w, True, \
-	         GrabModeAsync, GrabModeAsync); \
-	XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), LockMask|(mask), w, True, \
-	         GrabModeAsync, GrabModeAsync); \
-	if (numlockmask) { \
-		XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), numlockmask|(mask), \
-		         w, True, GrabModeAsync, GrabModeAsync); \
-		XGrabKey(dpy, XKeysymToKeycode(dpy, keysym), \
-		         numlockmask|LockMask|(mask), w, True, \
-		         GrabModeAsync, GrabModeAsync); \
-	}
 #define grab_button(w, mask, button) \
 	XGrabButton(dpy, button, (mask), w, False, ButtonMask, \
 	            GrabModeAsync, GrabModeSync, None, None); \
@@ -245,13 +233,10 @@ void scan_windows(void);
 
 extern int need_client_tidy;
 extern int ignore_xerror;
-/* void do_event_loop(void); */
 int handle_xerror(Display *dsply, XErrorEvent *e);
 void spawn(const char *const cmd[]);
 void handle_signal(int signo);
-#ifdef DEBUG
-void show_event(XEvent e);
-#endif
+void grab_keysym(Window w, unsigned int mask, KeySym keysym);
 
 /* new.c */
 

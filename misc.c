@@ -70,7 +70,6 @@ int handle_xerror(Display *dsply, XErrorEvent *e) {
 	}
 	LOG_DEBUG("**ERK** handle_xerror() caught an XErrorEvent: error_code=%d request_code=%d minor_code=%d\n",
 			e->error_code, e->request_code, e->minor_code);
-	/* if (e->error_code == BadAccess && e->resourceid == root) { */
 	if (e->error_code == BadAccess && e->request_code == X_ChangeWindowAttributes) {
 		LOG_ERROR("root window unavailable (maybe another wm is running?)\n");
 		exit(1);
@@ -83,4 +82,18 @@ int handle_xerror(Display *dsply, XErrorEvent *e) {
 		need_client_tidy = 1;
 	}
 	return 0;
+}
+
+void grab_keysym(Window w, unsigned int mask, KeySym keysym) {
+	KeyCode keycode = XKeysymToKeycode(dpy, keysym);
+	XGrabKey(dpy, keycode, mask, w, True,
+			GrabModeAsync, GrabModeAsync);
+	XGrabKey(dpy, keycode, mask|LockMask, w, True,
+			GrabModeAsync, GrabModeAsync);
+	if (numlockmask) {
+		XGrabKey(dpy, keycode, mask|numlockmask, w, True,
+				GrabModeAsync, GrabModeAsync);
+		XGrabKey(dpy, keycode, mask|numlockmask|LockMask, w, True,
+				GrabModeAsync, GrabModeAsync);
+	}
 }
