@@ -444,3 +444,6 @@ Old
 
 2006-02-10
 	Added -nosoliddrag option (thanks to Erik Auerswald).
+
+2006-02-17
+	Rewrite grab_keysym() macro as a function.
