@@ -447,3 +447,6 @@ Old
 
 2006-02-17
 	Rewrite grab_keysym() macro as a function.
+
+2006-02-20
+	Released 0.99.24.
