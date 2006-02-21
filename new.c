@@ -253,7 +253,7 @@ static void reparent(Client *c) {
 
 	p_attr.border_pixel = c->screen->bg.pixel;
 	p_attr.override_redirect = True;
-	p_attr.event_mask = ChildMask | ButtonPressMask | ExposureMask | EnterWindowMask;
+	p_attr.event_mask = ChildMask | ButtonPressMask | EnterWindowMask;
 	c->parent = XCreateWindow(dpy, c->screen->root, c->x-c->border, c->y-c->border,
 		c->width, c->height, c->border,
 		DefaultDepth(dpy, c->screen->screen), CopyFromParent,
