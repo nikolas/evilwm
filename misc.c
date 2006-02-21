@@ -46,7 +46,7 @@ void handle_signal(int signo) {
 	if (font) XFreeFont(dpy, font);
 	for (i = 0; i < num_screens; i++) {
 		XFreeGC(dpy, screens[i].invert_gc);
-		XInstallColormap(dpy, DefaultColormap(dpy, screens[i].screen));
+		XInstallColormap(dpy, DefaultColormap(dpy, i));
 	}
 	free(screens);
 	XCloseDisplay(dpy);
