@@ -195,6 +195,7 @@ static int send_xmessage(Window w, Atom a, long x) {
 
 #ifdef SHAPE
 void set_shape(Client *c) {
+	int bounding_shaped;
 	int i, b;  unsigned int u;  /* dummies */
 
 	if (!have_shape) return;
@@ -202,9 +203,9 @@ void set_shape(Client *c) {
 	 * Previous method (more than one rectangle returned from
 	 * XShapeGetRectangles) worked _most_ of the time. */
 	XShapeSelectInput(dpy, c->window, ShapeNotifyMask);
-	if (XShapeQueryExtents(dpy, c->window, &(c->bounding_shaped), &i, &i,
-				&u, &u, &b, &i, &i, &u, &u) && c->bounding_shaped) {
-		LOG_DEBUG("%d shape extents\n", c->bounding_shaped);
+	if (XShapeQueryExtents(dpy, c->window, &bounding_shaped, &i, &i,
+				&u, &u, &b, &i, &i, &u, &u) && bounding_shaped) {
+		LOG_DEBUG("%d shape extents\n", bounding_shaped);
 		XShapeCombineShape(dpy, c->parent, ShapeBounding, 0, 0,
 				c->window, ShapeBounding, ShapeSet);
 	}

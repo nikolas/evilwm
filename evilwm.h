@@ -132,9 +132,6 @@ struct Client {
 	int             vdesk;
 	int             sticky;
 #endif /* def VWM */
-#ifdef SHAPE
-	int             bounding_shaped;
-#endif
 	int             remove;  /* set when client needs to be removed */
 };
 
