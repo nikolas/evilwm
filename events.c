@@ -21,15 +21,48 @@ static void current_to_head(void) {
 }
 
 static void handle_key_event(XKeyEvent *e) {
-	Client *c = find_client(e->window);
 	KeySym key = XKeycodeToKeysym(dpy,e->keycode,0);
+	Client *c;
+	int width_inc, height_inc;
 
-	if (!c)
-		c = current;
-	if (c) {
-		int width_inc = (c->width_inc > 1) ? c->width_inc : 16;
-		int height_inc = (c->height_inc > 1) ? c->height_inc : 16;
-		switch (key) {
+	switch(key) {
+		case KEY_NEW:
+			spawn(opt_term);
+			break;
+		case KEY_NEXT:
+			next();
+			if (XGrabKeyboard(dpy, e->root, False, GrabModeAsync, GrabModeAsync, CurrentTime) == GrabSuccess) {
+				XEvent ev;
+				do {
+					XMaskEvent(dpy, KeyPressMask|KeyReleaseMask, &ev);
+					if (ev.type == KeyPress && XKeycodeToKeysym(dpy,ev.xkey.keycode,0) == KEY_NEXT)
+						next();
+				} while (ev.type == KeyPress || XKeycodeToKeysym(dpy,ev.xkey.keycode,0) == KEY_NEXT);
+				XUngrabKeyboard(dpy, CurrentTime);
+			}
+			current_to_head();
+			break;
+#ifdef VWM
+		case XK_1: case XK_2: case XK_3: case XK_4:
+		case XK_5: case XK_6: case XK_7: case XK_8:
+			switch_vdesk(KEY_TO_VDESK(key));
+			break;
+		case KEY_PREVDESK:
+			if (vdesk > KEY_TO_VDESK(XK_1))
+				switch_vdesk(vdesk - 1);
+			break;
+		case KEY_NEXTDESK:
+			if (vdesk < KEY_TO_VDESK(XK_8))
+				switch_vdesk(vdesk + 1);
+			break;
+#endif
+		default: break;
+	}
+	c = current;
+	if (c == NULL) return;
+	width_inc = (c->width_inc > 1) ? c->width_inc : 16;
+	height_inc = (c->height_inc > 1) ? c->height_inc : 16;
+	switch (key) {
 		case KEY_LEFT:
 			if (e->state & altmask) {
 				if ((c->width - width_inc) >= c->min_width)
@@ -102,39 +135,7 @@ static void handle_key_event(XKeyEvent *e) {
 			fix_client(c);
 			break;
 #endif
-		}
-	}
-	switch(key) {
-		case KEY_NEW:
-			spawn(opt_term);
-			break;
-		case KEY_NEXT:
-			next();
-			if (XGrabKeyboard(dpy, e->root, False, GrabModeAsync, GrabModeAsync, CurrentTime) == GrabSuccess) {
-				XEvent ev;
-				do {
-					XMaskEvent(dpy, KeyPressMask|KeyReleaseMask, &ev);
-					if (ev.type == KeyPress && XKeycodeToKeysym(dpy,ev.xkey.keycode,0) == KEY_NEXT)
-						next();
-				} while (ev.type == KeyPress || XKeycodeToKeysym(dpy,ev.xkey.keycode,0) == KEY_NEXT);
-				XUngrabKeyboard(dpy, CurrentTime);
-			}
-			current_to_head();
-			break;
-#ifdef VWM
-		case XK_1: case XK_2: case XK_3: case XK_4:
-		case XK_5: case XK_6: case XK_7: case XK_8:
-			switch_vdesk(KEY_TO_VDESK(key));
-			break;
-		case KEY_PREVDESK:
-			if (vdesk > KEY_TO_VDESK(XK_1))
-				switch_vdesk(vdesk - 1);
-			break;
-		case KEY_NEXTDESK:
-			if (vdesk < KEY_TO_VDESK(XK_8))
-				switch_vdesk(vdesk + 1);
-			break;
-#endif
+		default: break;
 	}
 	return;
 move_client:
