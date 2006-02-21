@@ -266,9 +266,6 @@ static void handle_enter_event(XCrossingEvent *e) {
 #endif
 		select_client(c);
 		current_to_head();
-#ifdef MOUSE
-		grab_button(c->parent, grabmask2, AnyButton);
-#endif
 	}
 }
 

@@ -264,6 +264,9 @@ static void reparent(Client *c) {
 	XSetWindowBorderWidth(dpy, c->window, 0);
 	XReparentWindow(dpy, c->window, c->parent, 0, 0);
 	XMapWindow(dpy, c->window);
+#ifdef MOUSE
+	grab_button(c->parent, grabmask2, AnyButton);
+#endif
 }
 
 /* Get WM_NORMAL_HINTS property */
