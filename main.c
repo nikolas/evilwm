@@ -21,14 +21,14 @@ Client          *head_client = NULL;
 Application     *head_app = NULL;
 Cursor          move_curs;
 Cursor          resize_curs;
-const char      *opt_display = "";
-const char      *opt_font = DEF_FONT;
-const char      *opt_fg = DEF_FG;
-const char      *opt_bg = DEF_BG;
+static const char *opt_display = "";
+static const char *opt_font = DEF_FONT;
+static const char *opt_fg = DEF_FG;
+static const char *opt_bg = DEF_BG;
 const char      *opt_term[3] = { DEF_TERM, DEF_TERM, NULL };
 int             opt_bw = DEF_BW;
 #ifdef VWM
-const char      *opt_fc = DEF_FC;
+static const char *opt_fc = DEF_FC;
 int             vdesk = KEY_TO_VDESK(XK_1);
 #endif
 #ifdef SNAP

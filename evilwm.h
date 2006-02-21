@@ -162,14 +162,9 @@ extern Client           *head_client;
 extern Application      *head_app;
 extern Cursor           move_curs;
 extern Cursor           resize_curs;
-extern const char       *opt_display;
-extern const char       *opt_font;
-extern const char       *opt_fg;
-extern const char       *opt_bg;
 extern const char       *opt_term[3];
 extern int              opt_bw;
 #ifdef VWM
-extern const char       *opt_fc;
 extern int              vdesk;
 #endif
 #ifdef SNAP
