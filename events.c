@@ -258,7 +258,6 @@ static void handle_property_change(XPropertyEvent *e) {
 static void handle_enter_event(XCrossingEvent *e) {
 	Client *c;
 
-	current_screen = find_screen(e->root);
 	if ((c = find_client(e->window))) {
 #ifdef VWM
 		if (c->vdesk != vdesk && !is_sticky(c))

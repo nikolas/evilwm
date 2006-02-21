@@ -13,7 +13,6 @@
 Display         *dpy;
 int             num_screens;
 ScreenInfo      *screens;
-ScreenInfo      *current_screen;
 Client          *current = NULL;
 volatile Window initialising = None;
 XFontStruct     *font;
@@ -343,7 +342,6 @@ static void setup_display(void) {
 		}
 		XFree(wins);
 	}
-	current_screen = find_screen(DefaultScreen(dpy));
 }
 
 /* Used for overriding the default WM modifiers */

@@ -154,7 +154,6 @@ struct Application {
 extern Display          *dpy;
 extern int              num_screens;
 extern ScreenInfo       *screens;
-extern ScreenInfo       *current_screen;
 extern Client           *current;
 extern volatile Window  initialising;
 extern XFontStruct      *font;
