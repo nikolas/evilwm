@@ -91,16 +91,6 @@ static void draw_outline(Client *c) {
 }
 #endif
 
-#ifdef MOUSE
-void get_mouse_position(int *x, int *y, Window root) {
-	Window dw1, dw2;
-	int t1, t2;
-	unsigned int t3;
-
-	XQueryPointer(dpy, root, &dw1, &dw2, x, y, &t1, &t2, &t3);
-}
-#endif
-
 void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2) {
 	c->width = abs(x1 - x2);
 	c->height = abs(y1 - y2);

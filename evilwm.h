@@ -236,7 +236,13 @@ long get_wm_normal_hints(Client *c);
 /* screen.c */
 
 void drag(Client *c);
-void get_mouse_position(int *x, int *y, Window root);
+#define get_mouse_position(xp,yp,root) { \
+		Window dw; \
+		int di; \
+		unsigned int dui; \
+		XQueryPointer(dpy, root, &dw, &dw, xp, yp, &di, &di, &dui); \
+	}
+
 void moveresize(Client *c);
 void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2);
 void maximise_client(Client *c, int hv);
