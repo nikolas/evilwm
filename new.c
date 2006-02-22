@@ -14,7 +14,6 @@ static void init_geometry(Client *c);
 static void reparent(Client *c);
 static void *get_property(Window w, Atom property, Atom req_type,
 		unsigned long *nitems_return);
-static PropMwmHints *get_mwm_hints(Window);
 #ifdef XDEBUG
 static const char *map_state_string(int map_state);
 static const char *gravity_string(int gravity);
@@ -27,7 +26,6 @@ void make_new_client(Window w, ScreenInfo *s) {
 	Client *c;
 	char *name;
 	XClassHint *class;
-	PropMwmHints *mhints;
 
 	XGrabServer(dpy);
 
@@ -74,14 +72,6 @@ void make_new_client(Window w, ScreenInfo *s) {
 	XUngrabServer(dpy);
 
 	c->border = opt_bw;
-	if ((mhints = get_mwm_hints(c->window))) {
-		if ((mhints->flags & MWM_HINTS_DECORATIONS)
-				&& !(mhints->decorations & MWM_DECOR_ALL)
-				&& !(mhints->decorations & MWM_DECOR_BORDER)) {
-			c->border = 0;
-		}
-		XFree(mhints);
-	}
 
 	init_geometry(c);
 
@@ -178,11 +168,23 @@ void make_new_client(Window w, ScreenInfo *s) {
 static void init_geometry(Client *c) {
 	long size_flags;
 	XWindowAttributes attr;
+	unsigned long nitems;
+	PropMwmHints *mprop;
 #ifdef VWM
-	unsigned long nitems, i;
+	unsigned long i;
 	unsigned long *lprop;
 	Atom *aprop;
 #endif
+
+	if ( (mprop = get_property(c->window, mwm_hints, mwm_hints, &nitems)) ) {
+		if (nitems >= PROP_MWM_HINTS_ELEMENTS
+				&& (mprop->flags & MWM_HINTS_DECORATIONS)
+				&& !(mprop->decorations & MWM_DECOR_ALL)
+				&& !(mprop->decorations & MWM_DECOR_BORDER)) {
+			c->border = 0;
+		}
+		XFree(mprop);
+	}
 
 #ifdef VWM
 	c->vdesk = vdesk;
@@ -329,18 +331,6 @@ static void *get_property(Window w, Atom property, Atom req_type,
 			== Success) {
 		if (actual_type == req_type)
 			return (void *)prop;
-		XFree(prop);
-	}
-	return NULL;
-}
-
-static PropMwmHints *get_mwm_hints(Window w) {
-	unsigned long nitems;
-	PropMwmHints *prop;
-	if ( (prop = get_property(w, mwm_hints, mwm_hints, &nitems)) ) {
-		if (nitems >= PROP_MWM_HINTS_ELEMENTS) {
-			return prop;
-		}
 		XFree(prop);
 	}
 	return NULL;
