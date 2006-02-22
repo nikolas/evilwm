@@ -173,9 +173,11 @@ extern Atom xa_wm_cmapwins;
 /* Motif atoms */
 extern Atom mwm_hints;
 /* EWMH atoms */
+#ifdef VWM
 extern Atom xa_net_wm_desktop;
 extern Atom xa_net_wm_state;
 extern Atom xa_net_wm_state_sticky;
+#endif
 
 /* Things that affect user interaction */
 extern unsigned int     numlockmask;

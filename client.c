@@ -130,8 +130,10 @@ void remove_client(Client *c) {
 	if (c->remove) {
 		LOG_DEBUG("\tremove_client() : setting WithdrawnState\n");
 		set_wm_state(c, WithdrawnState);
+#ifdef VWM
 		XDeleteProperty(dpy, c->window, xa_net_wm_desktop);
 		XDeleteProperty(dpy, c->window, xa_net_wm_state);
+#endif
 	}
 
 	ungravitate(c);
