@@ -10,40 +10,16 @@
 #include "evilwm.h"
 #include "log.h"
 
-Display         *dpy;
-int             num_screens;
-ScreenInfo      *screens;
-Client          *current = NULL;
-volatile Window initialising = None;
-XFontStruct     *font;
-Client          *head_client = NULL;
-Application     *head_app = NULL;
-Cursor          move_curs;
-Cursor          resize_curs;
-static const char *opt_display = "";
-static const char *opt_font = DEF_FONT;
-static const char *opt_fg = DEF_FG;
-static const char *opt_bg = DEF_BG;
-const char      *opt_term[3] = { DEF_TERM, DEF_TERM, NULL };
-int             opt_bw = DEF_BW;
-#ifdef VWM
-static const char *opt_fc = DEF_FC;
-int             vdesk = KEY_TO_VDESK(XK_1);
-#endif
-#ifdef SNAP
-int             opt_snap = 0;
-#endif
-#ifdef SOLIDDRAG
-int             solid_drag = 1;  /* use solid drag by default */
-#endif
+/* Commonly used X information */
+Display     *dpy;
+XFontStruct *font;
+Cursor      move_curs;
+Cursor      resize_curs;
+int         num_screens;
+ScreenInfo  *screens;
 #ifdef SHAPE
-int             have_shape, shape_event;
+int         have_shape, shape_event;
 #endif
-unsigned int numlockmask = 0;
-static unsigned int grabmask1 = ControlMask|Mod1Mask;
-/* This one is used for per-client mousebutton grabs, so global: */
-unsigned int grabmask2 = Mod1Mask;
-unsigned int altmask = ShiftMask;
 
 /* Standard X protocol atoms */
 Atom xa_wm_state;
@@ -56,6 +32,36 @@ Atom mwm_hints;
 Atom xa_net_wm_desktop;
 Atom xa_net_wm_state;
 Atom xa_net_wm_state_sticky;
+
+/* Things that affect user interaction */
+static unsigned int grabmask1 = ControlMask|Mod1Mask;
+static const char   *opt_display = "";
+static const char   *opt_font = DEF_FONT;
+static const char   *opt_fg = DEF_FG;
+static const char   *opt_bg = DEF_BG;
+#ifdef VWM
+static const char   *opt_fc = DEF_FC;
+#endif
+unsigned int numlockmask = 0;
+unsigned int grabmask2 = Mod1Mask;
+unsigned int altmask = ShiftMask;
+const char   *opt_term[3] = { DEF_TERM, DEF_TERM, NULL };
+int          opt_bw = DEF_BW;
+#ifdef SNAP
+int          opt_snap = 0;
+#endif
+#ifdef SOLIDDRAG
+int          solid_drag = 1;  /* use solid drag by default */
+#endif
+Application  *head_app = NULL;
+
+/* Client tracking information */
+Client          *head_client = NULL;
+Client          *current = NULL;
+volatile Window initialising = None;
+#ifdef VWM
+int             vdesk = KEY_TO_VDESK(XK_1);
+#endif
 
 static void setup_display(void);
 static void *xmalloc(size_t size);

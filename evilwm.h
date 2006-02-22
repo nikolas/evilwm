@@ -22,9 +22,6 @@ typedef struct {
 	unsigned long decorations;
 } PropMwmHints;
 
-#define MAXIMISE_HORZ        (1<<0)
-#define MAXIMISE_VERT        (1<<1)
-
 /* sanity on options */
 #if defined(INFOBANNER_MOVERESIZE) && !defined(INFOBANNER)
 # define INFOBANNER
@@ -52,6 +49,9 @@ typedef struct {
 #define RAISE           1
 #define NO_RAISE        0       /* for unhide() */
 
+#define MAXIMISE_HORZ        (1<<0)
+#define MAXIMISE_VERT        (1<<1)
+
 /* some coding shorthand */
 
 #define ChildMask       (SubstructureRedirectMask|SubstructureNotifyMask)
@@ -61,18 +61,25 @@ typedef struct {
 #define grab_pointer(w, mask, curs) \
 	(XGrabPointer(dpy, w, False, mask, GrabModeAsync, GrabModeAsync, \
 	None, curs, CurrentTime) == GrabSuccess)
-#define grab_button(w, mask, button) \
-	XGrabButton(dpy, button, (mask), w, False, ButtonMask, \
-	            GrabModeAsync, GrabModeSync, None, None); \
-	XGrabButton(dpy, button, LockMask|(mask), w, False, ButtonMask, \
-	            GrabModeAsync, GrabModeSync, None, None); \
-	XGrabButton(dpy, button, numlockmask|(mask), w, False, \
-		    ButtonMask, GrabModeAsync, GrabModeSync, \
-		    None, None); \
-	XGrabButton(dpy, button, numlockmask|LockMask|(mask), w, False, \
-		    ButtonMask, GrabModeAsync, GrabModeSync, \
-		    None, None);
+#define grab_button(w, mask, button) do { \
+		XGrabButton(dpy, button, (mask), w, False, ButtonMask, \
+			    GrabModeAsync, GrabModeSync, None, None); \
+		XGrabButton(dpy, button, LockMask|(mask), w, False, ButtonMask,\
+			    GrabModeAsync, GrabModeSync, None, None); \
+		XGrabButton(dpy, button, numlockmask|(mask), w, False, \
+			    ButtonMask, GrabModeAsync, GrabModeSync, \
+			    None, None); \
+		XGrabButton(dpy, button, numlockmask|LockMask|(mask), w, False,\
+			    ButtonMask, GrabModeAsync, GrabModeSync, \
+			    None, None); \
+	} while (0)
 #define setmouse(w, x, y) XWarpPointer(dpy, None, w, 0, 0, 0, 0, x, y)
+#define get_mouse_position(xp,yp,root) do { \
+		Window dw; \
+		int di; \
+		unsigned int dui; \
+		XQueryPointer(dpy, root, &dw, &dw, xp, yp, &di, &di, &dui); \
+	} while (0)
 #define gravitate(c) gravitate_client(c, 1)
 #define ungravitate(c) gravitate_client(c, -1)
 
@@ -90,15 +97,13 @@ typedef struct {
 /* screen structure */
 
 typedef struct ScreenInfo ScreenInfo;
-
 struct ScreenInfo {
 	int screen;
 	Window root;
 	GC invert_gc;
-#ifdef VWM
-	XColor fg, bg, fc;
-#else
 	XColor fg, bg;
+#ifdef VWM
+	XColor fc;
 #endif
 	char *display;
 };
@@ -106,13 +111,10 @@ struct ScreenInfo {
 /* client structure */
 
 typedef struct Client Client;
-
 struct Client {
-	Client  *next;
 	Window  window;
 	Window  parent;
 	ScreenInfo      *screen;
-
 #ifdef COLOURMAP
 	Colormap        cmap;
 #endif
@@ -131,8 +133,9 @@ struct Client {
 #ifdef VWM
 	int             vdesk;
 	int             sticky;
-#endif /* def VWM */
+#endif
 	int             remove;  /* set when client needs to be removed */
+	Client  *next;
 };
 
 typedef struct Application Application;
@@ -149,23 +152,37 @@ struct Application {
 	Application *next;
 };
 
-/* declarations for global variables in main.c */
+/* Declarations for global variables in main.c */
 
-extern Display          *dpy;
-extern int              num_screens;
-extern ScreenInfo       *screens;
-extern Client           *current;
-extern volatile Window  initialising;
-extern XFontStruct      *font;
-extern Client           *head_client;
-extern Application      *head_app;
-extern Cursor           move_curs;
-extern Cursor           resize_curs;
+/* Commonly used X information */
+extern Display      *dpy;
+extern XFontStruct  *font;
+extern Cursor       move_curs;
+extern Cursor       resize_curs;
+extern int          num_screens;
+extern ScreenInfo   *screens;
+#ifdef SHAPE
+extern int          have_shape, shape_event;
+#endif
+
+/* Standard X protocol atoms */
+extern Atom xa_wm_state;
+extern Atom xa_wm_protos;
+extern Atom xa_wm_delete;
+extern Atom xa_wm_cmapwins;
+/* Motif atoms */
+extern Atom mwm_hints;
+/* EWMH atoms */
+extern Atom xa_net_wm_desktop;
+extern Atom xa_net_wm_state;
+extern Atom xa_net_wm_state_sticky;
+
+/* Things that affect user interaction */
+extern unsigned int     numlockmask;
+extern unsigned int     grabmask2;
+extern unsigned int     altmask;
 extern const char       *opt_term[3];
 extern int              opt_bw;
-#ifdef VWM
-extern int              vdesk;
-#endif
 #ifdef SNAP
 extern int              opt_snap;
 #endif
@@ -174,29 +191,19 @@ extern int              solid_drag;
 #else
 # define solid_drag (0)
 #endif
-#ifdef SHAPE
-extern int              have_shape, shape_event;
-#endif
-extern unsigned int numlockmask;
-extern unsigned int grabmask2;
-extern unsigned int altmask;
+extern Application      *head_app;
 
-/* Standard X protocol atoms */
-extern Atom             xa_wm_state;
-extern Atom             xa_wm_protos;
-extern Atom             xa_wm_delete;
-extern Atom             xa_wm_cmapwins;
-/* Motif atoms */
-extern Atom             mwm_hints;
-/* EWMH atoms */
-extern Atom xa_net_wm_desktop;
-extern Atom xa_net_wm_state;
-extern Atom xa_net_wm_state_sticky;
+/* Client tracking information */
+extern Client           *head_client;
+extern Client           *current;
+extern volatile Window  initialising;
+#ifdef VWM
+extern int              vdesk;
+#endif
 
 /* client.c */
 
 Client *find_client(Window w);
-int wm_state(Client *c);
 void gravitate_client(Client *c, int sign);
 void select_client(Client *c);
 #ifdef VWM
@@ -212,11 +219,6 @@ void client_update_current(Client *c, Client *newcurrent);
 /* events.c */
 
 void event_main_loop(void);
-
-/* main.c */
-
-int main(int argc, char *argv[]);
-void scan_windows(void);
 
 /* misc.c */
 
@@ -235,13 +237,6 @@ long get_wm_normal_hints(Client *c);
 /* screen.c */
 
 void drag(Client *c);
-#define get_mouse_position(xp,yp,root) { \
-		Window dw; \
-		int di; \
-		unsigned int dui; \
-		XQueryPointer(dpy, root, &dw, &dw, xp, yp, &di, &di, &dui); \
-	}
-
 void moveresize(Client *c);
 void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2);
 void maximise_client(Client *c, int hv);
@@ -252,7 +247,7 @@ void next(void);
 #ifdef VWM
 void hide(Client *c);
 void switch_vdesk(int v);
-#endif /* def VWM */
+#endif
 ScreenInfo *find_screen(Window root);
 
 /* ewmh.c */
