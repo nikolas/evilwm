@@ -217,12 +217,16 @@ void set_shape(Client *c) {
 void client_update_current(Client *c, Client *newcurrent) {
 	if (c) {
 		unsigned long bpixel;
+		if (c != newcurrent) {
+			bpixel = c->screen->bg.pixel;
+		} else {
 #ifdef VWM
-		if (is_sticky(c))
-			bpixel = c == newcurrent ? c->screen->fc.pixel : c->screen->bg.pixel;
-		else
+			if (is_sticky(c))
+				bpixel = c->screen->fc.pixel;
+			else
 #endif
-			bpixel = c == newcurrent ? c->screen->fg.pixel : c->screen->bg.pixel;
+				bpixel = c->screen->fg.pixel;
+		}
 		XSetWindowBorder(dpy, c->parent, bpixel);
 	}
 	current = newcurrent;
