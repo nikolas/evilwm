@@ -94,18 +94,29 @@ void gravitate_client(Client *c, int sign) {
 }
 
 void select_client(Client *c) {
-#ifdef COLOURMAP
-	XInstallColormap(dpy, c->cmap);
+	if (current)
+		XSetWindowBorder(dpy, current->parent, current->screen->bg.pixel);
+	if (c) {
+		unsigned long bpixel;
+#ifdef VWM
+		if (is_sticky(c))
+			bpixel = c->screen->fc.pixel;
+		else
 #endif
-	client_update_current(current, c);
-	client_update_current(c, current);
-	XSetInputFocus(dpy, c->window, RevertToPointerRoot, CurrentTime);
+			bpixel = c->screen->fg.pixel;
+		XSetWindowBorder(dpy, c->parent, bpixel);
+#ifdef COLOURMAP
+		XInstallColormap(dpy, c->cmap);
+#endif
+		XSetInputFocus(dpy, c->window, RevertToPointerRoot, CurrentTime);
+	}
+	current = c;
 }
 
 #ifdef VWM
 void fix_client(Client *c) {
 	toggle_sticky(c);
-	client_update_current(c, current);
+	select_client(c);
 	update_net_wm_state(c);
 }
 #endif
@@ -213,21 +224,3 @@ void set_shape(Client *c) {
 	}
 }
 #endif
-
-void client_update_current(Client *c, Client *newcurrent) {
-	if (c) {
-		unsigned long bpixel;
-		if (c != newcurrent) {
-			bpixel = c->screen->bg.pixel;
-		} else {
-#ifdef VWM
-			if (is_sticky(c))
-				bpixel = c->screen->fc.pixel;
-			else
-#endif
-				bpixel = c->screen->fg.pixel;
-		}
-		XSetWindowBorder(dpy, c->parent, bpixel);
-	}
-	current = newcurrent;
-}

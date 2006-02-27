@@ -381,7 +381,7 @@ void switch_vdesk(int v) {
 	if (v == vdesk)
 		return;
 	if (current && !is_sticky(current)) {
-		client_update_current(current, NULL);
+		select_client(NULL);
 	}
 	LOG_DEBUG("switch_vdesk(): Switching to desk %d", v);
 	for (c = head_client; c; c = c->next) {
