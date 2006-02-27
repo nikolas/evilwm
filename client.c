@@ -215,7 +215,6 @@ void set_shape(Client *c) {
 	/* Logic to decide if we have a shaped window cribbed from fvwm-2.5.10.
 	 * Previous method (more than one rectangle returned from
 	 * XShapeGetRectangles) worked _most_ of the time. */
-	XShapeSelectInput(dpy, c->window, ShapeNotifyMask);
 	if (XShapeQueryExtents(dpy, c->window, &bounding_shaped, &i, &i,
 				&u, &u, &b, &i, &i, &u, &u) && bounding_shaped) {
 		LOG_DEBUG("%d shape extents\n", bounding_shaped);
