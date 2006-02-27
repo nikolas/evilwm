@@ -91,7 +91,7 @@ static void draw_outline(Client *c) {
 }
 #endif
 
-void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2) {
+static void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2) {
 	c->width = abs(x1 - x2);
 	c->height = abs(y1 - y2);
 	c->width -= (c->width - c->base_width) % c->width_inc;

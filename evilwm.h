@@ -239,7 +239,6 @@ long get_wm_normal_hints(Client *c);
 
 void drag(Client *c);
 void moveresize(Client *c);
-void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2);
 void maximise_client(Client *c, int hv);
 void show_info(Client *c, KeySym key);
 void sweep(Client *c);
