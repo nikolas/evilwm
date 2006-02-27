@@ -228,7 +228,6 @@ extern int ignore_xerror;
 int handle_xerror(Display *dsply, XErrorEvent *e);
 void spawn(const char *const cmd[]);
 void handle_signal(int signo);
-void grab_keysym(Window w, unsigned int mask, KeySym keysym);
 
 /* new.c */
 

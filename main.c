@@ -68,6 +68,7 @@ int             vdesk = KEY_TO_VDESK(XK_1);
 static void setup_display(void);
 static void *xmalloc(size_t size);
 static unsigned int parse_modifiers(char *s);
+static void grab_keysym(Window w, unsigned int mask, KeySym keysym);
 
 int main(int argc, char *argv[]) {
 	struct sigaction act;
@@ -383,4 +384,18 @@ static unsigned int parse_modifiers(char *s) {
 		tmp = strtok(NULL, ",+");
 	} while (tmp);
 	return ret;
+}
+
+static void grab_keysym(Window w, unsigned int mask, KeySym keysym) {
+	KeyCode keycode = XKeysymToKeycode(dpy, keysym);
+	XGrabKey(dpy, keycode, mask, w, True,
+			GrabModeAsync, GrabModeAsync);
+	XGrabKey(dpy, keycode, mask|LockMask, w, True,
+			GrabModeAsync, GrabModeAsync);
+	if (numlockmask) {
+		XGrabKey(dpy, keycode, mask|numlockmask, w, True,
+				GrabModeAsync, GrabModeAsync);
+		XGrabKey(dpy, keycode, mask|numlockmask|LockMask, w, True,
+				GrabModeAsync, GrabModeAsync);
+	}
 }

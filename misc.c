@@ -90,17 +90,3 @@ int handle_xerror(Display *dsply, XErrorEvent *e) {
 	}
 	return 0;
 }
-
-void grab_keysym(Window w, unsigned int mask, KeySym keysym) {
-	KeyCode keycode = XKeysymToKeycode(dpy, keysym);
-	XGrabKey(dpy, keycode, mask, w, True,
-			GrabModeAsync, GrabModeAsync);
-	XGrabKey(dpy, keycode, mask|LockMask, w, True,
-			GrabModeAsync, GrabModeAsync);
-	if (numlockmask) {
-		XGrabKey(dpy, keycode, mask|numlockmask, w, True,
-				GrabModeAsync, GrabModeAsync);
-		XGrabKey(dpy, keycode, mask|numlockmask|LockMask, w, True,
-				GrabModeAsync, GrabModeAsync);
-	}
-}
