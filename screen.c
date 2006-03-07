@@ -143,6 +143,7 @@ void sweep(Client *c) {
 				XUngrabPointer(dpy, CurrentTime);
 				moveresize(c);
 				return;
+			default: break;
 		}
 	}
 }
@@ -280,8 +281,7 @@ void drag(Client *c) {
 					moveresize(c);
 				}
 				return;
-			default:
-				break;
+			default: break;
 		}
 	}
 }

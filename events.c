@@ -158,6 +158,7 @@ static void handle_button_event(XButtonEvent *e) {
 				sweep(c); break;
 			case Button3:
 				XLowerWindow(dpy, c->parent); break;
+			default: break;
 		}
 	}
 }
