@@ -44,8 +44,8 @@ void spawn(const char *const cmd[]) {
 }
 
 void handle_signal(int signo) {
-	(void)signo;  /* unused */
 	int i;
+	(void)signo;  /* unused */
 	/* SIGCHLD check no longer necessary */
 	/* Quit Nicely */
 	while(head_client) remove_client(head_client);
@@ -61,8 +61,8 @@ void handle_signal(int signo) {
 }
 
 int handle_xerror(Display *dsply, XErrorEvent *e) {
-	(void)dsply;  /* unused */
 	Client *c;
+	(void)dsply;  /* unused */
 
 	if (ignore_xerror) {
 		LOG_DEBUG("handle_xerror() ignored an XErrorEvent: %d\n", e->error_code);
