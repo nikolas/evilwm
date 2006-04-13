@@ -167,6 +167,7 @@ static void handle_button_event(XButtonEvent *e) {
 static void handle_configure_request(XConfigureRequestEvent *e) {
 	Client *c = find_client(e->window);
 	XWindowChanges wc;
+	unsigned int value_mask = e->value_mask;
 
 	wc.sibling = e->above;
 	wc.stack_mode = e->detail;
@@ -174,10 +175,16 @@ static void handle_configure_request(XConfigureRequestEvent *e) {
 	wc.height = e->height;
 	if (c) {
 		ungravitate(c);
-		if (e->value_mask & CWWidth) c->width = e->width;
-		if (e->value_mask & CWHeight) c->height = e->height;
-		if (e->value_mask & CWX) c->x = e->x;
-		if (e->value_mask & CWY) c->y = e->y;
+		if (value_mask & CWWidth) c->width = e->width;
+		if (value_mask & CWHeight) c->height = e->height;
+		if (value_mask & CWX) c->x = e->x;
+		if (value_mask & CWY) c->y = e->y;
+		if (value_mask & CWStackMode && value_mask & CWSibling) {
+			Client *sibling = find_client(e->above);
+			if (sibling) {
+				wc.sibling = sibling->parent;
+			}
+		}
 		if (c->x == 0 && c->width >= DisplayWidth(dpy, c->screen->screen)) {
 			c->x -= c->border;
 		}
@@ -189,15 +196,19 @@ static void handle_configure_request(XConfigureRequestEvent *e) {
 		wc.x = c->x - c->border;
 		wc.y = c->y - c->border;
 		wc.border_width = c->border;
-		XConfigureWindow(dpy, c->parent, e->value_mask, &wc);
-		send_config(c);
+		LOG_XDEBUG("XConfigureWindow(dpy, parent(%x), %lx, &wc);\n", (unsigned int)c->parent, value_mask);
+		XConfigureWindow(dpy, c->parent, value_mask, &wc);
+		XMoveResizeWindow(dpy, c->window, 0, 0, c->width, c->height);
+		if ((value_mask & (CWX|CWY)) && !(value_mask & (CWWidth|CWHeight))) {
+			send_config(c);
+		}
 		wc.border_width = 0;
+	} else {
+		wc.x = c ? 0 : e->x;
+		wc.y = c ? 0 : e->y;
+		LOG_XDEBUG("XConfigureWindow(dpy, window(%x), %lx, &wc);\n", (unsigned int)e->window, value_mask);
+		XConfigureWindow(dpy, e->window, value_mask, &wc);
 	}
-
-	wc.x = c ? 0 : e->x;
-	wc.y = c ? 0 : e->y;
-	XConfigureWindow(dpy, e->window, e->value_mask, &wc);
-	LOG_DEBUG("handle_configure_request() : window configured to %dx%d+%d+%d\n", wc.width, wc.height, wc.x, wc.y);
 }
 
 static void handle_map_request(XMapRequestEvent *e) {
