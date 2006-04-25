@@ -24,6 +24,7 @@ static void handle_key_event(XKeyEvent *e) {
 	KeySym key = XKeycodeToKeysym(dpy,e->keycode,0);
 	Client *c;
 	int width_inc, height_inc;
+	ScreenInfo *current_screen = find_current_screen();
 
 	switch(key) {
 		case KEY_NEW:
@@ -45,15 +46,19 @@ static void handle_key_event(XKeyEvent *e) {
 #ifdef VWM
 		case XK_1: case XK_2: case XK_3: case XK_4:
 		case XK_5: case XK_6: case XK_7: case XK_8:
-			switch_vdesk(KEY_TO_VDESK(key));
+			switch_vdesk(current_screen, KEY_TO_VDESK(key));
 			break;
 		case KEY_PREVDESK:
-			if (vdesk > KEY_TO_VDESK(XK_1))
-				switch_vdesk(vdesk - 1);
+			if (current_screen->vdesk > KEY_TO_VDESK(XK_1)) {
+				switch_vdesk(current_screen,
+						current_screen->vdesk - 1);
+			}
 			break;
 		case KEY_NEXTDESK:
-			if (vdesk < KEY_TO_VDESK(XK_8))
-				switch_vdesk(vdesk + 1);
+			if (current_screen->vdesk < KEY_TO_VDESK(XK_8)) {
+				switch_vdesk(current_screen,
+						current_screen->vdesk + 1);
+			}
 			break;
 #endif
 		default: break;
@@ -216,8 +221,8 @@ static void handle_map_request(XMapRequestEvent *e) {
 
 	if (c) {
 #ifdef VWM
-		if (c->vdesk != vdesk)
-			switch_vdesk(c->vdesk);
+		if (c->vdesk != c->screen->vdesk)
+			switch_vdesk(c->screen, c->vdesk);
 #endif
 		unhide(c, RAISE);
 	} else {
@@ -272,7 +277,7 @@ static void handle_enter_event(XCrossingEvent *e) {
 
 	if ((c = find_client(e->window))) {
 #ifdef VWM
-		if (c->vdesk != vdesk)
+		if (c->vdesk != c->screen->vdesk)
 			return;
 #endif
 		select_client(c);

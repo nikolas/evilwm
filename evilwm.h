@@ -103,6 +103,7 @@ struct ScreenInfo {
 	GC invert_gc;
 	XColor fg, bg;
 #ifdef VWM
+	int vdesk;
 	XColor fc;
 #endif
 	char *display;
@@ -199,9 +200,6 @@ extern Application      *head_app;
 extern Client           *head_client;
 extern Client           *current;
 extern volatile Window  initialising;
-#ifdef VWM
-extern int              vdesk;
-#endif
 
 /* client.c */
 
@@ -245,9 +243,10 @@ void unhide(Client *c, int raise_win);
 void next(void);
 #ifdef VWM
 void hide(Client *c);
-void switch_vdesk(int v);
+void switch_vdesk(ScreenInfo *s, int v);
 #endif
 ScreenInfo *find_screen(Window root);
+ScreenInfo *find_current_screen(void);
 
 /* ewmh.c */
 

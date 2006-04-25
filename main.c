@@ -61,9 +61,6 @@ Application  *head_app = NULL;
 Client          *head_client = NULL;
 Client          *current = NULL;
 volatile Window initialising = None;
-#ifdef VWM
-int             vdesk = KEY_TO_VDESK(XK_1);
-#endif
 
 static void setup_display(void);
 static void *xmalloc(size_t size);
@@ -323,6 +320,7 @@ static void setup_display(void) {
 
 		screens[i].screen = i;
 		screens[i].root = RootWindow(dpy, i);
+		screens[i].vdesk = KEY_TO_VDESK(XK_1);
 
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_fg, &screens[i].fg, &dummy);
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_bg, &screens[i].bg, &dummy);

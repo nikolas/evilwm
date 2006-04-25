@@ -141,7 +141,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	/* Only map the window frame (and thus the window) if it's supposed
 	 * to be visible on this virtual desktop. */
 #ifdef VWM
-	if (vdesk == c->vdesk)
+	if (s->vdesk == c->vdesk)
 #endif
 	{
 		unhide(c, RAISE);
@@ -187,7 +187,7 @@ static void init_geometry(Client *c) {
 	}
 
 #ifdef VWM
-	c->vdesk = vdesk;
+	c->vdesk = c->screen->vdesk;
 	if ( (lprop = get_property(c->window, xa_net_wm_desktop, XA_CARDINAL, &nitems)) ) {
 		if (nitems && valid_vdesk(lprop[0]))
 			c->vdesk = lprop[0];

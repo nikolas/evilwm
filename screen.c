@@ -200,7 +200,7 @@ static void snap_client(Client *c) {
 		if (ci != c
 				&& (ci->screen == c->screen)
 #ifdef VWM
-				&& (ci->vdesk == vdesk)
+				&& (ci->vdesk == c->vdesk)
 #endif
 				) {
 			if (ci->y - ci->border - c->border - c->height - c->y <= opt_snap && c->y - c->border - ci->border - ci->height - ci->y <= opt_snap) {
@@ -358,7 +358,9 @@ void next(void) {
 			return;
 	}
 #ifdef VWM
-	while (newc->vdesk != vdesk);
+	/* NOTE: Checking against newc->screen->vdesk implies we can Alt+Tab
+	 * across screen boundaries.  Is this what we want? */
+	while (newc->vdesk != newc->screen->vdesk);
 #else
 	while (0);
 #endif
@@ -373,24 +375,26 @@ void next(void) {
 }
 
 #ifdef VWM
-void switch_vdesk(int v) {
+void switch_vdesk(ScreenInfo *s, int v) {
 	Client *c;
 #ifdef DEBUG
 	int hidden = 0, raised = 0;
 #endif
 
-	if (v == vdesk)
+	if (v == s->vdesk)
 		return;
 	if (current && !is_sticky(current)) {
 		select_client(NULL);
 	}
-	LOG_DEBUG("switch_vdesk(): Switching to desk %d", v);
+	LOG_DEBUG("switch_vdesk(): Switching screen %d to desk %d", s->screen, v);
 	for (c = head_client; c; c = c->next) {
+		if (c->screen != s)
+			continue;
 		if (is_sticky(c) && c->vdesk != v) {
 			c->vdesk = v;
 			update_net_wm_desktop(c);
 		}
-		if (c->vdesk == vdesk) {
+		if (c->vdesk == s->vdesk) {
 			hide(c);
 #ifdef DEBUG
 			hidden++;
@@ -402,7 +406,7 @@ void switch_vdesk(int v) {
 #endif
 		}
 	}
-	vdesk = v;
+	s->vdesk = v;
 	LOG_DEBUG(" (%d hidden, %d raised)\n", hidden, raised);
 }
 #endif /* def VWM */
@@ -414,4 +418,14 @@ ScreenInfo *find_screen(Window root) {
 			return &screens[i];
 	}
 	return NULL;
+}
+
+ScreenInfo *find_current_screen(void) {
+	Window cur_root, dw;
+	int di;
+	unsigned int dui;
+
+	/* XQueryPointer is useful for getting the current pointer root */
+	XQueryPointer(dpy, screens[0].root, &cur_root, &dw, &di, &di, &di, &di, &dui);
+	return find_screen(cur_root);
 }
