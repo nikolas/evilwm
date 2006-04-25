@@ -141,7 +141,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	/* Only map the window frame (and thus the window) if it's supposed
 	 * to be visible on this virtual desktop. */
 #ifdef VWM
-	if (vdesk == c->vdesk || is_sticky(c))
+	if (vdesk == c->vdesk)
 #endif
 	{
 		unhide(c, RAISE);

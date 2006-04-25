@@ -200,7 +200,7 @@ static void snap_client(Client *c) {
 		if (ci != c
 				&& (ci->screen == c->screen)
 #ifdef VWM
-				&& (ci->vdesk == vdesk || is_sticky(ci))
+				&& (ci->vdesk == vdesk)
 #endif
 				) {
 			if (ci->y - ci->border - c->border - c->height - c->y <= opt_snap && c->y - c->border - ci->border - ci->height - ci->y <= opt_snap) {
@@ -358,7 +358,7 @@ void next(void) {
 			return;
 	}
 #ifdef VWM
-	while (newc->vdesk != vdesk && !is_sticky(newc));
+	while (newc->vdesk != vdesk);
 #else
 	while (0);
 #endif
