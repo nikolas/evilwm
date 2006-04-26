@@ -1,4 +1,88 @@
-Old
+*** Changes between 0.99.24 and 0.99.25:
+
+Wed Apr 26 18:35:53 BST 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Regrab keys on receipt of MappingNotify event
+
+Wed Apr 26 13:01:19 BST 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Make spawn() use find_current_screen()
+
+Wed Apr 26 11:30:04 BST 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Fix build errors/warnings when VWM not defined
+
+Tue Apr 25 19:35:44 BST 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Track vdesk separately on each managed screen
+
+Tue Apr 25 18:42:29 BST 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Remove is_sticky tests when only need to check vdesk
+
+Tue Apr 25 17:00:09 BST 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Only snap against clients on the same screen
+
+Thu Apr 13 16:15:09 BST 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Fix configure requests containing sibling information
+
+Mon Mar 13 12:53:55 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Move unused variable workarounds after declarations
+
+Tue Mar  7 08:13:59 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Flesh out some switches with default cases
+
+Mon Feb 27 16:49:18 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Remove redundant call to XShapeSelectInput()
+
+Mon Feb 27 14:52:48 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Move grab_keysym() to main.c, make static
+
+Mon Feb 27 14:36:19 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Make recalculate_sweep() static
+
+Mon Feb 27 14:20:58 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Wrap client_update_current into select_client
+
+Wed Feb 22 16:40:39 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Restructure client_update_current()
+
+Wed Feb 22 12:39:48 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Wrap fetching of mwm_hints property into init_geometry
+
+Wed Feb 22 10:58:45 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Omit some unneeded code when VWM not defined
+  EWMH atoms mostly, also some keymap defines.
+
+Wed Feb 22 08:57:14 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Code tidy
+  Dead declarations removed from evilwm.h.  Some reordering of other
+  declarations.  Nothing that should affect anything.
+
+Tue Feb 21 20:10:32 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Use XQueryPointer to find pointer root instead of trying to track it
+
+Tue Feb 21 20:09:57 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Macro-ise get_mouse_position()
+
+Tue Feb 21 19:36:08 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Declare some of opt_* as static in main.c
+
+Tue Feb 21 16:36:26 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Don't track bounding_shaped
+  This is never used outside set_shape and I'm not convinced that
+  XShapeQueryExtents refers to the old values.
+
+Tue Feb 21 16:16:46 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Fix foolish lookup of screen number where it's already known
+
+Tue Feb 21 15:00:15 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Expose events not needed on frame windows
+
+Tue Feb 21 14:59:31 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Grab buttons when making client instead of every enter event
+
+Tue Feb 21 12:12:18 GMT 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Refactored handle_key_event()
+
+
+
+*** Old ChangeLog:
 	Released version 0.3.3.
 
 2000-10-26
