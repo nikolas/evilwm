@@ -182,6 +182,7 @@ extern Atom xa_net_wm_state_sticky;
 
 /* Things that affect user interaction */
 extern unsigned int     numlockmask;
+extern unsigned int     grabmask1;
 extern unsigned int     grabmask2;
 extern unsigned int     altmask;
 extern const char       *opt_term[3];
@@ -247,6 +248,7 @@ void switch_vdesk(ScreenInfo *s, int v);
 #endif
 ScreenInfo *find_screen(Window root);
 ScreenInfo *find_current_screen(void);
+void grab_keys_for_screen(ScreenInfo *s);
 
 /* ewmh.c */
 

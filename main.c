@@ -36,7 +36,6 @@ Atom xa_net_wm_state_sticky;
 #endif
 
 /* Things that affect user interaction */
-static unsigned int grabmask1 = ControlMask|Mod1Mask;
 static const char   *opt_display = "";
 static const char   *opt_font = DEF_FONT;
 static const char   *opt_fg = DEF_FG;
@@ -45,6 +44,7 @@ static const char   *opt_bg = DEF_BG;
 static const char   *opt_fc = DEF_FC;
 #endif
 unsigned int numlockmask = 0;
+unsigned int grabmask1 = ControlMask|Mod1Mask;
 unsigned int grabmask2 = Mod1Mask;
 unsigned int altmask = ShiftMask;
 const char   *opt_term[3] = { DEF_TERM, DEF_TERM, NULL };
@@ -65,7 +65,6 @@ volatile Window initialising = None;
 static void setup_display(void);
 static void *xmalloc(size_t size);
 static unsigned int parse_modifiers(char *s);
-static void grab_keysym(Window w, unsigned int mask, KeySym keysym);
 
 int main(int argc, char *argv[]) {
 	struct sigaction act;
@@ -206,21 +205,6 @@ static void setup_display(void) {
 	XSetWindowAttributes attr;
 	XColor dummy;
 	XModifierKeymap *modmap;
-	KeySym *keysym;
-	KeySym keys_to_grab[] = {
-		KEY_NEW, KEY_KILL,
-		KEY_TOPLEFT, KEY_TOPRIGHT, KEY_BOTTOMLEFT, KEY_BOTTOMRIGHT,
-		KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP,
-		KEY_LOWER, KEY_ALTLOWER, KEY_INFO, KEY_MAXVERT, KEY_MAX,
-#ifdef VWM
-		KEY_FIX, KEY_PREVDESK, KEY_NEXTDESK,
-		XK_1, XK_2, XK_3, XK_4, XK_5, XK_6, XK_7, XK_8,
-#endif
-		0
-	};
-	KeySym alt_keys_to_grab[] = {
-		KEY_KILL, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP
-	};
 	/* used in scanning windows (XQueryTree) */
 	unsigned int i, j, nwins;
 	Window dw1, dw2, *wins;
@@ -333,14 +317,7 @@ static void setup_display(void) {
 		screens[i].invert_gc = XCreateGC(dpy, screens[i].root, GCFunction | GCSubwindowMode | GCLineWidth | GCFont, &gv);
 
 		XChangeWindowAttributes(dpy, screens[i].root, CWEventMask, &attr);
-		/* Grab key combinations we're interested in */
-		for (keysym = keys_to_grab; *keysym; keysym++) {
-			grab_keysym(screens[i].root, grabmask1, *keysym);
-		}
-		for (keysym = alt_keys_to_grab; *keysym; keysym++) {
-			grab_keysym(screens[i].root, grabmask1 | altmask, *keysym);
-		}
-		grab_keysym(screens[i].root, grabmask2, KEY_NEXT);
+		grab_keys_for_screen(&screens[i]);
 
 		/* scan all the windows on this screen */
 		LOG_XDEBUG("main:XQueryTree(); ");
@@ -384,18 +361,4 @@ static unsigned int parse_modifiers(char *s) {
 		tmp = strtok(NULL, ",+");
 	} while (tmp);
 	return ret;
-}
-
-static void grab_keysym(Window w, unsigned int mask, KeySym keysym) {
-	KeyCode keycode = XKeysymToKeycode(dpy, keysym);
-	XGrabKey(dpy, keycode, mask, w, True,
-			GrabModeAsync, GrabModeAsync);
-	XGrabKey(dpy, keycode, mask|LockMask, w, True,
-			GrabModeAsync, GrabModeAsync);
-	if (numlockmask) {
-		XGrabKey(dpy, keycode, mask|numlockmask, w, True,
-				GrabModeAsync, GrabModeAsync);
-		XGrabKey(dpy, keycode, mask|numlockmask|LockMask, w, True,
-				GrabModeAsync, GrabModeAsync);
-	}
 }

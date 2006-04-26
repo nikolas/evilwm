@@ -14,6 +14,7 @@ Window info_window = None;
 static void create_info_window(Client *c);
 static void update_info_window(Client *c);
 static void remove_info_window(void);
+static void grab_keysym(Window w, unsigned int mask, KeySym keysym);
 
 static void create_info_window(Client *c) {
 	info_window = XCreateSimpleWindow(dpy, c->screen->root, -4, -4, 2, 2,
@@ -428,4 +429,47 @@ ScreenInfo *find_current_screen(void) {
 	/* XQueryPointer is useful for getting the current pointer root */
 	XQueryPointer(dpy, screens[0].root, &cur_root, &dw, &di, &di, &di, &di, &dui);
 	return find_screen(cur_root);
+}
+
+static void grab_keysym(Window w, unsigned int mask, KeySym keysym) {
+	KeyCode keycode = XKeysymToKeycode(dpy, keysym);
+	XGrabKey(dpy, keycode, mask, w, True,
+			GrabModeAsync, GrabModeAsync);
+	XGrabKey(dpy, keycode, mask|LockMask, w, True,
+			GrabModeAsync, GrabModeAsync);
+	if (numlockmask) {
+		XGrabKey(dpy, keycode, mask|numlockmask, w, True,
+				GrabModeAsync, GrabModeAsync);
+		XGrabKey(dpy, keycode, mask|numlockmask|LockMask, w, True,
+				GrabModeAsync, GrabModeAsync);
+	}
+}
+
+void grab_keys_for_screen(ScreenInfo *s) {
+	KeySym *keysym;
+	KeySym keys_to_grab[] = {
+		KEY_NEW, KEY_KILL,
+		KEY_TOPLEFT, KEY_TOPRIGHT, KEY_BOTTOMLEFT, KEY_BOTTOMRIGHT,
+		KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP,
+		KEY_LOWER, KEY_ALTLOWER, KEY_INFO, KEY_MAXVERT, KEY_MAX,
+#ifdef VWM
+		KEY_FIX, KEY_PREVDESK, KEY_NEXTDESK,
+		XK_1, XK_2, XK_3, XK_4, XK_5, XK_6, XK_7, XK_8,
+#endif
+		0
+	};
+	KeySym alt_keys_to_grab[] = {
+		KEY_KILL, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP, 0
+	};
+
+	/* Release any previous grabs */
+	XUngrabKey(dpy, AnyKey, AnyModifier, s->root);
+	/* Grab key combinations we're interested in */
+	for (keysym = keys_to_grab; *keysym; keysym++) {
+		grab_keysym(s->root, grabmask1, *keysym);
+	}
+	for (keysym = alt_keys_to_grab; *keysym; keysym++) {
+		grab_keysym(s->root, grabmask1 | altmask, *keysym);
+	}
+	grab_keysym(s->root, grabmask2, KEY_NEXT);
 }

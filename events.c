@@ -287,6 +287,16 @@ static void handle_enter_event(XCrossingEvent *e) {
 	}
 }
 
+static void handle_mappingnotify_event(XMappingEvent *e) {
+	XRefreshKeyboardMapping(e);
+	if (e->request == MappingKeyboard) {
+		int i;
+		for (i = 0; i < num_screens; i++) {
+			grab_keys_for_screen(&screens[i]);
+		}
+	}
+}
+
 #ifdef SHAPE
 static void handle_shape_event(XShapeEvent *e) {
 	Client *c = find_client(e->window);
@@ -321,6 +331,8 @@ void event_main_loop(void) {
 				handle_property_change(&ev.xproperty); break;
 			case UnmapNotify:
 				handle_unmap_event(&ev.xunmap); break;
+			case MappingNotify:
+				handle_mappingnotify_event(&ev.xmapping); break;
 #ifdef SHAPE
 			default:
 				if (have_shape && ev.type == shape_event) {
