@@ -16,15 +16,9 @@ int ignore_xerror = 0;
 
 /* Now do this by fork()ing twice so we don't have to worry about SIGCHLDs */
 void spawn(const char *const cmd[]) {
-	Window cur_root, dw;
-	int di;
-	unsigned int dui;
-	ScreenInfo *current_screen;
+	ScreenInfo *current_screen = find_current_screen();
 	pid_t pid;
 
-	/* XQueryPointer is useful for getting the current pointer root */
-	XQueryPointer(dpy, screens[0].root, &cur_root, &dw, &di, &di, &di, &di, &dui);
-	current_screen = find_screen(cur_root);
 	if (current_screen && current_screen->display)
 		putenv(current_screen->display);
 	if (!(pid = fork())) {
