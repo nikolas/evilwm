@@ -24,7 +24,9 @@ static void handle_key_event(XKeyEvent *e) {
 	KeySym key = XKeycodeToKeysym(dpy,e->keycode,0);
 	Client *c;
 	int width_inc, height_inc;
+#ifdef VWM
 	ScreenInfo *current_screen = find_current_screen();
+#endif
 
 	switch(key) {
 		case KEY_NEW:

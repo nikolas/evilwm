@@ -320,7 +320,9 @@ static void setup_display(void) {
 
 		screens[i].screen = i;
 		screens[i].root = RootWindow(dpy, i);
+#ifdef VWM
 		screens[i].vdesk = KEY_TO_VDESK(XK_1);
+#endif
 
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_fg, &screens[i].fg, &dummy);
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_bg, &screens[i].bg, &dummy);
