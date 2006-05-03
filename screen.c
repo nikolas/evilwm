@@ -185,15 +185,17 @@ static int absmin(int a, int b) {
 
 static void snap_client(Client *c) {
 	int dx, dy;
+	int dpy_width = DisplayWidth(dpy, c->screen->screen);
+	int dpy_height = DisplayHeight(dpy, c->screen->screen);
 	Client *ci;
 
 	/* snap to screen border */
 	if (abs(c->x - c->border) < opt_snap) c->x = c->border;
 	if (abs(c->y - c->border) < opt_snap) c->y = c->border;
-	if (abs(c->x + c->width + c->border - DisplayWidth(dpy, c->screen->screen)) < opt_snap)
-		c->x = DisplayWidth(dpy, c->screen->screen) - c->width - c->border;
-	if (abs(c->y + c->height + c->border - DisplayHeight(dpy, c->screen->screen)) < opt_snap)
-		c->y = DisplayHeight(dpy, c->screen->screen) - c->height - c->border;
+	if (abs(c->x + c->width + c->border - dpy_width) < opt_snap)
+		c->x = dpy_width - c->width - c->border;
+	if (abs(c->y + c->height + c->border - dpy_height) < opt_snap)
+		c->y = dpy_height - c->height - c->border;
 
 	/* snap to other windows */
 	dx = dy = opt_snap;
@@ -222,6 +224,10 @@ static void snap_client(Client *c) {
 		c->x += dx;
 	if (abs(dy) < opt_snap)
 		c->y += dy;
+	if (abs(c->x) == c->border && c->width == dpy_width)
+		c->x = 0;
+	if (abs(c->y) == c->border && c->height == dpy_height)
+		c->y = 0;
 }
 #endif /* def SNAP */
 
