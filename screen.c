@@ -328,7 +328,6 @@ void maximise_client(Client *c, int hv) {
 			c->height = DisplayHeight(dpy, c->screen->screen);
 		}
 	}
-	recalculate_sweep(c, c->x, c->y, c->x + c->width, c->y + c->height);
 	moveresize(c);
 	discard_enter_events();
 }
