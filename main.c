@@ -62,6 +62,30 @@ Client          *head_client = NULL;
 Client          *current = NULL;
 volatile Window initialising = None;
 
+/* Simple command-line options */
+static struct {
+	const char *opt;
+	enum { OPT_INT, OPT_STRING, OPT_MODIFIERS } type;
+	void *dest;
+} option_list[] = {
+	{ "-fn", OPT_STRING, &opt_font },
+	{ "-display", OPT_STRING, &opt_display },
+	{ "-fg", OPT_STRING, &opt_fg },
+	{ "-bg", OPT_STRING, &opt_bg },
+#ifdef VWM
+	{ "-fc", OPT_STRING, &opt_fc },
+#endif
+	{ "-bw", OPT_INT, &opt_bw },
+	{ "-term", OPT_STRING, &opt_term[0] },
+#ifdef SNAP
+	{ "-snap", OPT_INT, &opt_snap },
+#endif
+	{ "-mask1", OPT_MODIFIERS, &grabmask1 },
+	{ "-mask2", OPT_MODIFIERS, &grabmask2 },
+	{ "-altmask", OPT_MODIFIERS, &altmask },
+	{ NULL, 0, NULL }
+};
+
 static void setup_display(void);
 static void *xmalloc(size_t size);
 static unsigned int parse_modifiers(char *s);
@@ -71,29 +95,33 @@ int main(int argc, char *argv[]) {
 	int i;
 
 	for (i = 1; i < argc; i++) {
-		if (!strcmp(argv[i], "-fn") && i+1<argc)
-			opt_font = argv[++i];
-		else if (!strcmp(argv[i], "-display") && i+1<argc) {
-			opt_display = argv[++i];
+		if (i+1 < argc) {
+			int done = 0;
+			int j;
+			for (j = 0; option_list[j].opt; j++) {
+				if (0 == strcmp(argv[i], option_list[j].opt)) {
+					i++;
+					switch (option_list[j].type) {
+					case OPT_STRING:
+						*((char **)option_list[j].dest) = argv[i];
+						break;
+					default:
+					case OPT_INT:
+						*((int *)option_list[j].dest) = atoi(argv[i]);
+						break;
+					case OPT_MODIFIERS:
+						*((unsigned int *)option_list[j].dest) = parse_modifiers(argv[i]);
+						break;
+					}
+					done = 1;
+					break;
+				}
+			}
+			if (done)
+				continue;
 		}
-		else if (!strcmp(argv[i], "-fg") && i+1<argc)
-			opt_fg = argv[++i];
-		else if (!strcmp(argv[i], "-bg") && i+1<argc)
-			opt_bg = argv[++i];
-#ifdef VWM
-		else if (!strcmp(argv[i], "-fc") && i+1<argc)
-			opt_fc = argv[++i];
-#endif
-		else if (!strcmp(argv[i], "-bw") && i+1<argc)
-			opt_bw = atoi(argv[++i]);
-		else if (!strcmp(argv[i], "-term") && i+1<argc) {
-			opt_term[0] = argv[++i];
-			opt_term[1] = opt_term[0];
-#ifdef SNAP
-		} else if (!strcmp(argv[i], "-snap") && i+1<argc) {
-			opt_snap = atoi(argv[++i]);
-#endif
-		} else if (!strcmp(argv[i], "-app") && i+1<argc) {
+
+		if (!strcmp(argv[i], "-app") && i+1<argc) {
 			Application *new = xmalloc(sizeof(Application));
 			char *tmp;
 			i++;
@@ -132,15 +160,6 @@ int main(int argc, char *argv[]) {
 			if (head_app)
 				head_app->sticky = 1;
 #endif
-		} else if (!strcmp(argv[i], "-mask1") && i+1<argc) {
-			i++;
-			grabmask1 = parse_modifiers(argv[i]);
-		} else if (!strcmp(argv[i], "-mask2") && i+1<argc) {
-			i++;
-			grabmask2 = parse_modifiers(argv[i]);
-		} else if (!strcmp(argv[i], "-altmask") && i+1<argc) {
-			i++;
-			altmask = parse_modifiers(argv[i]);
 #ifdef SOLIDDRAG
 		} else if (!strcmp(argv[i], "-nosoliddrag")) {
 			solid_drag = 0;
@@ -169,6 +188,8 @@ int main(int argc, char *argv[]) {
 			exit((!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))?0:1);
 		}
 	}
+
+	opt_term[1] = opt_term[0];
 
 	act.sa_handler = handle_signal;
 	sigemptyset(&act.sa_mask);
