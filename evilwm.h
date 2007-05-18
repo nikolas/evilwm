@@ -8,6 +8,10 @@
 #include <X11/extensions/shape.h>
 #endif
 
+#ifndef __GNUC__
+# define  __attribute__(x)
+#endif
+
 #include "keymap.h"
 
 /* Required for interpreting MWM hints: */
@@ -218,7 +222,7 @@ void set_shape(Client *c);
 
 /* events.c */
 
-void event_main_loop(void);
+void event_main_loop(void) __attribute__((noreturn));
 
 /* misc.c */
 
