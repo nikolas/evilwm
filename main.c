@@ -63,7 +63,7 @@ Client          *current = NULL;
 volatile Window initialising = None;
 
 /* Simple command-line options */
-static struct {
+static struct simple_option {
 	const char *opt;
 	enum { OPT_INT, OPT_STRING, OPT_MODIFIERS } type;
 	void *dest;
@@ -83,8 +83,9 @@ static struct {
 	{ "-mask1", OPT_MODIFIERS, &grabmask1 },
 	{ "-mask2", OPT_MODIFIERS, &grabmask2 },
 	{ "-altmask", OPT_MODIFIERS, &altmask },
-	{ NULL, 0, NULL }
 };
+
+#define NUM_SIMPLE_OPTS (int)(sizeof(option_list) / sizeof(struct simple_option))
 
 static void setup_display(void);
 static void *xmalloc(size_t size);
@@ -98,7 +99,7 @@ int main(int argc, char *argv[]) {
 		if (i+1 < argc) {
 			int done = 0;
 			int j;
-			for (j = 0; option_list[j].opt; j++) {
+			for (j = 0; j < NUM_SIMPLE_OPTS; j++) {
 				if (0 == strcmp(argv[i], option_list[j].opt)) {
 					i++;
 					switch (option_list[j].type) {
