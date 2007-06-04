@@ -186,7 +186,9 @@ int main(int argc, char *argv[]) {
 			LOG_INFO("\n              [-nosoliddrag]");
 #endif
 			LOG_INFO(" [-V]\n");
-			exit((!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))?0:1);
+			if (0 == strcmp(argv[i], "-h") || 0 == strcmp(argv[i], "--help"))
+				exit(0);
+			exit(1);
 		}
 	}
 
