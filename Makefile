@@ -28,7 +28,7 @@ DEFINES += -DVWM
 
 # To support shaped windows properly, uncomment the following two lines:
 DEFINES += -DSHAPE
-LIBS	+= -lXext
+LIBS    += -lXext
 
 # Uncomment for mouse support.  You probably want this.
 DEFINES += -DMOUSE
@@ -52,7 +52,7 @@ DEFINES += -DCOLOURMAP
 #DEFINES += -DKEY_KILL=XK_q
 
 # Print whatever debugging messages I've left in this release.
-#DEFINES += -DDEBUG	# miscellaneous debugging
+#DEFINES += -DDEBUG  # miscellaneous debugging
 
 # ----- You shouldn't need to change anything under this line ------ #
 
@@ -60,7 +60,7 @@ version = 0.99.25
 
 distname = evilwm-$(version)
 
-#DEFINES += -DXDEBUG	# show some X calls
+#DEFINES += -DXDEBUG  # show some X calls
 
 DEFINES += -DVERSION=\"$(version)\" $(DEBIAN)
 CFLAGS  += $(INCLUDES) $(DEFINES) -Os -Wall
