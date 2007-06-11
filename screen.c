@@ -92,6 +92,7 @@ static void draw_outline(Client *c) {
 }
 #endif
 
+#ifdef MOUSE
 static void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2) {
 	c->width = abs(x1 - x2);
 	c->height = abs(y1 - y2);
@@ -105,7 +106,6 @@ static void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2) {
 	c->y = (y1 <= y2) ? y1 : y1 - c->height;
 }
 
-#ifdef MOUSE
 void sweep(Client *c) {
 	XEvent ev;
 	int old_cx = c->x;
