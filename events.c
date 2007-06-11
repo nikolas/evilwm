@@ -333,12 +333,18 @@ void event_main_loop(void) {
 				handle_unmap_event(&ev.xunmap); break;
 			case MappingNotify:
 				handle_mappingnotify_event(&ev.xmapping); break;
-#ifdef SHAPE
 			default:
+#ifdef SHAPE
 				if (have_shape && ev.type == shape_event) {
 					handle_shape_event((XShapeEvent *)&ev);
 				}
 #endif
+#ifdef RANDR
+				if (have_randr && ev.type == randr_event_base + RRScreenChangeNotify) {
+					XRRUpdateConfiguration(&ev);
+				}
+#endif
+				break;
 		}
 		if (need_client_tidy) {
 			Client *c, *nc;

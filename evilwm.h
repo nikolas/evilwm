@@ -7,6 +7,9 @@
 #ifdef SHAPE
 #include <X11/extensions/shape.h>
 #endif
+#ifdef RANDR
+#include <X11/extensions/Xrandr.h>
+#endif
 
 #ifndef __GNUC__
 # define  __attribute__(x)
@@ -168,6 +171,9 @@ extern int          num_screens;
 extern ScreenInfo   *screens;
 #ifdef SHAPE
 extern int          have_shape, shape_event;
+#endif
+#ifdef RANDR
+extern int          have_randr, randr_event_base;
 #endif
 
 /* Standard X protocol atoms */

@@ -20,6 +20,9 @@ ScreenInfo  *screens;
 #ifdef SHAPE
 int         have_shape, shape_event;
 #endif
+#ifdef RANDR
+int         have_randr, randr_event_base;
+#endif
 
 /* Standard X protocol atoms */
 Atom xa_wm_state;
@@ -301,6 +304,17 @@ static void setup_display(void) {
 		have_shape = XShapeQueryExtension(dpy, &shape_event, &e_dummy);
 	}
 #endif
+	/* Xrandr extension? */
+#ifdef RANDR
+	{
+		int e_dummy;
+		have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy);
+#ifdef DEBUG
+		if (!have_randr)
+			LOG_DEBUG("Xrandr is not supported on this display.\n");
+#endif
+	}
+#endif
 
 	/* now set up each screen in turn */
 	num_screens = ScreenCount(dpy);
@@ -328,6 +342,11 @@ static void setup_display(void) {
 
 		screens[i].screen = i;
 		screens[i].root = RootWindow(dpy, i);
+#ifdef RANDR
+		if (have_randr) {
+			XRRSelectInput(dpy, screens[i].root, RRScreenChangeNotifyMask);
+		}
+#endif
 #ifdef VWM
 		screens[i].vdesk = KEY_TO_VDESK(XK_1);
 #endif

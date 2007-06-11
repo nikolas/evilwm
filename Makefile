@@ -30,6 +30,10 @@ DEFINES += -DVWM
 DEFINES += -DSHAPE
 LIBS    += -lXext
 
+# To support Xrandr properly, uncomment the following two lines:
+DEFINES += -DRANDR
+LIBS    += -lXrandr
+
 # Uncomment for mouse support.  You probably want this.
 DEFINES += -DMOUSE
 
