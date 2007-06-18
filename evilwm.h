@@ -1,3 +1,7 @@
+/* evilwm - Minimalist Window Manager for X
+ * Copyright (C) 1999-2007 Ciaran Anscomb <evilwm@6809.org.uk>
+ * see README for license and other details. */
+
 #include <X11/X.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
