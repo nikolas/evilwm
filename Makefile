@@ -30,7 +30,11 @@ DEFINES += -DVWM
 DEFINES += -DSHAPE
 LIBS    += -lXext
 
-# To support Xrandr properly, uncomment the following two lines:
+# Uncomment to support the Xrandr extension (thanks, Yura Semashko).
+#
+# Be sure that libXrandr is in your library search directory (e.g., under
+# Solaris, it is in /usr/X11R6/lib, so can be built against with the default
+# XPATH above, but won't necessarily be in the library search path).
 DEFINES += -DRANDR
 LIBS    += -lXrandr
 
