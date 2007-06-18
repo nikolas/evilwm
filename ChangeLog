@@ -1,3 +1,18 @@
+*** Changes between 0.99.25 and 1.0.0:
+
+Mon Jun 11 14:26:33 BST 2007  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Add basic Xrandr support
+  Thanks to Yura Semashko for this patch.
+
+Thu May 17 15:48:31 BST 2007  Ciaran Anscomb <evilwm@6809.org.uk>
+  * When snapping, prefer screen edge to other windows
+
+Wed May  3 16:53:01 BST 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Don't account for width_inc and height_inc when maximising
+
+Wed May  3 15:38:08 BST 2006  Ciaran Anscomb <evilwm@6809.org.uk>
+  * Ignore borders when snapping maximised client to screen edge
+
 *** Changes between 0.99.24 and 0.99.25:
 
 Wed Apr 26 18:35:53 BST 2006  Ciaran Anscomb <evilwm@6809.org.uk>
