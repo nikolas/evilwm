@@ -55,7 +55,7 @@ typedef struct {
 /* readability stuff */
 
 #define KEY_TO_VDESK(key) ((key) - XK_1)
-#define valid_vdesk(v) ((unsigned)(v) < KEY_TO_VDESK(XK_8))
+#define valid_vdesk(v) ((unsigned)(v) <= KEY_TO_VDESK(XK_8))
 
 #define RAISE           1
 #define NO_RAISE        0       /* for unhide() */
