@@ -38,20 +38,8 @@ void spawn(const char *const cmd[]) {
 }
 
 void handle_signal(int signo) {
-	int i;
 	(void)signo;  /* unused */
-	/* SIGCHLD check no longer necessary */
-	/* Quit Nicely */
-	while(head_client) remove_client(head_client);
-	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
-	if (font) XFreeFont(dpy, font);
-	for (i = 0; i < num_screens; i++) {
-		XFreeGC(dpy, screens[i].invert_gc);
-		XInstallColormap(dpy, DefaultColormap(dpy, i));
-	}
-	free(screens);
-	XCloseDisplay(dpy);
-	exit(0);
+	wm_exit = 1;
 }
 
 int handle_xerror(Display *dsply, XErrorEvent *e) {

@@ -65,6 +65,9 @@ Client          *head_client = NULL;
 Client          *current = NULL;
 volatile Window initialising = None;
 
+/* Event loop will run until this flag is set */
+int wm_exit;
+
 /* Simple command-line options */
 static struct simple_option {
 	const char *opt;
@@ -197,6 +200,7 @@ int main(int argc, char *argv[]) {
 
 	opt_term[1] = opt_term[0];
 
+	wm_exit = 0;
 	act.sa_handler = handle_signal;
 	sigemptyset(&act.sa_mask);
 	act.sa_flags = 0;
@@ -208,7 +212,18 @@ int main(int argc, char *argv[]) {
 
 	event_main_loop();
 
-	return 1;
+	/* Quit Nicely */
+	while(head_client) remove_client(head_client);
+	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
+	if (font) XFreeFont(dpy, font);
+	for (i = 0; i < num_screens; i++) {
+		XFreeGC(dpy, screens[i].invert_gc);
+		XInstallColormap(dpy, DefaultColormap(dpy, i));
+	}
+	free(screens);
+	XCloseDisplay(dpy);
+
+	return 0;
 }
 
 static void *xmalloc(size_t size) {

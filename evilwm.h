@@ -216,6 +216,9 @@ extern Client           *head_client;
 extern Client           *current;
 extern volatile Window  initialising;
 
+/* Event loop will run until this flag is set */
+extern int wm_exit;
+
 /* client.c */
 
 Client *find_client(Window w);
@@ -232,7 +235,7 @@ void set_shape(Client *c);
 
 /* events.c */
 
-void event_main_loop(void) __attribute__((noreturn));
+void event_main_loop(void);
 
 /* misc.c */
 

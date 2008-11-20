@@ -3,8 +3,12 @@
  * see README for license and other details. */
 
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include "evilwm.h"
 #include "log.h"
+
+static int interruptibleXNextEvent(XEvent *event);
 
 static void current_to_head(void) {
 	Client *c;
@@ -308,9 +312,9 @@ static void handle_shape_event(XShapeEvent *e) {
 void event_main_loop(void) {
 	XEvent ev;
 	/* main event loop here */
-	for (;;) {
-		XNextEvent(dpy, &ev);
-		switch (ev.type) {
+	while (!wm_exit) {
+		if (interruptibleXNextEvent(&ev)) {
+			switch (ev.type) {
 			case KeyPress:
 				handle_key_event(&ev.xkey); break;
 #ifdef MOUSE
@@ -345,6 +349,7 @@ void event_main_loop(void) {
 				}
 #endif
 				break;
+			}
 		}
 		if (need_client_tidy) {
 			Client *c, *nc;
@@ -352,6 +357,42 @@ void event_main_loop(void) {
 				nc = c->next;
 				if (c->remove)
 					remove_client(c);
+			}
+		}
+	}
+}
+
+/* interruptibleXNextEvent() is taken from the Blender source and comes with
+ * the following copyright notice: */
+
+/* Copyright (c) Mark J. Kilgard, 1994, 1995, 1996. */
+
+/* This program is freely distributable without licensing fees
+ * and is provided without guarantee or warrantee expressed or
+ * implied. This program is -not- in the public domain. */
+
+/* Unlike XNextEvent, if a signal arrives, interruptibleXNextEvent will
+ * return zero. */
+
+static int interruptibleXNextEvent(XEvent *event) {
+	fd_set fds;
+	int rc;
+	int dpy_fd = ConnectionNumber(dpy);
+	/* Flush X protocol since XPending does not do this implicitly. */
+	XFlush(dpy);
+	for (;;) {
+		if (XPending(dpy)) {
+			XNextEvent(dpy, event);
+			return 1;
+		}
+		FD_ZERO(&fds);
+		FD_SET(dpy_fd, &fds);
+		rc = select(dpy_fd + 1, &fds, NULL, NULL, NULL);
+		if (rc < 0) {
+			if (errno == EINTR) {
+				return 0;
+			} else {
+				LOG_ERROR("interruptibleXNextEvent(): select()\n");
 			}
 		}
 	}
