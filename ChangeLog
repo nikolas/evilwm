@@ -1,3 +1,17 @@
+*** Changes between 1.0.0 and 1.0.1:
+
+Wed Mar 11 15:41:02 GMT 2009  Ciaran Anscomb <evilwm@6809.org.uk>
+  * XFlush() shouldn't be required in interruptibleXNextEvent()
+
+Thu Nov 20 11:17:07 GMT 2008  Larry Doolittle <>
+  * Fix interaction with X and signal handler
+  Larry Doolittle encountered a problem with the signal handler's
+  interaction with later versions of X.org and submitted this patch.  It
+  adds an interruptible version of XNextEvent() borrowed from the Blender
+  source code (copyright Mark J. Kilgard) that allows a more graceful
+  exit from the main event loop rather than getting the signal handler to
+  do it.
+
 *** Changes between 0.99.25 and 1.0.0:
 
 Mon Jun 11 14:26:33 BST 2007  Ciaran Anscomb <evilwm@6809.org.uk>
