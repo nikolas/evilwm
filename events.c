@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2007 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2009 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 #include <stdlib.h>
@@ -378,8 +378,6 @@ static int interruptibleXNextEvent(XEvent *event) {
 	fd_set fds;
 	int rc;
 	int dpy_fd = ConnectionNumber(dpy);
-	/* Flush X protocol since XPending does not do this implicitly. */
-	XFlush(dpy);
 	for (;;) {
 		if (XPending(dpy)) {
 			XNextEvent(dpy, event);
