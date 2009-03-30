@@ -94,16 +94,24 @@ static void draw_outline(Client *c) {
 
 #ifdef MOUSE
 static void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2) {
-	c->width = abs(x1 - x2);
-	c->height = abs(y1 - y2);
-	c->width -= (c->width - c->base_width) % c->width_inc;
-	c->height -= (c->height - c->base_height) % c->height_inc;
-	if (c->min_width && c->width < c->min_width) c->width = c->min_width;
-	if (c->min_height && c->height < c->min_height) c->height = c->min_height;
-	if (c->max_width && c->width > c->max_width) c->width = c->max_width;
-	if (c->max_height && c->height > c->max_height) c->height = c->max_height;
-	c->x = (x1 <= x2) ? x1 : x1 - c->width;
-	c->y = (y1 <= y2) ? y1 : y1 - c->height;
+	if (c->oldw == 0) {
+		c->width = abs(x1 - x2);
+		c->width -= (c->width - c->base_width) % c->width_inc;
+		if (c->min_width && c->width < c->min_width)
+			c->width = c->min_width;
+		if (c->max_width && c->width > c->max_width)
+			c->width = c->max_width;
+		c->x = (x1 <= x2) ? x1 : x1 - c->width;
+	}
+	if (c->oldh == 0)  {
+		c->height = abs(y1 - y2);
+		c->height -= (c->height - c->base_height) % c->height_inc;
+		if (c->min_height && c->height < c->min_height)
+			c->height = c->min_height;
+		if (c->max_height && c->height > c->max_height)
+			c->height = c->max_height;
+		c->y = (y1 <= y2) ? y1 : y1 - c->height;
+	}
 }
 
 void sweep(Client *c) {
