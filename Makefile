@@ -93,8 +93,10 @@ evilwm: $(OBJS)
 install: evilwm
 	if [ -f evilwm.exe ]; then mv evilwm.exe evilwm; fi
 	mkdir -p $(prefix)/bin $(prefix)/share/man/man1
+	mkdir -p $(prefix)/share/xsessions
 	install -s evilwm $(prefix)/bin
 	install evilwm.1 $(prefix)/share/man/man1
+	install evilwm.desktop $(prefix)/share/xsessions
 	#gzip -9 $(prefix)/share/man/man1/evilwm.1
 
 dist:

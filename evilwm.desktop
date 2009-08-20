@@ -1,0 +1,7 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=XSession
+Exec=evilwm
+TryExec=evilwm
+Name=evilwm
+Comment=evilwm - minimalist window manager
