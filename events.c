@@ -150,6 +150,10 @@ static void handle_key_event(XKeyEvent *e) {
 	}
 	return;
 move_client:
+	if (abs(c->x) == c->border && c->oldw != 0)
+		c->x = 0;
+	if (abs(c->y) == c->border && c->oldh != 0)
+		c->y = 0;
 	moveresize(c);
 	setmouse(c->window, c->width + c->border - 1,
 			c->height + c->border - 1);
