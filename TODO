@@ -1,12 +1,4 @@
-Required for 1.0.0 release:
-
-   * Stability.
-   * Must build for all combinations of optional features.
-   * Would be nice to keep the stripped, 32-bit x86 and SPARC binaries
-     under 32K for no justifiable reason (I'm well aware this has no
-     bearing on resident size).
-
-Things to put off until 1.1.x:
+Desired functionality for 1.2.x:
 
    * EWMH compliance, including:
         + Client control via root window messages.
@@ -15,6 +7,4 @@ Things to put off until 1.1.x:
    * A few things can probably cease to be compile-time options.
    * Better interoperation with Xinerama (David Flynn has some patches
      for this).
-   * Configuration file, possibly replacing most command-line options.
    * Option for new windows to tile as well as possible.
-   * 64K limit?  Storage is getting cheaper these days, after all.

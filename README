@@ -1,4 +1,4 @@
-evilwm 1.0 by Ciaran Anscomb <evilwm@6809.org.uk>
+evilwm 1.1 by Ciaran Anscomb <evilwm@6809.org.uk>
 
 evilwm is a minimalist window manager for the X Window System.
 
@@ -95,7 +95,7 @@ http://www.red-bean.com/~decklin/aewm/
 
 LICENCE
 
-evilwm 1.0
+evilwm 1.1
 Copyright (C) 1999-2009 Ciaran Anscomb <evilwm@6809.org.uk>
 
 This is free software.  You can do what you want to it, but if it
