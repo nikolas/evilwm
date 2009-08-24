@@ -254,7 +254,7 @@ void drag(Client *c) {
 #ifdef INFOBANNER_MOVERESIZE
 	create_info_window(c);
 #endif
-	if (!solid_drag) {
+	if (no_solid_drag) {
 		XGrabServer(dpy);
 		draw_outline(c);
 	}
@@ -264,7 +264,7 @@ void drag(Client *c) {
 			case MotionNotify:
 				if (ev.xmotion.root != c->screen->root)
 					break;
-				if (!solid_drag) {
+				if (no_solid_drag) {
 					draw_outline(c); /* clear */
 					XUngrabServer(dpy);
 				}
@@ -278,7 +278,7 @@ void drag(Client *c) {
 #ifdef INFOBANNER_MOVERESIZE
 				update_info_window(c);
 #endif
-				if (!solid_drag) {
+				if (no_solid_drag) {
 					XSync(dpy, False);
 					XGrabServer(dpy);
 					draw_outline(c);
@@ -290,7 +290,7 @@ void drag(Client *c) {
 				}
 				break;
 			case ButtonRelease:
-				if (!solid_drag) {
+				if (no_solid_drag) {
 					draw_outline(c); /* clear */
 					XUngrabServer(dpy);
 				}
@@ -298,7 +298,7 @@ void drag(Client *c) {
 				remove_info_window();
 #endif
 				XUngrabPointer(dpy, CurrentTime);
-				if (!solid_drag) {
+				if (no_solid_drag) {
 					moveresize(c);
 				}
 				return;

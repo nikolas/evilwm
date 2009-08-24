@@ -9,6 +9,7 @@
 #include <X11/cursorfont.h>
 #include "evilwm.h"
 #include "log.h"
+#include "xconfig.h"
 
 /* Commonly used X information */
 Display     *dpy;
@@ -39,6 +40,7 @@ Atom xa_net_wm_state_sticky;
 #endif
 
 /* Things that affect user interaction */
+#define CONFIG_FILE ".evilwmrc"
 static const char   *opt_display = "";
 static const char   *opt_font = DEF_FONT;
 static const char   *opt_fg = DEF_FG;
@@ -46,6 +48,9 @@ static const char   *opt_bg = DEF_BG;
 #ifdef VWM
 static const char   *opt_fc = DEF_FC;
 #endif
+static char *opt_grabmask1 = NULL;
+static char *opt_grabmask2 = NULL;
+static char *opt_altmask = NULL;
 unsigned int numlockmask = 0;
 unsigned int grabmask1 = ControlMask|Mod1Mask;
 unsigned int grabmask2 = Mod1Mask;
@@ -56,7 +61,7 @@ int          opt_bw = DEF_BW;
 int          opt_snap = 0;
 #endif
 #ifdef SOLIDDRAG
-int          solid_drag = 1;  /* use solid drag by default */
+int          no_solid_drag = 0;  /* use solid drag by default */
 #endif
 Application  *head_app = NULL;
 
@@ -68,137 +73,107 @@ volatile Window initialising = None;
 /* Event loop will run until this flag is set */
 int wm_exit;
 
-/* Simple command-line options */
-static struct simple_option {
-	const char *opt;
-	enum { OPT_INT, OPT_STRING, OPT_MODIFIERS } type;
-	void *dest;
-} option_list[] = {
-	{ "-fn", OPT_STRING, &opt_font },
-	{ "-display", OPT_STRING, &opt_display },
-	{ "-fg", OPT_STRING, &opt_fg },
-	{ "-bg", OPT_STRING, &opt_bg },
+static void set_app(const char *arg);
+static void set_app_geometry(const char *arg);
 #ifdef VWM
-	{ "-fc", OPT_STRING, &opt_fc },
+static void set_app_vdesk(const char *arg);
+static void set_app_sticky(void);
 #endif
-	{ "-bw", OPT_INT, &opt_bw },
-	{ "-term", OPT_STRING, &opt_term[0] },
-#ifdef SNAP
-	{ "-snap", OPT_INT, &opt_snap },
-#endif
-	{ "-mask1", OPT_MODIFIERS, &grabmask1 },
-	{ "-mask2", OPT_MODIFIERS, &grabmask2 },
-	{ "-altmask", OPT_MODIFIERS, &altmask },
-};
 
-#define NUM_SIMPLE_OPTS (int)(sizeof(option_list) / sizeof(struct simple_option))
+static struct xconfig_option evilwm_options[] = {
+	{ XCONFIG_STRING,   "fn",           &opt_font },
+	{ XCONFIG_STRING,   "display",      &opt_display },
+	{ XCONFIG_STRING,   "fg",           &opt_fg },
+	{ XCONFIG_STRING,   "bg",           &opt_bg },
+#ifdef VWM
+	{ XCONFIG_STRING,   "fc",           &opt_fc },
+#endif
+	{ XCONFIG_STRING,   "bw",           &opt_bw },
+	{ XCONFIG_STRING,   "term",         &opt_term[0] },
+#ifdef SNAP
+	{ XCONFIG_INT,      "snap",         &opt_snap },
+#endif
+	{ XCONFIG_STRING,   "mask1",        &opt_grabmask1 },
+	{ XCONFIG_STRING,   "mask2",        &opt_grabmask2 },
+	{ XCONFIG_STRING,   "altmask",      &opt_altmask },
+	{ XCONFIG_CALL_1,   "app",          &set_app },
+	{ XCONFIG_CALL_1,   "g",            &set_app_geometry },
+#ifdef VWM
+	{ XCONFIG_CALL_1,   "v",            &set_app_vdesk },
+	{ XCONFIG_CALL_0,   "s",            &set_app_sticky },
+#endif
+#ifdef SOLIDDRAG
+	{ XCONFIG_BOOL,     "nosoliddrag",  &no_solid_drag },
+#endif
+	{ XCONFIG_END, NULL, NULL }
+};
 
 static void setup_display(void);
 static void *xmalloc(size_t size);
 static unsigned int parse_modifiers(char *s);
 
-int main(int argc, char *argv[]) {
-	struct sigaction act;
-	int i;
-
-	for (i = 1; i < argc; i++) {
-		if (i+1 < argc) {
-			int done = 0;
-			int j;
-			for (j = 0; j < NUM_SIMPLE_OPTS; j++) {
-				if (0 == strcmp(argv[i], option_list[j].opt)) {
-					i++;
-					switch (option_list[j].type) {
-					case OPT_STRING:
-						*((char **)option_list[j].dest) = argv[i];
-						break;
-					default:
-					case OPT_INT:
-						*((int *)option_list[j].dest) = atoi(argv[i]);
-						break;
-					case OPT_MODIFIERS:
-						*((unsigned int *)option_list[j].dest) = parse_modifiers(argv[i]);
-						break;
-					}
-					done = 1;
-					break;
-				}
-			}
-			if (done)
-				continue;
-		}
-
-		if (!strcmp(argv[i], "-app") && i+1<argc) {
-			Application *new = xmalloc(sizeof(Application));
-			char *tmp;
-			i++;
-			new->res_name = new->res_class = NULL;
-			new->geometry_mask = 0;
+#ifdef STDIO
+static void helptext(void) {
+	puts(
+"usage: evilwm [-display display] [-term termprog] [-fn fontname]\n"
+"              [-fg foreground]"
 #ifdef VWM
-			new->vdesk = -1;
-			new->sticky = 0;
+" [-fc fixed]"
 #endif
-			if ((tmp = strchr(argv[i], '/'))) {
-				*(tmp++) = 0;
-			}
-			if (strlen(argv[i]) > 0) {
-				new->res_name = xmalloc(strlen(argv[i])+1);
-				strcpy(new->res_name, argv[i]);
-			}
-			if (tmp && strlen(tmp) > 0) {
-				new->res_class = xmalloc(strlen(tmp)+1);
-				strcpy(new->res_class, tmp);
-			}
-			new->next = head_app;
-			head_app = new;
-		} else if (!strcmp(argv[i], "-g") && i+1<argc) {
-			i++;
-			if (!head_app)
-				continue;
-			head_app->geometry_mask = XParseGeometry(argv[i],
-					&head_app->x, &head_app->y,
-					&head_app->width, &head_app->height);
+" [-bg background] [-bw borderwidth]\n"
+"              [-mask1 modifiers] [-mask2 modifiers] [-altmask modifiers]\n"
+"              [-snap num]"
 #ifdef VWM
-		} else if (!strcmp(argv[i], "-v") && i+1<argc) {
-			int v = atoi(argv[++i]);
-			if (head_app && valid_vdesk(v))
-				head_app->vdesk = v;
-		} else if (!strcmp(argv[i], "-s")) {
-			if (head_app)
-				head_app->sticky = 1;
+" [-app name/class] [-g geometry] [-v vdesk] [-s]"
 #endif
 #ifdef SOLIDDRAG
-		} else if (!strcmp(argv[i], "-nosoliddrag")) {
-			solid_drag = 0;
+"\n              [-nosoliddrag]"
 #endif
+" [-V]"
+	);
+}
+#else
+#define helptext()
+#endif
+
+int main(int argc, char *argv[]) {
+	struct sigaction act;
+	int argn = 1, ret;
+
+	{
+		const char *home = getenv("HOME");
+		if (home) {
+			char *conffile = xmalloc(strlen(home) + sizeof(CONFIG_FILE) + 2);
+			strcpy(conffile, home);
+			strcat(conffile, "/" CONFIG_FILE);
+			xconfig_parse_file(evilwm_options, conffile);
+		}
+	}
+	ret = xconfig_parse_cli(evilwm_options, argc, argv, &argn);
+	if (ret == XCONFIG_MISSING_ARG) {
+		fprintf(stderr, "%s: missing argument to `%s'\n", argv[0], argv[argn]);
+		exit(1);
+	} else if (ret == XCONFIG_BAD_OPTION) {
+		if (0 == strcmp(argv[argn], "-h")
+				|| 0 == strcmp(argv[argn], "--help")) {
+			helptext();
+			exit(0);
 #ifdef STDIO
-		} else if (!strcmp(argv[i], "-V")) {
+		} else if (0 == strcmp(argv[argn], "-V")
+				|| 0 == strcmp(argv[argn], "--version")) {
 			LOG_INFO("evilwm version " VERSION "\n");
 			exit(0);
 #endif
 		} else {
-			LOG_INFO("usage: evilwm [-display display] [-term termprog] [-fn fontname]\n");
-			LOG_INFO("              [-fg foreground]");
-#ifdef VWM
-			LOG_INFO(" [-fc fixed]");
-#endif
-			LOG_INFO(" [-bg background] [-bw borderwidth]\n");
-			LOG_INFO("              [-mask1 modifiers] [-mask2 modifiers] [-altmask modifiers]\n");
-			LOG_INFO("              [-snap num]");
-#ifdef VWM
-			LOG_INFO(" [-app name/class] [-g geometry] [-v vdesk] [-s]");
-#endif
-#ifdef SOLIDDRAG
-			LOG_INFO("\n              [-nosoliddrag]");
-#endif
-			LOG_INFO(" [-V]\n");
-			if (0 == strcmp(argv[i], "-h") || 0 == strcmp(argv[i], "--help"))
-				exit(0);
+			helptext();
 			exit(1);
 		}
 	}
 
 	opt_term[1] = opt_term[0];
+	if (opt_grabmask1) grabmask1 = parse_modifiers(opt_grabmask1);
+	if (opt_grabmask2) grabmask2 = parse_modifiers(opt_grabmask2);
+	if (opt_altmask) altmask = parse_modifiers(opt_altmask);
 
 	wm_exit = 0;
 	act.sa_handler = handle_signal;
@@ -216,9 +191,12 @@ int main(int argc, char *argv[]) {
 	while(head_client) remove_client(head_client);
 	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
 	if (font) XFreeFont(dpy, font);
-	for (i = 0; i < num_screens; i++) {
-		XFreeGC(dpy, screens[i].invert_gc);
-		XInstallColormap(dpy, DefaultColormap(dpy, i));
+	{
+		int i;
+		for (i = 0; i < num_screens; i++) {
+			XFreeGC(dpy, screens[i].invert_gc);
+			XInstallColormap(dpy, DefaultColormap(dpy, i));
+		}
 	}
 	free(screens);
 	XCloseDisplay(dpy);
@@ -389,6 +367,54 @@ static void setup_display(void) {
 		XFree(wins);
 	}
 }
+
+/**************************************************************************/
+/* Option parsing callbacks */
+
+static void set_app(const char *arg) {
+	Application *new = xmalloc(sizeof(Application));
+	char *tmp;
+	new->res_name = new->res_class = NULL;
+	new->geometry_mask = 0;
+#ifdef VWM
+	new->vdesk = -1;
+	new->sticky = 0;
+#endif
+	if ((tmp = strchr(arg, '/'))) {
+		*(tmp++) = 0;
+	}
+	if (strlen(arg) > 0) {
+		new->res_name = xmalloc(strlen(arg)+1);
+		strcpy(new->res_name, arg);
+	}
+	if (tmp && strlen(tmp) > 0) {
+		new->res_class = xmalloc(strlen(tmp)+1);
+		strcpy(new->res_class, tmp);
+	}
+	new->next = head_app;
+	head_app = new;
+}
+
+static void set_app_geometry(const char *arg) {
+	if (!head_app)
+		return;
+	head_app->geometry_mask = XParseGeometry(arg,
+			&head_app->x, &head_app->y,
+			&head_app->width, &head_app->height);
+}
+
+#ifdef VWM
+static void set_app_vdesk(const char *arg) {
+	int v = atoi(arg);
+	if (head_app && valid_vdesk(v))
+		head_app->vdesk = v;
+}
+
+static void set_app_sticky(void) {
+	if (head_app)
+		head_app->sticky = 1;
+}
+#endif
 
 /* Used for overriding the default WM modifiers */
 static unsigned int parse_modifiers(char *s) {

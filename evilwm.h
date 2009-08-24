@@ -205,9 +205,9 @@ extern int              opt_bw;
 extern int              opt_snap;
 #endif
 #ifdef SOLIDDRAG
-extern int              solid_drag;
+extern int              no_solid_drag;
 #else
-# define solid_drag (0)
+# define no_solid_drag (1)
 #endif
 extern Application      *head_app;
 
