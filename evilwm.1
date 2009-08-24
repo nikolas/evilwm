@@ -1,38 +1,25 @@
-.TH evilwm 1 "February 13, 2006" "" ""
+.TH evilwm 1 "August 24, 2009" "" ""
 .SH NAME
 evilwm \- Minimalist Window Manager for X
 .SH SYNOPSIS
-.B evilwm [ \-display
-.I display
-.B ] [ \-term
-.I termprog
-.B ] [ \-fn
-.I fontname
-.B ] [ \-fg
-.I foreground colour
-.B ] [ \-fc
-.I fixed colour
-.B ] [ \-bg
-.I background colour
-.B ] [ \-bw
-.I borderwidth
-.B ] [ \-snap
-.I num
-.B ] [ \-mask1
-.I modifiers
-.B ] [ \-mask2
-.I modifiers
-.B ] [ \-altmask
-.I modifier
-.B ] [ [ \-app
-.I name/class
-.B [ \-g
-.I geometry
-.B ] [ \-v
-.I vdesk
-.B ] [ \-s ] ]...
-.B [ \-nosoliddrag ]
-.B [ \-V ]
+\fBevilwm\fP
+[ \fB\-display\fP \fIdisplay\fP ]
+[ \fB\-term\fP \fItermprog\fP ]
+[ \fB\-fn\fP \fIfontname\fP ]
+[ \fB\-fg\fP \fIforeground-colour\fP ]
+[ \fB\-fc\fP \fIfixed-colour\fP ]
+[ \fB\-bg\fP \fIbackground-colour\fP ]
+[ \fB\-bw\fP \fIborderwidth\fP ]
+[ \fB\-snap\fP \fInum\fP ]
+[ \fB\-mask1\fP \fImodifiers\fP ]
+[ \fB\-mask2\fP \fImodifiers\fP ]
+[ \fB\-altmask\fP \fImodifier\fP ]
+[ [ \fB\-app\fP \fIname/class\fP ]
+[ \fB\-g\fP \fIgeometry\fP ]
+[ \fB\-v\fP \fIvdesk\fP ]
+[ \fB\-s\fP ] ]...
+[ \fB\-nosoliddrag\fP ]
+[ \fB\-V\fP ]
 .SH DESCRIPTION
 .B evilwm
 is a minimalist window manager based on aewm, extended to feature
@@ -47,42 +34,57 @@ gold, with other windows left as a dark grey.
 You can use the mouse to manipulate windows either by click/dragging
 the 1 pixel border, or by holding down Alt and doing so anywhere in the
 client window. The controls are:
-.IP "Button 1"
+.TP
+Button 1
 Move window.
-.IP "Button 2"
+.TP
+Button 2
 Resize window.
-.IP "Button 3"
+.TP
+Button 3
 Lower window.
 .PP
 Most keyboard controls are used by holding down Control and Alt, then
 pressing a key. Available functions are:
-.IP Return
+.TP
+Return
 Spawn new terminal.
-.IP Escape
+.TP
+Escape
 Delete current window.  Hold Shift as well to force kill a client.
-.IP Insert
+.TP
+Insert
 Lower current window.
-.IP "H, J, K, L"
+.TP
+H, J, K, L
 Move window left, down, up or right (16 pixels).  Holding Shift resizes the
 window instead.
-.IP "Y, U, B, N"
+.TP
+Y, U, B, N
 Move window to top-left, top-right, bottom-left or
 bottom-right of screen.
-.IP I
+.TP
+I
 Show information about current window.
-.IP Equals
+.TP
+Equals
 Maximise current window vertically (toggle).
-.IP X
+.TP
+X
 Maximise current window (toggle).
 .PP
 If compiled with virtual desktop support, these functions are also available: 
-.IP F
+.TP
+F
 Fix or unfix current window.
-.IP "1--8"
+.TP
+1--8
 Switch virtual desktop.
-.IP Left
+.TP
+Left
 Previous virtual desktop.
-.IP Right
+.TP
+Right
 Next virtual desktop.
 .PP
 In addition to the above, Alt+Tab can be used to cycle through windows
@@ -92,60 +94,67 @@ To make
 .B evilwm
 exit, you have to kill the process.
 .SH OPTIONS
-.IP "\-display display"
+.TP
+\-display \fIdisplay\fP
 specifies the X display to run on.
-.IP "\-term termprog"
+.TP
+\-term \fItermprog\fP
 specifies an alternative program to run when spawning a new terminal (defaults
 to xterm, or x\-terminal\-emulator in Debian).
-.IP "\-fn fontname"
+.TP
+\-fn \fIfontname\fP
 specify a font to use when resizing or displaying window titles.
-.IP "\-fg foreground colour"
+.TP
+\-fg \fIforeground-colour\fP
 frame colour of currently active window.
-.IP "\-fc fixed colour"
+.TP
+\-fc \fIfixed-colour\fP
 frame colour of active fixed windows.
-.IP "\-bg background colour"
+.TP
+\-bg \fIbackground-colour\fP
 frame colour of inactive windows.
-.IP "\-bw borderwidth"
+.TP
+\-bw \fIborderwidth\fP
 width of window borders in pixels.
-.IP "\-snap num"
+.TP
+\-snap \fInum\fP
 enable snap-to-border support.  num gives the proximity in pixels to snap to.
-.IP "\-mask1 modifiers"
-.IP "\-mask2 modifiers"
-.IP "\-altmask modifier"
+.TP
+\-mask1 \fImodifiers\fP, \-mask2 \fImodifiers\fP, \-altmask \fImodifier\fP
 override the default keyboard modifiers used to grab keys for window manager
 functionality.
-.I mask1
-is used for most keyboard controls (default: control+alt), and
-.I mask2
-is used for mouse button controls and cycling windows (default: alt).
-.I altmask
-is used to modify the behaviour of certain controls (default: shift).
-Modifiers may be separated with + signs.  Valid modifiers are shift, lock,
-control, alt, mod1, mod2, mod3, mod4, mod5.
-.IP "\-app name/class"
-match an application by instance name and class (for help in finding these,
-use the
-.BR xprop
-tool to extract the
-.I WM_CLASS
-property).  Subsequent
-.I \-g, \-s
-and
-.I \-v
-options will apply to this match.
-.IP "\-g geometry"
+\fImask1\fP is used for most keyboard controls (default: control+alt),
+and \fImask2\fP is used for mouse button controls and cycling windows
+(default: alt).
+\fIaltmask\fP is used to modify the behaviour of certain controls
+(default: shift).
+Modifiers may be separated with + signs.
+Valid modifiers are shift, lock, control, alt, mod1, mod2, mod3, mod4,
+mod5.
+.TP
+\-app \fIname/class\fP
+match an application by instance name and class (for help in finding
+these, use the \fBxprop\fP tool to extract the \fIWM_CLASS\fP property).
+Subsequent \fI\-g\fP, \fI\-s\fP and \fI\-v\fP options will apply to
+this match.
+.TP
+\-g \fIgeometry\fP
 apply a geometry (using a standard X geometry string) to applications matching
 the last
 .I \-app.
-.IP "\-v vdesk"
+.TP
+\-v \fIvdesk\fP
 specify a default virtual desktop for applications matching the last
 .I \-app.
 Note that desktops are numbered from 0.
-.IP "\-s"
+.TP
+\-s
 specify that application is to start with a sticky client window.
-.IP "\-nosoliddrag"
+.TP
+\-nosoliddrag
 draw a window outline while moving or resizing.
-.IP "\-V"
+.TP
+\-V
 print version number.
 .SH BUGS
 The author's idea of friendly may differ to that of many other people.
