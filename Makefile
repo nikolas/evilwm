@@ -80,7 +80,7 @@ HEADERS  = evilwm.h log.h
 SRCS     = client.c events.c main.c misc.c new.c screen.c ewmh.c
 OBJS     = $(SRCS:.c=.o)
 
-.PHONY: all install dist debuild clean
+.PHONY: all install install-strip dist debuild clean
 
 all: evilwm
 
@@ -94,10 +94,13 @@ install: evilwm
 	if [ -f evilwm.exe ]; then mv evilwm.exe evilwm; fi
 	mkdir -p $(prefix)/bin $(prefix)/share/man/man1
 	mkdir -p $(prefix)/share/xsessions
-	install -s evilwm $(prefix)/bin
+	install evilwm $(prefix)/bin
 	install evilwm.1 $(prefix)/share/man/man1
 	install evilwm.desktop $(prefix)/share/xsessions
 	#gzip -9 $(prefix)/share/man/man1/evilwm.1
+
+install-strip: install
+	strip $(prefix)/bin/evilwm
 
 dist:
 	darcs dist --dist-name $(distname)
