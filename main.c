@@ -97,9 +97,12 @@ static struct xconfig_option evilwm_options[] = {
 	{ XCONFIG_STRING,   "mask2",        &opt_grabmask2 },
 	{ XCONFIG_STRING,   "altmask",      &opt_altmask },
 	{ XCONFIG_CALL_1,   "app",          &set_app },
+	{ XCONFIG_CALL_1,   "geometry",     &set_app_geometry },
 	{ XCONFIG_CALL_1,   "g",            &set_app_geometry },
 #ifdef VWM
+	{ XCONFIG_CALL_1,   "vdesk",        &set_app_vdesk },
 	{ XCONFIG_CALL_1,   "v",            &set_app_vdesk },
+	{ XCONFIG_CALL_0,   "sticky",       &set_app_sticky },
 	{ XCONFIG_CALL_0,   "s",            &set_app_sticky },
 #endif
 #ifdef SOLIDDRAG
