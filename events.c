@@ -313,6 +313,15 @@ static void handle_shape_event(XShapeEvent *e) {
 }
 #endif
 
+static void handle_client_message(XClientMessageEvent *e) {
+	Client *c;
+	c = find_client(e->window);
+	if (!c && e->message_type == xa_net_request_frame_extents) {
+		ewmh_set_net_frame_extents(e->window);
+		return;
+	}
+}
+
 void event_main_loop(void) {
 	XEvent ev;
 	/* main event loop here */
@@ -341,6 +350,8 @@ void event_main_loop(void) {
 				handle_unmap_event(&ev.xunmap); break;
 			case MappingNotify:
 				handle_mappingnotify_event(&ev.xmapping); break;
+			case ClientMessage:
+				handle_client_message(&ev.xclient); break;
 			default:
 #ifdef SHAPE
 				if (have_shape && ev.type == shape_event) {

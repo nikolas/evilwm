@@ -10,6 +10,7 @@
 /* Root Window Properties (and Related Messages) */
 static Atom xa_net_supported;
 static Atom xa_net_supporting_wm_check;
+Atom xa_net_request_frame_extents;
 
 /* Application Window Properties */
 static Atom xa_net_wm_name;
@@ -19,11 +20,13 @@ Atom xa_net_wm_state;
 Atom xa_net_wm_state_sticky;
 #endif
 static Atom xa_net_wm_pid;
+Atom xa_net_frame_extents;
 
 void ewmh_init(void) {
 	/* Root Window Properties (and Related Messages) */
 	xa_net_supported = XInternAtom(dpy, "_NET_SUPPORTED", False);
 	xa_net_supporting_wm_check = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
+	xa_net_request_frame_extents = XInternAtom(dpy, "_NET_REQUEST_FRAME_EXTENTS", False);
 
 	/* Application Window Properties */
 	xa_net_wm_name = XInternAtom(dpy, "_NET_WM_NAME", False);
@@ -33,18 +36,21 @@ void ewmh_init(void) {
 	xa_net_wm_state_sticky = XInternAtom(dpy, "_NET_WM_STATE_STICKY", False);
 #endif
 	xa_net_wm_pid = XInternAtom(dpy, "_NET_WM_PID", False);
+	xa_net_frame_extents = XInternAtom(dpy, "_NET_FRAME_EXTENTS", False);
 }
 
 void ewmh_init_screen(ScreenInfo *s) {
 	unsigned long pid = getpid();
 	Atom supported[] = {
 		xa_net_supporting_wm_check,
+		xa_net_request_frame_extents,
 
 #ifdef VWM
 		xa_net_wm_desktop,
 		xa_net_wm_state,
 		xa_net_wm_state_sticky,
 #endif
+		xa_net_frame_extents,
 	};
 	s->supporting = XCreateSimpleWindow(dpy, s->root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, s->root, xa_net_supported,
@@ -88,3 +94,11 @@ void ewmh_set_net_wm_state(Client *c) {
 			(unsigned char *)&state, i);
 }
 #endif
+
+void ewmh_set_net_frame_extents(Window w) {
+	unsigned long extents[4];
+	extents[0] = extents[1] = extents[2] = extents[3] = opt_bw;
+	XChangeProperty(dpy, w, xa_net_frame_extents,
+			XA_CARDINAL, 32, PropModeReplace,
+			(unsigned char *)&extents, 4);
+}

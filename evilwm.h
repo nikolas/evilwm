@@ -190,12 +190,16 @@ extern Atom xa_wm_cmapwins;
 /* Motif atoms */
 extern Atom mwm_hints;
 
+/* EWMH: Root Window Properties (and Related Messages) */
+extern Atom xa_net_request_frame_extents;
+
 /* EWMH: Application Window Properties */
 #ifdef VWM
 extern Atom xa_net_wm_desktop;
 extern Atom xa_net_wm_state;
 extern Atom xa_net_wm_state_sticky;
 #endif
+extern Atom xa_net_frame_extents;
 
 /* Things that affect user interaction */
 extern unsigned int     numlockmask;
@@ -279,3 +283,4 @@ void ewmh_deinit_screen(ScreenInfo *s);
 void ewmh_set_net_wm_desktop(Client *c);
 void ewmh_set_net_wm_state(Client *c);
 #endif
+void ewmh_set_net_frame_extents(Window w);
