@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2007 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2009 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 #include <stdlib.h>
@@ -156,7 +156,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	else {
 		set_wm_state(c, IconicState);
 	}
-	update_net_wm_desktop(c);
+	ewmh_set_net_wm_desktop(c);
 #endif
 }
 

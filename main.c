@@ -32,12 +32,6 @@ Atom xa_wm_delete;
 Atom xa_wm_cmapwins;
 /* Motif atoms */
 Atom mwm_hints;
-/* EWMH atoms */
-#ifdef VWM
-Atom xa_net_wm_desktop;
-Atom xa_net_wm_state;
-Atom xa_net_wm_state_sticky;
-#endif
 
 /* Things that affect user interaction */
 #define CONFIG_FILE ".evilwmrc"
@@ -197,6 +191,7 @@ int main(int argc, char *argv[]) {
 	{
 		int i;
 		for (i = 0; i < num_screens; i++) {
+			ewmh_deinit_screen(&screens[i]);
 			XFreeGC(dpy, screens[i].invert_gc);
 			XInstallColormap(dpy, DefaultColormap(dpy, i));
 		}
@@ -251,11 +246,7 @@ static void setup_display(void) {
 	/* Motif atoms */
 	mwm_hints = XInternAtom(dpy, _XA_MWM_HINTS, False);
 	/* EWMH atoms */
-#ifdef VWM
-	xa_net_wm_desktop = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
-	xa_net_wm_state = XInternAtom(dpy, "_NET_WM_STATE", False);
-	xa_net_wm_state_sticky = XInternAtom(dpy, "_NET_WM_STATE_STICKY", False);
-#endif
+	ewmh_init();
 
 	font = XLoadQueryFont(dpy, opt_font);
 	if (!font) font = XLoadQueryFont(dpy, DEF_FONT);
@@ -368,6 +359,7 @@ static void setup_display(void) {
 				make_new_client(wins[j], &screens[i]);
 		}
 		XFree(wins);
+		ewmh_init_screen(&screens[i]);
 	}
 }
 

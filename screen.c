@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2007 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2009 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 #include <stdio.h>
@@ -411,7 +411,7 @@ void switch_vdesk(ScreenInfo *s, int v) {
 			continue;
 		if (is_sticky(c) && c->vdesk != v) {
 			c->vdesk = v;
-			update_net_wm_desktop(c);
+			ewmh_set_net_wm_desktop(c);
 		}
 		if (c->vdesk == s->vdesk) {
 			hide(c);

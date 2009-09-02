@@ -111,6 +111,7 @@ typedef struct ScreenInfo ScreenInfo;
 struct ScreenInfo {
 	int screen;
 	Window root;
+	Window supporting;  /* Dummy window for EWMH */
 	GC invert_gc;
 	XColor fg, bg;
 #ifdef VWM
@@ -185,9 +186,11 @@ extern Atom xa_wm_state;
 extern Atom xa_wm_protos;
 extern Atom xa_wm_delete;
 extern Atom xa_wm_cmapwins;
+
 /* Motif atoms */
 extern Atom mwm_hints;
-/* EWMH atoms */
+
+/* EWMH: Application Window Properties */
 #ifdef VWM
 extern Atom xa_net_wm_desktop;
 extern Atom xa_net_wm_state;
@@ -269,7 +272,10 @@ void grab_keys_for_screen(ScreenInfo *s);
 
 /* ewmh.c */
 
+void ewmh_init(void);
+void ewmh_init_screen(ScreenInfo *s);
+void ewmh_deinit_screen(ScreenInfo *s);
 #ifdef VWM
-void update_net_wm_desktop(Client *c);
-void update_net_wm_state(Client *c);
+void ewmh_set_net_wm_desktop(Client *c);
+void ewmh_set_net_wm_state(Client *c);
 #endif

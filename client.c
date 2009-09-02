@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2007 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2009 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 #include <stdio.h>
@@ -117,7 +117,7 @@ void select_client(Client *c) {
 void fix_client(Client *c) {
 	toggle_sticky(c);
 	select_client(c);
-	update_net_wm_state(c);
+	ewmh_set_net_wm_state(c);
 }
 #endif
 
