@@ -79,9 +79,10 @@ void ewmh_deinit_screen(ScreenInfo *s) {
 
 #ifdef VWM
 void ewmh_set_net_wm_desktop(Client *c) {
+	unsigned long vdesk = c->vdesk;
 	XChangeProperty(dpy, c->window, xa_net_wm_desktop,
 			XA_CARDINAL, 32, PropModeReplace,
-			(unsigned char *)&c->vdesk, 1);
+			(unsigned char *)&vdesk, 1);
 }
 
 void ewmh_set_net_wm_state(Client *c) {
