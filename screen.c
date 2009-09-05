@@ -426,6 +426,7 @@ void switch_vdesk(ScreenInfo *s, int v) {
 		}
 	}
 	s->vdesk = v;
+	ewmh_set_net_current_desktop(s);
 	LOG_DEBUG(" (%d hidden, %d raised)\n", hidden, raised);
 }
 #endif /* def VWM */

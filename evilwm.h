@@ -191,6 +191,7 @@ extern Atom xa_wm_cmapwins;
 extern Atom mwm_hints;
 
 /* EWMH: Root Window Properties (and Related Messages) */
+extern Atom xa_net_current_desktop;
 extern Atom xa_net_request_frame_extents;
 
 /* EWMH: Application Window Properties */
@@ -280,6 +281,7 @@ void ewmh_init(void);
 void ewmh_init_screen(ScreenInfo *s);
 void ewmh_deinit_screen(ScreenInfo *s);
 #ifdef VWM
+void ewmh_set_net_current_desktop(ScreenInfo *s);
 void ewmh_set_net_wm_desktop(Client *c);
 void ewmh_set_net_wm_state(Client *c);
 #endif

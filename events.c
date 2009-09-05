@@ -314,7 +314,12 @@ static void handle_shape_event(XShapeEvent *e) {
 #endif
 
 static void handle_client_message(XClientMessageEvent *e) {
+	ScreenInfo *s = find_current_screen();
 	Client *c;
+	if (e->message_type == xa_net_current_desktop) {
+		switch_vdesk(s, e->data.l[0]);
+		return;
+	}
 	c = find_client(e->window);
 	if (!c && e->message_type == xa_net_request_frame_extents) {
 		ewmh_set_net_frame_extents(e->window);
