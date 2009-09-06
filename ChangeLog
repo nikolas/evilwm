@@ -1,5 +1,9 @@
 *** Changes between 1.0.1 and 1.1.0:
 
+Sun Sep  6 2009
+  * Record pre-maximisation dimensions in evilwm-specific window properties
+  _EVILWM_UNMAXIMISED_HORZ and _EVILWM_UNMAXIMISED_VERT.
+
 Sat Sep  5 2009
   * Support _NET_NUMBER_OF_DESKTOPS and _NET_CURRENT_DESKTOP
   Including _NET_CURRENT_DESKTOP root window message.

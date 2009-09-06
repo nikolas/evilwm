@@ -322,11 +322,18 @@ void maximise_client(Client *c, int hv) {
 			c->x = c->oldx;
 			c->width = c->oldw;
 			c->oldw = 0;
+			XDeleteProperty(dpy, c->window, xa_evilwm_unmaximised_horz);
 		} else {
+			unsigned long props[2];
 			c->oldx = c->x;
 			c->oldw = c->width;
 			c->x = 0;
 			c->width = DisplayWidth(dpy, c->screen->screen);
+			props[0] = c->oldx;
+			props[1] = c->oldw;
+			XChangeProperty(dpy, c->window, xa_evilwm_unmaximised_horz,
+					XA_CARDINAL, 32, PropModeReplace,
+					(unsigned char *)&props, 2);
 		}
 	}
 	if (hv & MAXIMISE_VERT) {
@@ -334,11 +341,18 @@ void maximise_client(Client *c, int hv) {
 			c->y = c->oldy;
 			c->height = c->oldh;
 			c->oldh = 0;
+			XDeleteProperty(dpy, c->window, xa_evilwm_unmaximised_vert);
 		} else {
+			unsigned long props[2];
 			c->oldy = c->y;
 			c->oldh = c->height;
 			c->y = 0;
 			c->height = DisplayHeight(dpy, c->screen->screen);
+			props[0] = c->oldy;
+			props[1] = c->oldh;
+			XChangeProperty(dpy, c->window, xa_evilwm_unmaximised_vert,
+					XA_CARDINAL, 32, PropModeReplace,
+					(unsigned char *)&props, 2);
 		}
 	}
 	moveresize(c);

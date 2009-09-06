@@ -30,8 +30,13 @@ Atom xa_wm_state;
 Atom xa_wm_protos;
 Atom xa_wm_delete;
 Atom xa_wm_cmapwins;
+
 /* Motif atoms */
 Atom mwm_hints;
+
+/* evilwm atoms */
+Atom xa_evilwm_unmaximised_horz;
+Atom xa_evilwm_unmaximised_vert;
 
 /* Things that affect user interaction */
 #define CONFIG_FILE ".evilwmrc"
@@ -245,6 +250,9 @@ static void setup_display(void) {
 #endif
 	/* Motif atoms */
 	mwm_hints = XInternAtom(dpy, _XA_MWM_HINTS, False);
+	/* evilwm atoms */
+	xa_evilwm_unmaximised_horz = XInternAtom(dpy, "_EVILWM_UNMAXIMISED_HORZ", False);
+	xa_evilwm_unmaximised_vert = XInternAtom(dpy, "_EVILWM_UNMAXIMISED_VERT", False);
 	/* EWMH atoms */
 	ewmh_init();
 

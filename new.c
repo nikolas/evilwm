@@ -168,6 +168,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 static void init_geometry(Client *c) {
 	long size_flags;
 	XWindowAttributes attr;
+	unsigned long *eprop;
 	unsigned long nitems;
 	PropMwmHints *mprop;
 #ifdef VWM
@@ -212,6 +213,21 @@ static void init_geometry(Client *c) {
 #ifdef COLOURMAP
 	c->cmap = attr.colormap;
 #endif
+
+	if ( (eprop = get_property(c->window, xa_evilwm_unmaximised_horz, XA_CARDINAL, &nitems)) ) {
+		if (nitems == 2) {
+			c->oldx = eprop[0];
+			c->oldw = eprop[1];
+		}
+		XFree(eprop);
+	}
+	if ( (eprop = get_property(c->window, xa_evilwm_unmaximised_vert, XA_CARDINAL, &nitems)) ) {
+		if (nitems == 2) {
+			c->oldy = eprop[0];
+			c->oldh = eprop[1];
+		}
+		XFree(eprop);
+	}
 
 	size_flags = get_wm_normal_hints(c);
 
