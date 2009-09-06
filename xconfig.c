@@ -52,7 +52,7 @@ enum xconfig_result xconfig_parse_file(struct xconfig_option *options,
 	cfg = fopen(filename, "r");
 	if (cfg == NULL) return XCONFIG_FILE_ERROR;
 	while ((line = fgets(buf, sizeof(buf), cfg))) {
-		while (isspace(*line))
+		while (isspace((int)*line))
 			line++;
 		if (*line == 0 || *line == '#')
 			continue;
