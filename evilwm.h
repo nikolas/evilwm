@@ -195,7 +195,9 @@ extern Atom xa_evilwm_unmaximised_horz;
 extern Atom xa_evilwm_unmaximised_vert;
 
 /* EWMH: Root Window Properties (and Related Messages) */
+#ifdef VWM
 extern Atom xa_net_current_desktop;
+#endif
 extern Atom xa_net_request_frame_extents;
 
 /* EWMH: Application Window Properties */

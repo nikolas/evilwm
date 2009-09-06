@@ -9,8 +9,10 @@
 
 /* Root Window Properties (and Related Messages) */
 static Atom xa_net_supported;
+#ifdef VWM
 static Atom xa_net_number_of_desktops;
 Atom xa_net_current_desktop;
+#endif
 static Atom xa_net_supporting_wm_check;
 Atom xa_net_request_frame_extents;
 
@@ -27,8 +29,10 @@ Atom xa_net_frame_extents;
 void ewmh_init(void) {
 	/* Root Window Properties (and Related Messages) */
 	xa_net_supported = XInternAtom(dpy, "_NET_SUPPORTED", False);
+#ifdef VWM
 	xa_net_number_of_desktops = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
 	xa_net_current_desktop = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
+#endif
 	xa_net_supporting_wm_check = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
 	xa_net_request_frame_extents = XInternAtom(dpy, "_NET_REQUEST_FRAME_EXTENTS", False);
 
@@ -46,8 +50,10 @@ void ewmh_init(void) {
 void ewmh_init_screen(ScreenInfo *s) {
 	unsigned long pid = getpid();
 	Atom supported[] = {
+#ifdef VWM
 		xa_net_number_of_desktops,
 		xa_net_current_desktop,
+#endif
 		xa_net_supporting_wm_check,
 		xa_net_request_frame_extents,
 
@@ -58,19 +64,23 @@ void ewmh_init_screen(ScreenInfo *s) {
 #endif
 		xa_net_frame_extents,
 	};
+#ifdef VWM
 	unsigned long num_desktops = 8;
 	unsigned long vdesk = s->vdesk;
+#endif
 	s->supporting = XCreateSimpleWindow(dpy, s->root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, s->root, xa_net_supported,
 			XA_ATOM, 32, PropModeReplace,
 			(unsigned char *)&supported,
 			sizeof(supported) / sizeof(Atom));
+#ifdef VWM
 	XChangeProperty(dpy, s->root, xa_net_number_of_desktops,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&num_desktops, 1);
 	XChangeProperty(dpy, s->root, xa_net_current_desktop,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&vdesk, 1);
+#endif
 	XChangeProperty(dpy, s->root, xa_net_supporting_wm_check,
 			XA_WINDOW, 32, PropModeReplace,
 			(unsigned char *)&s->supporting, 1);
@@ -87,8 +97,10 @@ void ewmh_init_screen(ScreenInfo *s) {
 
 void ewmh_deinit_screen(ScreenInfo *s) {
 	XDeleteProperty(dpy, s->root, xa_net_supported);
+#ifdef VWM
 	XDeleteProperty(dpy, s->root, xa_net_number_of_desktops);
 	XDeleteProperty(dpy, s->root, xa_net_current_desktop);
+#endif
 	XDeleteProperty(dpy, s->root, xa_net_supporting_wm_check);
 	XDestroyWindow(dpy, s->supporting);
 }
