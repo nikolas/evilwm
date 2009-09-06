@@ -149,6 +149,7 @@ int main(int argc, char *argv[]) {
 			strcpy(conffile, home);
 			strcat(conffile, "/" CONFIG_FILE);
 			xconfig_parse_file(evilwm_options, conffile);
+			free(conffile);
 		}
 	}
 	ret = xconfig_parse_cli(evilwm_options, argc, argv, &argn);
