@@ -316,45 +316,58 @@ void moveresize(Client *c) {
 	send_config(c);
 }
 
-void maximise_client(Client *c, int hv) {
+void maximise_client(Client *c, int action, int hv) {
 	if (hv & MAXIMISE_HORZ) {
 		if (c->oldw) {
-			c->x = c->oldx;
-			c->width = c->oldw;
-			c->oldw = 0;
-			XDeleteProperty(dpy, c->window, xa_evilwm_unmaximised_horz);
+			if (action == NET_WM_STATE_REMOVE
+					|| action == NET_WM_STATE_TOGGLE) {
+				c->x = c->oldx;
+				c->width = c->oldw;
+				c->oldw = 0;
+				XDeleteProperty(dpy, c->window, xa_evilwm_unmaximised_horz);
+			}
 		} else {
-			unsigned long props[2];
-			c->oldx = c->x;
-			c->oldw = c->width;
-			c->x = 0;
-			c->width = DisplayWidth(dpy, c->screen->screen);
-			props[0] = c->oldx;
-			props[1] = c->oldw;
-			XChangeProperty(dpy, c->window, xa_evilwm_unmaximised_horz,
-					XA_CARDINAL, 32, PropModeReplace,
-					(unsigned char *)&props, 2);
+			if (action == NET_WM_STATE_ADD
+					|| action == NET_WM_STATE_TOGGLE) {
+				unsigned long props[2];
+				c->oldx = c->x;
+				c->oldw = c->width;
+				c->x = 0;
+				c->width = DisplayWidth(dpy, c->screen->screen);
+				props[0] = c->oldx;
+				props[1] = c->oldw;
+				XChangeProperty(dpy, c->window, xa_evilwm_unmaximised_horz,
+						XA_CARDINAL, 32, PropModeReplace,
+						(unsigned char *)&props, 2);
+			}
 		}
 	}
 	if (hv & MAXIMISE_VERT) {
 		if (c->oldh) {
-			c->y = c->oldy;
-			c->height = c->oldh;
-			c->oldh = 0;
-			XDeleteProperty(dpy, c->window, xa_evilwm_unmaximised_vert);
+			if (action == NET_WM_STATE_REMOVE
+					|| action == NET_WM_STATE_TOGGLE) {
+				c->y = c->oldy;
+				c->height = c->oldh;
+				c->oldh = 0;
+				XDeleteProperty(dpy, c->window, xa_evilwm_unmaximised_vert);
+			}
 		} else {
-			unsigned long props[2];
-			c->oldy = c->y;
-			c->oldh = c->height;
-			c->y = 0;
-			c->height = DisplayHeight(dpy, c->screen->screen);
-			props[0] = c->oldy;
-			props[1] = c->oldh;
-			XChangeProperty(dpy, c->window, xa_evilwm_unmaximised_vert,
-					XA_CARDINAL, 32, PropModeReplace,
-					(unsigned char *)&props, 2);
+			if (action == NET_WM_STATE_ADD
+					|| action == NET_WM_STATE_TOGGLE) {
+				unsigned long props[2];
+				c->oldy = c->y;
+				c->oldh = c->height;
+				c->y = 0;
+				c->height = DisplayHeight(dpy, c->screen->screen);
+				props[0] = c->oldy;
+				props[1] = c->oldh;
+				XChangeProperty(dpy, c->window, xa_evilwm_unmaximised_vert,
+						XA_CARDINAL, 32, PropModeReplace,
+						(unsigned char *)&props, 2);
+			}
 		}
 	}
+	ewmh_set_net_wm_state(c);
 	moveresize(c);
 	discard_enter_events();
 }

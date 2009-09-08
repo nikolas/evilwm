@@ -137,14 +137,14 @@ static void handle_key_event(XKeyEvent *e) {
 			show_info(c, key);
 			break;
 		case KEY_MAX:
-			maximise_client(c, MAXIMISE_HORZ|MAXIMISE_VERT);
+			maximise_client(c, NET_WM_STATE_TOGGLE, MAXIMISE_HORZ|MAXIMISE_VERT);
 			break;
 		case KEY_MAXVERT:
-			maximise_client(c, MAXIMISE_VERT);
+			maximise_client(c, NET_WM_STATE_TOGGLE, MAXIMISE_VERT);
 			break;
 #ifdef VWM
 		case KEY_FIX:
-			fix_client(c);
+			fix_client(c, NET_WM_STATE_TOGGLE);
 			break;
 #endif
 		default: break;
@@ -326,6 +326,25 @@ static void handle_client_message(XClientMessageEvent *e) {
 	c = find_client(e->window);
 	if (!c && e->message_type == xa_net_request_frame_extents) {
 		ewmh_set_net_frame_extents(e->window);
+		return;
+	}
+	if (e->message_type == xa_net_wm_state) {
+		int i, maximise_hv;
+		/* Message can contain up to two state changes: */
+		for (i = 1; i <= 2; i++) {
+			if ((Atom)e->data.l[i] == xa_net_wm_state_sticky) {
+				fix_client(c, e->data.l[0]);
+			} else if ((Atom)e->data.l[i] == xa_net_wm_state_maximized_vert) {
+				maximise_hv |= MAXIMISE_VERT;
+			} else if ((Atom)e->data.l[i] == xa_net_wm_state_maximized_horz) {
+				maximise_hv |= MAXIMISE_HORZ;
+			} else if ((Atom)e->data.l[i] == xa_net_wm_state_fullscreen) {
+				maximise_hv |= MAXIMISE_VERT|MAXIMISE_HORZ;
+			}
+			if (maximise_hv) {
+				maximise_client(c, e->data.l[0], maximise_hv);
+			}
+		}
 		return;
 	}
 }

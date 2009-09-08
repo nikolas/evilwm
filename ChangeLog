@@ -1,5 +1,10 @@
 *** Changes between 1.0.1 and 1.1.0:
 
+Tue Sep  8 2009
+  * Support maximising EWMH states and client messages
+  _NET_WM_STATE_MAXIMIZED_VERT, _NET_WM_STATE_MAXIMIZED_HORZ and
+  _NET_WM_STATE_FULLSCREEN.
+
 Sun Sep  6 2009
   * Record pre-maximisation dimensions in evilwm-specific window properties
   _EVILWM_UNMAXIMISED_HORZ and _EVILWM_UNMAXIMISED_VERT.

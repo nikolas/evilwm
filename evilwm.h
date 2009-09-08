@@ -60,8 +60,14 @@ typedef struct {
 #define RAISE           1
 #define NO_RAISE        0       /* for unhide() */
 
-#define MAXIMISE_HORZ        (1<<0)
-#define MAXIMISE_VERT        (1<<1)
+/* EWMH hints use these definitions, so for simplicity my functions
+ * will too: */
+#define NET_WM_STATE_REMOVE     0    /* remove/unset property */
+#define NET_WM_STATE_ADD        1    /* add/set property */
+#define NET_WM_STATE_TOGGLE     2    /* toggle property  */
+
+#define MAXIMISE_HORZ   (1<<0)
+#define MAXIMISE_VERT   (1<<1)
 
 /* some coding shorthand */
 
@@ -206,6 +212,9 @@ extern Atom xa_net_wm_desktop;
 extern Atom xa_net_wm_state;
 extern Atom xa_net_wm_state_sticky;
 #endif
+extern Atom xa_net_wm_state_maximized_vert;
+extern Atom xa_net_wm_state_maximized_horz;
+extern Atom xa_net_wm_state_fullscreen;
 extern Atom xa_net_frame_extents;
 
 /* Things that affect user interaction */
@@ -239,7 +248,7 @@ Client *find_client(Window w);
 void gravitate_client(Client *c, int sign);
 void select_client(Client *c);
 #ifdef VWM
-void fix_client(Client *c);
+void fix_client(Client *c, int action);
 #endif
 void remove_client(Client *c);
 void send_config(Client *c);
@@ -268,7 +277,7 @@ long get_wm_normal_hints(Client *c);
 
 void drag(Client *c);
 void moveresize(Client *c);
-void maximise_client(Client *c, int hv);
+void maximise_client(Client *c, int action, int hv);
 void show_info(Client *c, KeySym key);
 void sweep(Client *c);
 void unhide(Client *c, int raise_win);

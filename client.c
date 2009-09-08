@@ -114,8 +114,13 @@ void select_client(Client *c) {
 }
 
 #ifdef VWM
-void fix_client(Client *c) {
-	toggle_sticky(c);
+void fix_client(Client *c, int action) {
+	switch (action) {
+		default:
+		case NET_WM_STATE_REMOVE: remove_sticky(c); break;
+		case NET_WM_STATE_ADD:    add_sticky(c); break;
+		case NET_WM_STATE_TOGGLE: toggle_sticky(c); break;
+	}
 	select_client(c);
 	ewmh_set_net_wm_state(c);
 }

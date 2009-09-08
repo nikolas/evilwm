@@ -23,6 +23,9 @@ Atom xa_net_wm_desktop;
 Atom xa_net_wm_state;
 Atom xa_net_wm_state_sticky;
 #endif
+Atom xa_net_wm_state_maximized_vert;
+Atom xa_net_wm_state_maximized_horz;
+Atom xa_net_wm_state_fullscreen;
 static Atom xa_net_wm_pid;
 Atom xa_net_frame_extents;
 
@@ -43,6 +46,9 @@ void ewmh_init(void) {
 	xa_net_wm_state = XInternAtom(dpy, "_NET_WM_STATE", False);
 	xa_net_wm_state_sticky = XInternAtom(dpy, "_NET_WM_STATE_STICKY", False);
 #endif
+	xa_net_wm_state_maximized_vert = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+	xa_net_wm_state_maximized_horz = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+	xa_net_wm_state_fullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
 	xa_net_wm_pid = XInternAtom(dpy, "_NET_WM_PID", False);
 	xa_net_frame_extents = XInternAtom(dpy, "_NET_FRAME_EXTENTS", False);
 }
@@ -62,6 +68,9 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_wm_state,
 		xa_net_wm_state_sticky,
 #endif
+		xa_net_wm_state_maximized_vert,
+		xa_net_wm_state_maximized_horz,
+		xa_net_wm_state_fullscreen,
 		xa_net_frame_extents,
 	};
 #ifdef VWM
@@ -121,10 +130,16 @@ void ewmh_set_net_wm_desktop(Client *c) {
 }
 
 void ewmh_set_net_wm_state(Client *c) {
-	Atom state[1];
+	Atom state[4];
 	int i = 0;
 	if (is_sticky(c))
 		state[i++] = xa_net_wm_state_sticky;
+	if (c->oldh)
+		state[i++] = xa_net_wm_state_maximized_vert;
+	if (c->oldw)
+		state[i++] = xa_net_wm_state_maximized_horz;
+	if (c->oldh && c->oldw)
+		state[i++] = xa_net_wm_state_fullscreen;
 	XChangeProperty(dpy, c->window, xa_net_wm_state,
 			XA_ATOM, 32, PropModeReplace,
 			(unsigned char *)&state, i);
