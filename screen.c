@@ -377,8 +377,9 @@ void hide(Client *c) {
 	/* This will generate an unmap event.  Tell event handler
 	 * to ignore it. */
 	c->ignore_unmap++;
-	LOG_XDEBUG("screen:XUnmapWindow(parent); ");
+	LOG_XENTER("XUnmapWindow(parent=%lx)", c->parent);
 	XUnmapWindow(dpy, c->parent);
+	LOG_XLEAVE();
 	set_wm_state(c, IconicState);
 }
 #endif
@@ -429,10 +430,10 @@ void switch_vdesk(ScreenInfo *s, int v) {
 
 	if (v == s->vdesk)
 		return;
+	LOG_ENTER("switch_vdesk(screen=%d, from=%d, to=%d)", s->screen, s->vdesk, v);
 	if (current && !is_sticky(current)) {
 		select_client(NULL);
 	}
-	LOG_DEBUG("switch_vdesk(): Switching screen %d to desk %d", s->screen, v);
 	for (c = head_client; c; c = c->next) {
 		if (c->screen != s)
 			continue;
@@ -454,7 +455,8 @@ void switch_vdesk(ScreenInfo *s, int v) {
 	}
 	s->vdesk = v;
 	ewmh_set_net_current_desktop(s);
-	LOG_DEBUG(" (%d hidden, %d raised)\n", hidden, raised);
+	LOG_DEBUG("%d hidden, %d raised\n", hidden, raised);
+	LOG_LEAVE();
 }
 #endif /* def VWM */
 

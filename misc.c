@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2007 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2009 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 #include <X11/Xproto.h>
@@ -46,19 +46,21 @@ int handle_xerror(Display *dsply, XErrorEvent *e) {
 	Client *c;
 	(void)dsply;  /* unused */
 
+	LOG_ENTER("handle_xerror(error=%d, request=%d/%d, resourceid=%lx)", e->error_code, e->request_code, e->minor_code, e->resourceid);
+
 	if (ignore_xerror) {
-		LOG_DEBUG("handle_xerror() ignored an XErrorEvent: %d\n", e->error_code);
+		LOG_DEBUG("ignoring...\n");
+		LOG_LEAVE();
 		return 0;
 	}
 	/* If this error actually occurred while setting up the new
 	 * window, best let make_new_client() know not to bother */
 	if (initialising != None && e->resourceid == initialising) {
-		LOG_DEBUG("\t **SAVED?** handle_xerror() caught error %d while initialising\n", e->error_code);
+		LOG_DEBUG("error caught while initialising window=%lx\n", initialising);
 		initialising = None;
+		LOG_LEAVE();
 		return 0;
 	}
-	LOG_DEBUG("**ERK** handle_xerror() caught an XErrorEvent: error_code=%d request_code=%d minor_code=%d\n",
-			e->error_code, e->request_code, e->minor_code);
 	if (e->error_code == BadAccess && e->request_code == X_ChangeWindowAttributes) {
 		LOG_ERROR("root window unavailable (maybe another wm is running?)\n");
 		exit(1);
@@ -66,9 +68,12 @@ int handle_xerror(Display *dsply, XErrorEvent *e) {
 
 	c = find_client(e->resourceid);
 	if (c) {
-		LOG_DEBUG("\thandle_xerror() : flagging client for removal\n");
+		LOG_DEBUG("flagging client for removal\n");
 		c->remove = 1;
 		need_client_tidy = 1;
+	} else {
+		LOG_DEBUG("unknown error: not handling\n");
 	}
+	LOG_LEAVE();
 	return 0;
 }

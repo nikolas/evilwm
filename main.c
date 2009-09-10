@@ -11,6 +11,10 @@
 #include "log.h"
 #include "xconfig.h"
 
+#ifdef DEBUG
+int log_indent = 0;
+#endif
+
 /* Commonly used X information */
 Display     *dpy;
 XFontStruct *font;
@@ -234,6 +238,8 @@ static void setup_display(void) {
 	Window dw1, dw2, *wins;
 	XWindowAttributes winattr;
 
+	LOG_ENTER("setup_display()");
+
 	dpy = XOpenDisplay(opt_display);
 	if (!dpy) { 
 		LOG_ERROR("can't open display %s\n", opt_display);
@@ -274,7 +280,7 @@ static void setup_display(void) {
 		for (j = 0; j < (unsigned int)modmap->max_keypermod; j++) {
 			if (modmap->modifiermap[i*modmap->max_keypermod+j] == XKeysymToKeycode(dpy, XK_Num_Lock)) {
 				numlockmask = (1<<i);
-				LOG_DEBUG("setup_display() : XK_Num_Lock is (1<<0x%02x)\n", i);
+				LOG_DEBUG("XK_Num_Lock is (1<<0x%02x)\n", i);
 			}
 		}
 	}
@@ -305,10 +311,8 @@ static void setup_display(void) {
 	{
 		int e_dummy;
 		have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy);
-#ifdef DEBUG
 		if (!have_randr)
-			LOG_DEBUG("Xrandr is not supported on this display.\n");
-#endif
+			LOG_DEBUG("XRandR is not supported on this display.\n");
 	}
 #endif
 
@@ -359,9 +363,10 @@ static void setup_display(void) {
 		grab_keys_for_screen(&screens[i]);
 
 		/* scan all the windows on this screen */
-		LOG_XDEBUG("main:XQueryTree(); ");
+		LOG_XENTER("XQueryTree(screen=%d)", i);
 		XQueryTree(dpy, screens[i].root, &dw1, &dw2, &wins, &nwins);
 		LOG_XDEBUG("%d windows\n", nwins);
+		LOG_XLEAVE();
 		for (j = 0; j < nwins; j++) {
 			XGetWindowAttributes(dpy, wins[j], &winattr);
 			if (!winattr.override_redirect && winattr.map_state == IsViewable)
@@ -370,6 +375,7 @@ static void setup_display(void) {
 		XFree(wins);
 		ewmh_init_screen(&screens[i]);
 	}
+	LOG_LEAVE();
 }
 
 /**************************************************************************/

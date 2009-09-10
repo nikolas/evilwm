@@ -212,8 +212,9 @@ static void handle_configure_request(XConfigureRequestEvent *e) {
 		wc.x = c->x - c->border;
 		wc.y = c->y - c->border;
 		wc.border_width = c->border;
-		LOG_XDEBUG("XConfigureWindow(dpy, parent(%x), %lx, &wc);\n", (unsigned int)c->parent, value_mask);
+		LOG_XENTER("XConfigureWindow(parent=%lx, value_mask=%lx)", (unsigned int)c->parent, value_mask);
 		XConfigureWindow(dpy, c->parent, value_mask, &wc);
+		LOG_XLEAVE();
 		XMoveResizeWindow(dpy, c->window, 0, 0, c->width, c->height);
 		if ((value_mask & (CWX|CWY)) && !(value_mask & (CWWidth|CWHeight))) {
 			send_config(c);
@@ -222,14 +223,16 @@ static void handle_configure_request(XConfigureRequestEvent *e) {
 	} else {
 		wc.x = c ? 0 : e->x;
 		wc.y = c ? 0 : e->y;
-		LOG_XDEBUG("XConfigureWindow(dpy, window(%x), %lx, &wc);\n", (unsigned int)e->window, value_mask);
+		LOG_XENTER("XConfigureWindow(window=%lx, value_mask=%lx)", (unsigned int)e->window, value_mask);
 		XConfigureWindow(dpy, e->window, value_mask, &wc);
+		LOG_XLEAVE();
 	}
 }
 
 static void handle_map_request(XMapRequestEvent *e) {
 	Client *c = find_client(e->window);
 
+	LOG_ENTER("handle_map_request(window=%lx)", e->window);
 	if (c) {
 #ifdef VWM
 		if (c->vdesk != c->screen->vdesk)
@@ -238,16 +241,16 @@ static void handle_map_request(XMapRequestEvent *e) {
 		unhide(c, RAISE);
 	} else {
 		XWindowAttributes attr;
-		LOG_DEBUG("handle_map_request() : don't know this window, calling make_new_client();\n");
 		XGetWindowAttributes(dpy, e->window, &attr);
 		make_new_client(e->window, find_screen(attr.root));
 	}
+	LOG_LEAVE();
 }
 
 static void handle_unmap_event(XUnmapEvent *e) {
 	Client *c = find_client(e->window);
 
-	LOG_DEBUG("handle_unmap_event(): ");
+	LOG_ENTER("handle_unmap_event(window=%lx)", e->window);
 	if (c) {
 		if (c->ignore_unmap) {
 			c->ignore_unmap--;
@@ -260,6 +263,7 @@ static void handle_unmap_event(XUnmapEvent *e) {
 	} else {
 		LOG_DEBUG("unknown client!\n");
 	}
+	LOG_LEAVE();
 }
 
 #ifdef COLOURMAP
@@ -277,9 +281,12 @@ static void handle_property_change(XPropertyEvent *e) {
 	Client *c = find_client(e->window);
 
 	if (c) {
+		LOG_ENTER("handle_property_change(window=%lx)", e->window);
 		if (e->atom == XA_WM_NORMAL_HINTS) {
 			get_wm_normal_hints(c);
 		}
+		LOG_DEBUG("geometry=%dx%d+%d+%d\n", c->width, c->height, c->x, c->y);
+		LOG_LEAVE();
 	}
 }
 
@@ -314,18 +321,34 @@ static void handle_shape_event(XShapeEvent *e) {
 }
 #endif
 
+#ifdef DEBUG
+const char *debug_client_message_string(Atom message_type);
+const char *debug_client_message_string(Atom message_type) {
+	static char buf[48];
+	char *atom_name = XGetAtomName(dpy, message_type);
+	strncpy(buf, atom_name, sizeof(buf));
+	buf[sizeof(buf)-1] = 0;
+	return buf;
+}
+#endif
+
 static void handle_client_message(XClientMessageEvent *e) {
 	ScreenInfo *s = find_current_screen();
 	Client *c;
+
+	LOG_ENTER("handle_client_message(window=%lx, format=%d, type=%s)", e->window, e->format, debug_client_message_string(e->message_type));
+
 #ifdef VWM
 	if (e->message_type == xa_net_current_desktop) {
 		switch_vdesk(s, e->data.l[0]);
+		LOG_LEAVE();
 		return;
 	}
 #endif
 	c = find_client(e->window);
 	if (!c && e->message_type == xa_net_request_frame_extents) {
 		ewmh_set_net_frame_extents(e->window);
+		LOG_LEAVE();
 		return;
 	}
 	if (e->message_type == xa_net_wm_state) {
@@ -345,8 +368,10 @@ static void handle_client_message(XClientMessageEvent *e) {
 				maximise_client(c, e->data.l[0], maximise_hv);
 			}
 		}
+		LOG_LEAVE();
 		return;
 	}
+	LOG_LEAVE();
 }
 
 void event_main_loop(void) {

@@ -129,7 +129,7 @@ void fix_client(Client *c, int action) {
 void remove_client(Client *c) {
 	Client *p;
 
-	LOG_DEBUG("remove_client() : Removing...\n");
+	LOG_ENTER("remove_client(window=%lx, %s)", c->window, c->remove ? "withdrawing" : "wm quitting");
 
 	XGrabServer(dpy);
 	ignore_xerror = 1;
@@ -144,7 +144,7 @@ void remove_client(Client *c) {
 	 *  place when it is shutting down." (both _NET_WM_DESKTOP and
 	 *  _NET_WM_STATE) */
 	if (c->remove) {
-		LOG_DEBUG("\tremove_client() : setting WithdrawnState\n");
+		LOG_DEBUG("setting WithdrawnState\n");
 		set_wm_state(c, WithdrawnState);
 #ifdef VWM
 		XDeleteProperty(dpy, c->window, xa_net_wm_desktop);
@@ -172,14 +172,14 @@ void remove_client(Client *c) {
 		int i = 0;
 		for (pp = head_client; pp; pp = pp->next)
 			i++;
-		LOG_DEBUG("\tremove_client() : free(), window count now %d\n", i);
+		LOG_DEBUG("free(), window count now %d\n", i);
 	}
 #endif
 
 	XUngrabServer(dpy);
 	XSync(dpy, False);
 	ignore_xerror = 0;
-	LOG_DEBUG("remove_client() returning\n");
+	LOG_LEAVE();
 }
 
 void send_wm_delete(Client *c, int kill_client) {
