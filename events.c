@@ -11,6 +11,17 @@
 
 static int interruptibleXNextEvent(XEvent *event);
 
+#ifdef DEBUG
+const char *debug_atom_name(Atom a);
+const char *debug_atom_name(Atom a) {
+	static char buf[48];
+	char *atom_name = XGetAtomName(dpy, a);
+	strncpy(buf, atom_name, sizeof(buf));
+	buf[sizeof(buf)-1] = 0;
+	return buf;
+}
+#endif
+
 static void current_to_head(void) {
 	Client *c;
 	if (current && current != head_client) {
@@ -281,11 +292,11 @@ static void handle_property_change(XPropertyEvent *e) {
 	Client *c = find_client(e->window);
 
 	if (c) {
-		LOG_ENTER("handle_property_change(window=%lx)", e->window);
+		LOG_ENTER("handle_property_change(window=%lx, atom=%s)", e->window, debug_atom_name(e->atom));
 		if (e->atom == XA_WM_NORMAL_HINTS) {
 			get_wm_normal_hints(c);
+			LOG_DEBUG("geometry=%dx%d+%d+%d\n", c->width, c->height, c->x, c->y);
 		}
-		LOG_DEBUG("geometry=%dx%d+%d+%d\n", c->width, c->height, c->x, c->y);
 		LOG_LEAVE();
 	}
 }
@@ -321,22 +332,11 @@ static void handle_shape_event(XShapeEvent *e) {
 }
 #endif
 
-#ifdef DEBUG
-const char *debug_client_message_string(Atom message_type);
-const char *debug_client_message_string(Atom message_type) {
-	static char buf[48];
-	char *atom_name = XGetAtomName(dpy, message_type);
-	strncpy(buf, atom_name, sizeof(buf));
-	buf[sizeof(buf)-1] = 0;
-	return buf;
-}
-#endif
-
 static void handle_client_message(XClientMessageEvent *e) {
 	ScreenInfo *s = find_current_screen();
 	Client *c;
 
-	LOG_ENTER("handle_client_message(window=%lx, format=%d, type=%s)", e->window, e->format, debug_client_message_string(e->message_type));
+	LOG_ENTER("handle_client_message(window=%lx, format=%d, type=%s)", e->window, e->format, debug_atom_name(e->message_type));
 
 #ifdef VWM
 	if (e->message_type == xa_net_current_desktop) {
