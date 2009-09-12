@@ -311,8 +311,9 @@ static void setup_display(void) {
 	{
 		int e_dummy;
 		have_randr = XRRQueryExtension(dpy, &randr_event_base, &e_dummy);
-		if (!have_randr)
+		if (!have_randr) {
 			LOG_DEBUG("XRandR is not supported on this display.\n");
+		}
 	}
 #endif
 
