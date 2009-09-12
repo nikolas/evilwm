@@ -186,7 +186,6 @@ void show_info(Client *c, KeySym key) {
 }
 
 #ifdef MOUSE
-#ifdef SNAP
 static int absmin(int a, int b) {
 	if (abs(a) < abs(b))
 		return a;
@@ -240,7 +239,6 @@ static void snap_client(Client *c) {
 	if (abs(c->y) == c->border && c->height == dpy_height)
 		c->y = 0;
 }
-#endif /* def SNAP */
 
 void drag(Client *c) {
 	XEvent ev;
@@ -270,10 +268,8 @@ void drag(Client *c) {
 				}
 				c->x = old_cx + (ev.xmotion.x - x1);
 				c->y = old_cy + (ev.xmotion.y - y1);
-#ifdef SNAP
 				if (opt_snap)
 					snap_client(c);
-#endif
 
 #ifdef INFOBANNER_MOVERESIZE
 				update_info_window(c);

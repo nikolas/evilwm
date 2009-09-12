@@ -41,18 +41,10 @@ LIBS    += -lXrandr
 # Uncomment for mouse support.  You probably want this.
 DEFINES += -DMOUSE
 
-# Uncomment for snap-to-border support (thanks, Neil Drumm)
-# Start evilwm with -snap num to enable (num is proximity in pixels to snap to)
-DEFINES += -DSNAP
-
 # Uncomment to compile in certain text messages like help.  You want this too
 # unless you *really* want to trim the bytes.
 # Note that snprintf(3) is always part of the build.
 DEFINES += -DSTDIO
-
-# You can save a few bytes if you know you won't need colour map support
-# (e.g., for 16 or more bit displays)
-DEFINES += -DCOLOURMAP
 
 # Uncomment the following line if you want to use Ctrl+Alt+q to kill windows
 # instead of Ctrl+Alt+Escape (or just set it to what you want).  This is

@@ -60,9 +60,7 @@ unsigned int grabmask2 = Mod1Mask;
 unsigned int altmask = ShiftMask;
 const char   *opt_term[3] = { DEF_TERM, DEF_TERM, NULL };
 int          opt_bw = DEF_BW;
-#ifdef SNAP
 int          opt_snap = 0;
-#endif
 #ifdef SOLIDDRAG
 int          no_solid_drag = 0;  /* use solid drag by default */
 #endif
@@ -93,9 +91,7 @@ static struct xconfig_option evilwm_options[] = {
 #endif
 	{ XCONFIG_STRING,   "bw",           &opt_bw },
 	{ XCONFIG_STRING,   "term",         &opt_term[0] },
-#ifdef SNAP
 	{ XCONFIG_INT,      "snap",         &opt_snap },
-#endif
 	{ XCONFIG_STRING,   "mask1",        &opt_grabmask1 },
 	{ XCONFIG_STRING,   "mask2",        &opt_grabmask2 },
 	{ XCONFIG_STRING,   "altmask",      &opt_altmask },
@@ -252,9 +248,7 @@ static void setup_display(void) {
 	xa_wm_state = XInternAtom(dpy, "WM_STATE", False);
 	xa_wm_protos = XInternAtom(dpy, "WM_PROTOCOLS", False);
 	xa_wm_delete = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
-#ifdef COLOURMAP
 	xa_wm_cmapwins = XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
-#endif
 	/* Motif atoms */
 	mwm_hints = XInternAtom(dpy, _XA_MWM_HINTS, False);
 	/* evilwm atoms */
@@ -293,11 +287,7 @@ static void setup_display(void) {
 	gv.font = font->fid;
 
 	/* set up root window attributes - same for each screen */
-#ifdef COLOURMAP
 	attr.event_mask = ChildMask | EnterWindowMask | ColormapChangeMask;
-#else
-	attr.event_mask = ChildMask | EnterWindowMask;
-#endif
 
 	/* SHAPE extension? */
 #ifdef SHAPE

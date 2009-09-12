@@ -1,5 +1,9 @@
 *** Changes between 1.0.1 and 1.1.0:
 
+Sat Sep 12 2009
+  * Snap-to-border and colourmap support no longer optional
+  Though -snap still defaults to 0 (off).
+
 Tue Sep  8 2009
   * Support maximising EWMH states and client messages
   _NET_WM_STATE_MAXIMIZED_VERT, _NET_WM_STATE_MAXIMIZED_HORZ and

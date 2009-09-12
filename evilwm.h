@@ -134,9 +134,7 @@ struct Client {
 	Window  window;
 	Window  parent;
 	ScreenInfo      *screen;
-#ifdef COLOURMAP
 	Colormap        cmap;
-#endif
 	int             ignore_unmap;
 
 	int             x, y, width, height;
@@ -224,9 +222,7 @@ extern unsigned int     grabmask2;
 extern unsigned int     altmask;
 extern const char       *opt_term[3];
 extern int              opt_bw;
-#ifdef SNAP
 extern int              opt_snap;
-#endif
 #ifdef SOLIDDRAG
 extern int              no_solid_drag;
 #else

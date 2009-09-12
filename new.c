@@ -89,11 +89,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	}
 #endif
 
-#ifdef COLOURMAP
 	XSelectInput(dpy, c->window, ColormapChangeMask | EnterWindowMask | PropertyChangeMask);
-#else
-	XSelectInput(dpy, c->window, EnterWindowMask | PropertyChangeMask);
-#endif
 
 	reparent(c);
 
@@ -216,9 +212,7 @@ static void init_geometry(Client *c) {
 	LOG_XLEAVE();
 	c->old_border = attr.border_width;
 	c->oldw = c->oldh = 0;
-#ifdef COLOURMAP
 	c->cmap = attr.colormap;
-#endif
 
 	if ( (eprop = get_property(c->window, xa_evilwm_unmaximised_horz, XA_CARDINAL, &nitems)) ) {
 		if (nitems == 2) {

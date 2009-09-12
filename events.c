@@ -277,7 +277,6 @@ static void handle_unmap_event(XUnmapEvent *e) {
 	LOG_LEAVE();
 }
 
-#ifdef COLOURMAP
 static void handle_colormap_change(XColormapEvent *e) {
 	Client *c = find_client(e->window);
 
@@ -286,7 +285,6 @@ static void handle_colormap_change(XColormapEvent *e) {
 		XInstallColormap(dpy, c->cmap);
 	}
 }
-#endif
 
 static void handle_property_change(XPropertyEvent *e) {
 	Client *c = find_client(e->window);
@@ -390,10 +388,8 @@ void event_main_loop(void) {
 				handle_configure_request(&ev.xconfigurerequest); break;
 			case MapRequest:
 				handle_map_request(&ev.xmaprequest); break;
-#ifdef COLOURMAP
 			case ColormapNotify:
 				handle_colormap_change(&ev.xcolormap); break;
-#endif
 			case EnterNotify:
 				handle_enter_event(&ev.xcrossing); break;
 			case PropertyNotify:
