@@ -89,7 +89,7 @@ static struct xconfig_option evilwm_options[] = {
 #ifdef VWM
 	{ XCONFIG_STRING,   "fc",           &opt_fc },
 #endif
-	{ XCONFIG_STRING,   "bw",           &opt_bw },
+	{ XCONFIG_INT,      "bw",           &opt_bw },
 	{ XCONFIG_STRING,   "term",         &opt_term[0] },
 	{ XCONFIG_INT,      "snap",         &opt_snap },
 	{ XCONFIG_STRING,   "mask1",        &opt_grabmask1 },
