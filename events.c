@@ -350,7 +350,7 @@ static void handle_client_message(XClientMessageEvent *e) {
 		return;
 	}
 	if (e->message_type == xa_net_wm_state) {
-		int i, maximise_hv;
+		int i, maximise_hv = 0;
 		/* Message can contain up to two state changes: */
 		for (i = 1; i <= 2; i++) {
 			if ((Atom)e->data.l[i] == xa_net_wm_state_sticky) {
@@ -362,9 +362,9 @@ static void handle_client_message(XClientMessageEvent *e) {
 			} else if ((Atom)e->data.l[i] == xa_net_wm_state_fullscreen) {
 				maximise_hv |= MAXIMISE_VERT|MAXIMISE_HORZ;
 			}
-			if (maximise_hv) {
-				maximise_client(c, e->data.l[0], maximise_hv);
-			}
+		}
+		if (maximise_hv) {
+			maximise_client(c, e->data.l[0], maximise_hv);
 		}
 		LOG_LEAVE();
 		return;
