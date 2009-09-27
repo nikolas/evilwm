@@ -28,6 +28,11 @@ Atom xa_net_wm_state_sticky;
 Atom xa_net_wm_state_maximized_vert;
 Atom xa_net_wm_state_maximized_horz;
 Atom xa_net_wm_state_fullscreen;
+static Atom xa_net_wm_allowed_actions;
+static Atom xa_net_wm_action_stick;
+static Atom xa_net_wm_action_maximize_horz;
+static Atom xa_net_wm_action_maximize_vert;
+static Atom xa_net_wm_action_fullscreen;
 static Atom xa_net_wm_pid;
 Atom xa_net_frame_extents;
 
@@ -53,6 +58,11 @@ void ewmh_init(void) {
 	xa_net_wm_state_maximized_vert = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	xa_net_wm_state_maximized_horz = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
 	xa_net_wm_state_fullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	xa_net_wm_allowed_actions = XInternAtom(dpy, "_NET_WM_ALLOWED_ACTIONS", False);
+	xa_net_wm_action_stick = XInternAtom(dpy, "_NET_WM_ACTION_STICK", False);
+	xa_net_wm_action_maximize_horz = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_HORZ", False);
+	xa_net_wm_action_maximize_vert = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_VERT", False);
+	xa_net_wm_action_fullscreen = XInternAtom(dpy, "_NET_WM_ACTION_FULLSCREEN", False);
 	xa_net_wm_pid = XInternAtom(dpy, "_NET_WM_PID", False);
 	xa_net_frame_extents = XInternAtom(dpy, "_NET_FRAME_EXTENTS", False);
 }
@@ -118,6 +128,32 @@ void ewmh_deinit_screen(ScreenInfo *s) {
 #endif
 	XDeleteProperty(dpy, s->root, xa_net_supporting_wm_check);
 	XDestroyWindow(dpy, s->supporting);
+}
+
+void ewmh_init_client(Client *c) {
+	Atom allowed_actions[] = {
+#ifdef VWM
+		xa_net_wm_action_stick,
+#endif
+		xa_net_wm_action_maximize_horz,
+		xa_net_wm_action_maximize_vert,
+		xa_net_wm_action_fullscreen
+	};
+	XChangeProperty(dpy, c->window, xa_net_wm_allowed_actions,
+			XA_ATOM, 32, PropModeReplace,
+			(unsigned char *)&allowed_actions,
+			sizeof(allowed_actions) / sizeof(Atom));
+}
+
+void ewmh_deinit_client(Client *c) {
+	XDeleteProperty(dpy, c->window, xa_net_wm_allowed_actions);
+}
+
+void ewmh_withdraw_client(Client *c) {
+#ifdef VWM
+	XDeleteProperty(dpy, c->window, xa_net_wm_desktop);
+#endif
+	XDeleteProperty(dpy, c->window, xa_net_wm_state);
 }
 
 #ifdef VWM

@@ -137,6 +137,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 		XFree(class->res_class);
 		XFree(class);
 	}
+	ewmh_init_client(c);
 
 	/* Only map the window frame (and thus the window) if it's supposed
 	 * to be visible on this virtual desktop. */

@@ -293,6 +293,9 @@ void grab_keys_for_screen(ScreenInfo *s);
 void ewmh_init(void);
 void ewmh_init_screen(ScreenInfo *s);
 void ewmh_deinit_screen(ScreenInfo *s);
+void ewmh_init_client(Client *c);
+void ewmh_deinit_client(Client *c);
+void ewmh_withdraw_client(Client *c);
 #ifdef VWM
 void ewmh_set_net_current_desktop(ScreenInfo *s);
 void ewmh_set_net_wm_desktop(Client *c);
