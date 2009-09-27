@@ -331,7 +331,9 @@ static void handle_shape_event(XShapeEvent *e) {
 #endif
 
 static void handle_client_message(XClientMessageEvent *e) {
+#ifdef VWM
 	ScreenInfo *s = find_current_screen();
+#endif
 	Client *c;
 
 	LOG_ENTER("handle_client_message(window=%lx, format=%d, type=%s)", e->window, e->format, debug_atom_name(e->message_type));
@@ -353,9 +355,12 @@ static void handle_client_message(XClientMessageEvent *e) {
 		int i, maximise_hv = 0;
 		/* Message can contain up to two state changes: */
 		for (i = 1; i <= 2; i++) {
+#ifdef VWM
 			if ((Atom)e->data.l[i] == xa_net_wm_state_sticky) {
 				fix_client(c, e->data.l[0]);
-			} else if ((Atom)e->data.l[i] == xa_net_wm_state_maximized_vert) {
+			} else
+#endif
+			if ((Atom)e->data.l[i] == xa_net_wm_state_maximized_vert) {
 				maximise_hv |= MAXIMISE_VERT;
 			} else if ((Atom)e->data.l[i] == xa_net_wm_state_maximized_horz) {
 				maximise_hv |= MAXIMISE_HORZ;

@@ -20,7 +20,9 @@ Atom xa_net_request_frame_extents;
 static Atom xa_net_wm_name;
 #ifdef VWM
 Atom xa_net_wm_desktop;
+#endif
 Atom xa_net_wm_state;
+#ifdef VWM
 Atom xa_net_wm_state_sticky;
 #endif
 Atom xa_net_wm_state_maximized_vert;
@@ -43,7 +45,9 @@ void ewmh_init(void) {
 	xa_net_wm_name = XInternAtom(dpy, "_NET_WM_NAME", False);
 #ifdef VWM
 	xa_net_wm_desktop = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
+#endif
 	xa_net_wm_state = XInternAtom(dpy, "_NET_WM_STATE", False);
+#ifdef VWM
 	xa_net_wm_state_sticky = XInternAtom(dpy, "_NET_WM_STATE_STICKY", False);
 #endif
 	xa_net_wm_state_maximized_vert = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
@@ -65,7 +69,9 @@ void ewmh_init_screen(ScreenInfo *s) {
 
 #ifdef VWM
 		xa_net_wm_desktop,
+#endif
 		xa_net_wm_state,
+#ifdef VWM
 		xa_net_wm_state_sticky,
 #endif
 		xa_net_wm_state_maximized_vert,
@@ -128,12 +134,15 @@ void ewmh_set_net_wm_desktop(Client *c) {
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&vdesk, 1);
 }
+#endif
 
 void ewmh_set_net_wm_state(Client *c) {
 	Atom state[4];
 	int i = 0;
+#ifdef VWM
 	if (is_sticky(c))
 		state[i++] = xa_net_wm_state_sticky;
+#endif
 	if (c->oldh)
 		state[i++] = xa_net_wm_state_maximized_vert;
 	if (c->oldw)
@@ -144,7 +153,6 @@ void ewmh_set_net_wm_state(Client *c) {
 			XA_ATOM, 32, PropModeReplace,
 			(unsigned char *)&state, i);
 }
-#endif
 
 void ewmh_set_net_frame_extents(Window w) {
 	unsigned long extents[4];
