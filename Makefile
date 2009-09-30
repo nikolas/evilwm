@@ -5,6 +5,12 @@ CC       = gcc
 # Note that $(DESTDIR) is used by the Debian build process.
 prefix = $(DESTDIR)/usr
 
+INSTALL = install
+INSTALL_STRIP = -s
+INSTALL_DIR = $(INSTALL) -d -m 0755
+INSTALL_FILE = $(INSTALL) -m 0644
+INSTALL_PROGRAM = $(INSTALL) -m 0755 $(INSTALL_STRIP)
+
 XROOT    = /usr/X11R6
 INCLUDES = -I$(XROOT)/include
 LDPATH   = -L$(XROOT)/lib
@@ -73,7 +79,7 @@ SRCS     = client.c events.c list.c main.c misc.c new.c screen.c ewmh.c \
 	xconfig.c
 OBJS     = $(SRCS:.c=.o)
 
-.PHONY: all install install-strip dist debuild clean
+.PHONY: all install dist debuild clean
 
 all: evilwm
 
@@ -85,15 +91,12 @@ evilwm: $(OBJS)
 
 install: evilwm
 	if [ -f evilwm.exe ]; then mv evilwm.exe evilwm; fi
-	mkdir -p $(prefix)/bin $(prefix)/share/man/man1
-	mkdir -p $(prefix)/share/xsessions
-	install evilwm $(prefix)/bin
-	install evilwm.1 $(prefix)/share/man/man1
-	install evilwm.desktop $(prefix)/share/xsessions
-	#gzip -9 $(prefix)/share/man/man1/evilwm.1
-
-install-strip: install
-	strip $(prefix)/bin/evilwm
+	$(INSTALL_DIR) $(prefix)/bin
+	$(INSTALL_DIR) $(prefix)/share/man/man1
+	$(INSTALL_DIR) $(prefix)/share/xsessions
+	$(INSTALL_PROGRAM) evilwm $(prefix)/bin
+	$(INSTALL_FILE) evilwm.1 $(prefix)/share/man/man1
+	$(INSTALL_FILE) evilwm.desktop $(prefix)/share/xsessions
 
 dist:
 	darcs dist --dist-name $(distname)

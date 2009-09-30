@@ -4,6 +4,7 @@ Wed Sep 30 2009
   * Include actions in _NET_SUPPORTED
   * Support _NET_CLIENT_LIST property
   * Support _NET_CLIENT_LIST_STACKING property
+  * Makefile updates
 
 Sun Sep 27 2009
   * Include _NET_WM_ALLOWED_ACTIONS property
