@@ -64,7 +64,7 @@ int          opt_snap = 0;
 #ifdef SOLIDDRAG
 int          no_solid_drag = 0;  /* use solid drag by default */
 #endif
-Application  *head_app = NULL;
+struct list  *applications = NULL;
 
 /* Client tracking information */
 struct list     *clients_tab_order = NULL;
@@ -394,28 +394,31 @@ static void set_app(const char *arg) {
 		new->res_class = xmalloc(strlen(tmp)+1);
 		strcpy(new->res_class, tmp);
 	}
-	new->next = head_app;
-	head_app = new;
+	applications = list_prepend(applications, new);
 }
 
 static void set_app_geometry(const char *arg) {
-	if (!head_app)
-		return;
-	head_app->geometry_mask = XParseGeometry(arg,
-			&head_app->x, &head_app->y,
-			&head_app->width, &head_app->height);
+	if (applications) {
+		Application *app = applications->data;
+		app->geometry_mask = XParseGeometry(arg,
+				&app->x, &app->y, &app->width, &app->height);
+	}
 }
 
 #ifdef VWM
 static void set_app_vdesk(const char *arg) {
 	int v = atoi(arg);
-	if (head_app && valid_vdesk(v))
-		head_app->vdesk = v;
+	if (applications && valid_vdesk(v)) {
+		Application *app = applications->data;
+		app->vdesk = v;
+	}
 }
 
 static void set_app_sticky(void) {
-	if (head_app)
-		head_app->sticky = 1;
+	if (applications) {
+		Application *app = applications->data;
+		app->sticky = 1;
+	}
 }
 #endif
 

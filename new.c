@@ -104,9 +104,10 @@ void make_new_client(Window w, ScreenInfo *s) {
 	 * built with -app options */
 	class = XAllocClassHint();
 	if (class) {
-		Application *a = head_app;
+		struct list *aiter = applications;
 		XGetClassHint(dpy, w, class);
-		while (a) {
+		while (aiter) {
+			Application *a = aiter->data;
 			if ((!a->res_name || (class->res_name && !strcmp(class->res_name, a->res_name)))
 					&& (!a->res_class || (class->res_class && !strcmp(class->res_class, a->res_class)))) {
 				if (a->geometry_mask & WidthValue)
@@ -131,7 +132,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 				c->sticky = a->sticky;
 #endif
 			}
-			a = a->next;
+			aiter = aiter->next;
 		}
 		XFree(class->res_name);
 		XFree(class->res_class);

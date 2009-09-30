@@ -166,7 +166,6 @@ struct Application {
 	int vdesk;
 	int sticky;
 #endif
-	Application *next;
 };
 
 /* Declarations for global variables in main.c */
@@ -230,7 +229,7 @@ extern int              no_solid_drag;
 #else
 # define no_solid_drag (1)
 #endif
-extern Application      *head_app;
+extern struct list      *applications;
 
 /* Client tracking information */
 extern struct list      *clients_tab_order;
