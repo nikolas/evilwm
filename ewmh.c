@@ -167,6 +167,10 @@ void ewmh_withdraw_client(Client *c) {
 	XDeleteProperty(dpy, c->window, xa_net_wm_state);
 }
 
+void ewmh_select_client(Client *c) {
+	clients_tab_order = list_to_head(clients_tab_order, c);
+}
+
 #ifdef VWM
 void ewmh_set_net_current_desktop(ScreenInfo *s) {
 	unsigned long vdesk = s->vdesk;

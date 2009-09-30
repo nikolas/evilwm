@@ -67,7 +67,7 @@ int          no_solid_drag = 0;  /* use solid drag by default */
 Application  *head_app = NULL;
 
 /* Client tracking information */
-Client          *head_client = NULL;
+struct list     *clients_tab_order = NULL;
 Client          *current = NULL;
 volatile Window initialising = None;
 
@@ -191,7 +191,8 @@ int main(int argc, char *argv[]) {
 	event_main_loop();
 
 	/* Quit Nicely */
-	while(head_client) remove_client(head_client);
+	while (clients_tab_order)
+		remove_client(clients_tab_order->data);
 	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
 	if (font) XFreeFont(dpy, font);
 	{

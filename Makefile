@@ -69,7 +69,8 @@ CFLAGS  += $(DEFINES) $(INCLUDES) -Wall -W -Wstrict-prototypes -Wpointer-arith -
 LDFLAGS += $(LDPATH) $(LIBS)
 
 HEADERS  = evilwm.h log.h xconfig.h
-SRCS     = client.c events.c main.c misc.c new.c screen.c ewmh.c xconfig.c
+SRCS     = client.c events.c list.c main.c misc.c new.c screen.c ewmh.c \
+	xconfig.c
 OBJS     = $(SRCS:.c=.o)
 
 .PHONY: all install install-strip dist debuild clean

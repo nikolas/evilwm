@@ -22,20 +22,6 @@ const char *debug_atom_name(Atom a) {
 }
 #endif
 
-static void current_to_head(void) {
-	Client *c;
-	if (current && current != head_client) {
-		for (c = head_client; c; c = c->next) {
-			if (c->next == current) {
-				c->next = current->next;
-				current->next = head_client;
-				head_client = current;
-				break;
-			}
-		}
-	}
-}
-
 static void handle_key_event(XKeyEvent *e) {
 	KeySym key = XKeycodeToKeysym(dpy,e->keycode,0);
 	Client *c;
@@ -59,7 +45,7 @@ static void handle_key_event(XKeyEvent *e) {
 				} while (ev.type == KeyPress || XKeycodeToKeysym(dpy,ev.xkey.keycode,0) == KEY_NEXT);
 				XUngrabKeyboard(dpy, CurrentTime);
 			}
-			current_to_head();
+			ewmh_select_client(current);
 			break;
 #ifdef VWM
 		case XK_1: case XK_2: case XK_3: case XK_4:
@@ -308,7 +294,7 @@ static void handle_enter_event(XCrossingEvent *e) {
 			return;
 #endif
 		select_client(c);
-		current_to_head();
+		ewmh_select_client(c);
 	}
 }
 
@@ -420,10 +406,11 @@ void event_main_loop(void) {
 			}
 		}
 		if (need_client_tidy) {
-			Client *c, *nc;
+			struct list *iter, *niter;
 			need_client_tidy = 0;
-			for (c = head_client; c; c = nc) {
-				nc = c->next;
+			for (iter = clients_tab_order; iter; iter = niter) {
+				Client *c = iter->data;
+				niter = iter->next;
 				if (c->remove)
 					remove_client(c);
 			}

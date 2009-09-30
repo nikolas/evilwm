@@ -196,11 +196,13 @@ static void snap_client(Client *c) {
 	int dx, dy;
 	int dpy_width = DisplayWidth(dpy, c->screen->screen);
 	int dpy_height = DisplayHeight(dpy, c->screen->screen);
+	struct list *iter;
 	Client *ci;
 
 	/* snap to other windows */
 	dx = dy = opt_snap;
-	for (ci = head_client; ci; ci = ci->next) {
+	for (iter = clients_tab_order; iter; iter = iter->next) {
+		ci = iter->data;
 		if (ci != c
 				&& (ci->screen == c->screen)
 #ifdef VWM
@@ -386,17 +388,19 @@ void unhide(Client *c, int raise_win) {
 }
 
 void next(void) {
+	struct list *newl = list_find(clients_tab_order, current);
 	Client *newc = current;
 	do {
-		if (newc) {
-			newc = newc->next;
-			if (!newc && !current)
+		if (newl) {
+			newl = newl->next;
+			if (!newl && !current)
 				return;
 		}
-		if (!newc)
-			newc = head_client;
-		if (!newc)
+		if (!newl)
+			newl = clients_tab_order;
+		if (!newl)
 			return;
+		newc = newl->data;
 		if (newc == current)
 			return;
 	}
@@ -419,7 +423,7 @@ void next(void) {
 
 #ifdef VWM
 void switch_vdesk(ScreenInfo *s, int v) {
-	Client *c;
+	struct list *iter;
 #ifdef DEBUG
 	int hidden = 0, raised = 0;
 #endif
@@ -430,7 +434,8 @@ void switch_vdesk(ScreenInfo *s, int v) {
 	if (current && !is_sticky(current)) {
 		select_client(NULL);
 	}
-	for (c = head_client; c; c = c->next) {
+	for (iter = clients_tab_order; iter; iter = iter->next) {
+		Client *c = iter->data;
 		if (c->screen != s)
 			continue;
 		if (is_sticky(c) && c->vdesk != v) {

@@ -13,11 +13,13 @@ static int send_xmessage(Window w, Atom a, long x);
  * either window or parent */
 
 Client *find_client(Window w) {
-	Client *c;
+	struct list *iter;
 
-	for (c = head_client; c; c = c->next)
+	for (iter = clients_tab_order; iter; iter = iter->next) {
+		Client *c = iter->data;
 		if (w == c->parent || w == c->window)
 			return c;
+	}
 	return NULL;
 }
 
@@ -125,8 +127,6 @@ void fix_client(Client *c, int action) {
 #endif
 
 void remove_client(Client *c) {
-	Client *p;
-
 	LOG_ENTER("remove_client(window=%lx, %s)", c->window, c->remove ? "withdrawing" : "wm quitting");
 
 	XGrabServer(dpy);
@@ -156,18 +156,16 @@ void remove_client(Client *c) {
 	if (c->parent)
 		XDestroyWindow(dpy, c->parent);
 
-	if (head_client == c) head_client = c->next;
-	else for (p = head_client; p && p->next; p = p->next)
-		if (p->next == c) p->next = c->next;
+	clients_tab_order = list_delete(clients_tab_order, c);
 
 	if (current == c)
 		current = NULL;  /* an enter event should set this up again */
 	free(c);
 #ifdef DEBUG
 	{
-		Client *pp;
+		struct list *iter;
 		int i = 0;
-		for (pp = head_client; pp; pp = pp->next)
+		for (iter = clients_tab_order; iter; iter = iter->next)
 			i++;
 		LOG_DEBUG("free(), window count now %d\n", i);
 	}

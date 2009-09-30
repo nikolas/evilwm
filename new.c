@@ -62,8 +62,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 		LOG_LEAVE();
 		return;
 	}
-	c->next = head_client;
-	head_client = c;
+	clients_tab_order = list_prepend(clients_tab_order, c);
 
 	c->screen = s;
 	c->window = w;
@@ -81,9 +80,9 @@ void make_new_client(Window w, ScreenInfo *s) {
 
 #ifdef DEBUG
 	{
-		Client *p;
+		struct list *iter;
 		int i = 0;
-		for (p = head_client; p; p = p->next)
+		for (iter = clients_tab_order; iter; iter = iter->next)
 			i++;
 		LOG_DEBUG("new window %dx%d+%d+%d, wincount=%d\n", c->width, c->height, c->x, c->y, i);
 	}
