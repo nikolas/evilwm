@@ -87,6 +87,17 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_wm_state_maximized_vert,
 		xa_net_wm_state_maximized_horz,
 		xa_net_wm_state_fullscreen,
+		xa_net_wm_allowed_actions,
+		/* Not sure if it makes any sense including every action here
+		 * as they'll already be listed per-client in the
+		 * _NET_WM_ALOWED_ACTIONS property, but EWMH spec is unclear.
+		 * */
+#ifdef VWM
+		xa_net_wm_action_stick,
+#endif
+		xa_net_wm_action_maximize_horz,
+		xa_net_wm_action_maximize_vert,
+		xa_net_wm_action_fullscreen,
 		xa_net_frame_extents,
 	};
 #ifdef VWM
