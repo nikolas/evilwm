@@ -69,6 +69,7 @@ struct list  *applications = NULL;
 /* Client tracking information */
 struct list     *clients_tab_order = NULL;
 struct list     *clients_mapping_order = NULL;
+struct list     *clients_stacking_order = NULL;
 Client          *current = NULL;
 volatile Window initialising = None;
 
@@ -192,8 +193,8 @@ int main(int argc, char *argv[]) {
 	event_main_loop();
 
 	/* Quit Nicely */
-	while (clients_tab_order)
-		remove_client(clients_tab_order->data);
+	while (clients_stacking_order)
+		remove_client(clients_stacking_order->data);
 	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
 	if (font) XFreeFont(dpy, font);
 	{

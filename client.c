@@ -158,6 +158,7 @@ void remove_client(Client *c) {
 
 	clients_tab_order = list_delete(clients_tab_order, c);
 	clients_mapping_order = list_delete(clients_mapping_order, c);
+	clients_stacking_order = list_delete(clients_stacking_order, c);
 	/* If the wm is quitting, we'll remove the client list properties
 	 * soon enough, otherwise: */
 	if (c->remove) {

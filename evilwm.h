@@ -234,6 +234,7 @@ extern struct list      *applications;
 /* Client tracking information */
 extern struct list      *clients_tab_order;
 extern struct list      *clients_mapping_order;
+extern struct list      *clients_stacking_order;
 extern Client           *current;
 extern volatile Window  initialising;
 
@@ -297,7 +298,10 @@ void ewmh_init_client(Client *c);
 void ewmh_deinit_client(Client *c);
 void ewmh_withdraw_client(Client *c);
 void ewmh_select_client(Client *c);
+void ewmh_raise_client(Client *c);
+void ewmh_lower_client(Client *c);
 void ewmh_set_net_client_list(ScreenInfo *s);
+void ewmh_set_net_client_list_stacking(ScreenInfo *s);
 #ifdef VWM
 void ewmh_set_net_current_desktop(ScreenInfo *s);
 void ewmh_set_net_wm_desktop(Client *c);

@@ -129,6 +129,7 @@ static void handle_key_event(XKeyEvent *e) {
 			break;
 		case KEY_LOWER: case KEY_ALTLOWER:
 			XLowerWindow(dpy, c->parent);
+			ewmh_lower_client(c);
 			break;
 		case KEY_INFO:
 			show_info(c, key);
@@ -170,7 +171,9 @@ static void handle_button_event(XButtonEvent *e) {
 			case Button2:
 				sweep(c); break;
 			case Button3:
-				XLowerWindow(dpy, c->parent); break;
+				XLowerWindow(dpy, c->parent);
+				ewmh_lower_client(c);
+				break;
 			default: break;
 		}
 	}

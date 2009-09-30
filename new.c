@@ -64,6 +64,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	}
 	clients_tab_order = list_prepend(clients_tab_order, c);
 	clients_mapping_order = list_append(clients_mapping_order, c);
+	clients_stacking_order = list_append(clients_stacking_order, c);
 
 	c->screen = s;
 	c->window = w;

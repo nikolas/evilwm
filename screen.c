@@ -122,6 +122,7 @@ void sweep(Client *c) {
 	if (!grab_pointer(c->screen->root, MouseMask, resize_curs)) return;
 
 	XRaiseWindow(dpy, c->parent);
+	ewmh_raise_client(c);
 #ifdef INFOBANNER_MOVERESIZE
 	create_info_window(c);
 #endif
@@ -250,6 +251,7 @@ void drag(Client *c) {
 
 	if (!grab_pointer(c->screen->root, MouseMask, move_curs)) return;
 	XRaiseWindow(dpy, c->parent);
+	ewmh_raise_client(c);
 	get_mouse_position(&x1, &y1, c->screen->root);
 #ifdef INFOBANNER_MOVERESIZE
 	create_info_window(c);
@@ -308,6 +310,7 @@ void drag(Client *c) {
 
 void moveresize(Client *c) {
 	XRaiseWindow(dpy, c->parent);
+	ewmh_raise_client(c);
 	XMoveResizeWindow(dpy, c->parent, c->x - c->border, c->y - c->border,
 			c->width, c->height);
 	XMoveResizeWindow(dpy, c->window, 0, 0, c->width, c->height);
@@ -383,7 +386,13 @@ void hide(Client *c) {
 #endif
 
 void unhide(Client *c, int raise_win) {
-	raise_win ? XMapRaised(dpy, c->parent) : XMapWindow(dpy, c->parent);
+	if (raise_win) {
+		XMapRaised(dpy, c->parent);
+		clients_stacking_order = list_to_tail(clients_stacking_order, c);
+		ewmh_set_net_client_list_stacking(c->screen);
+	} else {
+		XMapWindow(dpy, c->parent);
+	}
 	set_wm_state(c, NormalState);
 }
 
