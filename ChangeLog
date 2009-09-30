@@ -5,6 +5,9 @@ Wed Sep 30 2009
   * Support _NET_CLIENT_LIST property
   * Support _NET_CLIENT_LIST_STACKING property
   * Makefile updates
+  * Report _NET_ACTIVE_WINDOW
+  * Accept _NET_ACTIVE_WINDOW client message
+  But only if from direct user action (source indication is 2).
 
 Sun Sep 27 2009
   * Include _NET_WM_ALLOWED_ACTIONS property
