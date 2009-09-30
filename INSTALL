@@ -1,7 +1,7 @@
 BUILDING EVILWM
 
-1) Edit Makefile to suit what you want.  Instructions are included by any
-   user-editable option.
+1) Edit Makefile to include the options you need (most people will not need
+   to do this).  Instructions are included by any user-editable option.
 
 2) Run 'make'
 

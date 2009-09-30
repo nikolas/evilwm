@@ -1,10 +1,11 @@
-Desired functionality for 1.2.x:
-
-   * EWMH compliance, including:
+Desired functionality for 1.1.x:
+   * EWMH support, including:
         + Client control via root window messages.
-        + Client ordering maintained bearing in mind _NET_WM_WINDOW_TYPE.
-     I already have some work towards this.
    * A few things can probably cease to be compile-time options.
    * Better interoperation with Xinerama (David Flynn has some patches
      for this).
    * Option for new windows to tile as well as possible.
+
+Desired functionality for 1.2.x:
+
+   * EWMH compliance.

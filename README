@@ -15,6 +15,7 @@ FEATURES
  * Solid window drags (optional - may be slow on old machines).
  * Virtual desktops.
  * Small binary size (even with everything turned on).
+ * Reasonable EWMH support (though not yet fully compliant).
 
 
 INSTALLATION
