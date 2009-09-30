@@ -157,6 +157,12 @@ void remove_client(Client *c) {
 		XDestroyWindow(dpy, c->parent);
 
 	clients_tab_order = list_delete(clients_tab_order, c);
+	clients_mapping_order = list_delete(clients_mapping_order, c);
+	/* If the wm is quitting, we'll remove the client list properties
+	 * soon enough, otherwise: */
+	if (c->remove) {
+		ewmh_set_net_client_list(c->screen);
+	}
 
 	if (current == c)
 		current = NULL;  /* an enter event should set this up again */

@@ -9,6 +9,7 @@
 
 /* Root Window Properties (and Related Messages) */
 static Atom xa_net_supported;
+static Atom xa_net_client_list;
 #ifdef VWM
 static Atom xa_net_number_of_desktops;
 Atom xa_net_current_desktop;
@@ -39,6 +40,7 @@ Atom xa_net_frame_extents;
 void ewmh_init(void) {
 	/* Root Window Properties (and Related Messages) */
 	xa_net_supported = XInternAtom(dpy, "_NET_SUPPORTED", False);
+	xa_net_client_list = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
 #ifdef VWM
 	xa_net_number_of_desktops = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
 	xa_net_current_desktop = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
@@ -70,6 +72,7 @@ void ewmh_init(void) {
 void ewmh_init_screen(ScreenInfo *s) {
 	unsigned long pid = getpid();
 	Atom supported[] = {
+		xa_net_client_list,
 #ifdef VWM
 		xa_net_number_of_desktops,
 		xa_net_current_desktop,
@@ -132,6 +135,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 }
 
 void ewmh_deinit_screen(ScreenInfo *s) {
+	XDeleteProperty(dpy, s->root, xa_net_client_list);
 	XDeleteProperty(dpy, s->root, xa_net_supported);
 #ifdef VWM
 	XDeleteProperty(dpy, s->root, xa_net_number_of_desktops);
@@ -169,6 +173,19 @@ void ewmh_withdraw_client(Client *c) {
 
 void ewmh_select_client(Client *c) {
 	clients_tab_order = list_to_head(clients_tab_order, c);
+}
+
+void ewmh_set_net_client_list(ScreenInfo *s) {
+	struct list *iter;
+	XDeleteProperty(dpy, s->root, xa_net_client_list);
+	for (iter = clients_mapping_order; iter; iter = iter->next) {
+		Client *c = iter->data;
+		if (c->screen == s) {
+			XChangeProperty(dpy, s->root, xa_net_client_list,
+					XA_WINDOW, 32, PropModeAppend,
+					(unsigned char *)&c->window, 1);
+		}
+	}
 }
 
 #ifdef VWM

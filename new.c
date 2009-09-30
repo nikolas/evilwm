@@ -63,6 +63,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 		return;
 	}
 	clients_tab_order = list_prepend(clients_tab_order, c);
+	clients_mapping_order = list_append(clients_mapping_order, c);
 
 	c->screen = s;
 	c->window = w;
@@ -137,6 +138,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 		XFree(class);
 	}
 	ewmh_init_client(c);
+	ewmh_set_net_client_list(c->screen);
 
 	/* Only map the window frame (and thus the window) if it's supposed
 	 * to be visible on this virtual desktop. */

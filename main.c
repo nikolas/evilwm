@@ -68,6 +68,7 @@ Application  *head_app = NULL;
 
 /* Client tracking information */
 struct list     *clients_tab_order = NULL;
+struct list     *clients_mapping_order = NULL;
 Client          *current = NULL;
 volatile Window initialising = None;
 
