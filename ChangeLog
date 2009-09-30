@@ -1,5 +1,13 @@
 *** Changes between 1.0.1 and 1.1.0:
 
+Wed Sep 30 2009
+  * Include actions in _NET_SUPPORTED
+  * Support _NET_CLIENT_LIST property
+  * Support _NET_CLIENT_LIST_STACKING property
+
+Sun Sep 27 2009
+  * Include _NET_WM_ALLOWED_ACTIONS property
+
 Sat Sep 12 2009
   * Snap-to-border and colourmap support no longer optional
   Though -snap still defaults to 0 (off).
