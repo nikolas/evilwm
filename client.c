@@ -111,6 +111,7 @@ void select_client(Client *c) {
 		XSetInputFocus(dpy, c->window, RevertToPointerRoot, CurrentTime);
 	}
 	current = c;
+	ewmh_set_net_active_window(c);
 }
 
 #ifdef VWM

@@ -15,6 +15,7 @@ static Atom xa_net_client_list_stacking;
 static Atom xa_net_number_of_desktops;
 Atom xa_net_current_desktop;
 #endif
+static Atom xa_net_active_window;
 static Atom xa_net_supporting_wm_check;
 Atom xa_net_request_frame_extents;
 
@@ -47,6 +48,7 @@ void ewmh_init(void) {
 	xa_net_number_of_desktops = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
 	xa_net_current_desktop = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
 #endif
+	xa_net_active_window = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	xa_net_supporting_wm_check = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
 	xa_net_request_frame_extents = XInternAtom(dpy, "_NET_REQUEST_FRAME_EXTENTS", False);
 
@@ -80,6 +82,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_number_of_desktops,
 		xa_net_current_desktop,
 #endif
+		xa_net_active_window,
 		xa_net_supporting_wm_check,
 		xa_net_request_frame_extents,
 
@@ -145,6 +148,7 @@ void ewmh_deinit_screen(ScreenInfo *s) {
 	XDeleteProperty(dpy, s->root, xa_net_number_of_desktops);
 	XDeleteProperty(dpy, s->root, xa_net_current_desktop);
 #endif
+	XDeleteProperty(dpy, s->root, xa_net_active_window);
 	XDeleteProperty(dpy, s->root, xa_net_supporting_wm_check);
 	XDestroyWindow(dpy, s->supporting);
 }
@@ -222,7 +226,24 @@ void ewmh_set_net_current_desktop(ScreenInfo *s) {
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&vdesk, 1);
 }
+#endif
 
+void ewmh_set_net_active_window(Client *c) {
+	int i;
+	for (i = 0; i < num_screens; i++) {
+		Window w;
+		if (c && i == c->screen->screen) {
+			w = c->window;
+		} else {
+			w = None;
+		}
+		XChangeProperty(dpy, screens[i].root, xa_net_active_window,
+				XA_WINDOW, 32, PropModeReplace,
+				(unsigned char *)&w, 1);
+	}
+}
+
+#ifdef VWM
 void ewmh_set_net_wm_desktop(Client *c) {
 	unsigned long vdesk = c->vdesk;
 	XChangeProperty(dpy, c->window, xa_net_wm_desktop,

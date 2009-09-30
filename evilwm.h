@@ -304,6 +304,9 @@ void ewmh_set_net_client_list(ScreenInfo *s);
 void ewmh_set_net_client_list_stacking(ScreenInfo *s);
 #ifdef VWM
 void ewmh_set_net_current_desktop(ScreenInfo *s);
+#endif
+void ewmh_set_net_active_window(Client *c);
+#ifdef VWM
 void ewmh_set_net_wm_desktop(Client *c);
 #endif
 void ewmh_set_net_wm_state(Client *c);

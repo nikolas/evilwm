@@ -369,6 +369,7 @@ static void setup_display(void) {
 		XFree(wins);
 		ewmh_init_screen(&screens[i]);
 	}
+	ewmh_set_net_active_window(NULL);
 	LOG_LEAVE();
 }
 
