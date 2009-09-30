@@ -201,6 +201,7 @@ extern Atom xa_evilwm_unmaximised_vert;
 #ifdef VWM
 extern Atom xa_net_current_desktop;
 #endif
+extern Atom xa_net_active_window;
 extern Atom xa_net_request_frame_extents;
 
 /* EWMH: Application Window Properties */

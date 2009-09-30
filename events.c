@@ -335,6 +335,17 @@ static void handle_client_message(XClientMessageEvent *e) {
 	}
 #endif
 	c = find_client(e->window);
+	if (e->message_type == xa_net_active_window) {
+		/* Only do this if it came from direct user action */
+		if (e->data.l[0] == 2) {
+#ifdef VWM
+			if (c->screen == s)
+#endif
+				select_client(c);
+		}
+		LOG_LEAVE();
+		return;
+	}
 	if (!c && e->message_type == xa_net_request_frame_extents) {
 		ewmh_set_net_frame_extents(e->window);
 		LOG_LEAVE();

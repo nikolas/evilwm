@@ -15,7 +15,7 @@ static Atom xa_net_client_list_stacking;
 static Atom xa_net_number_of_desktops;
 Atom xa_net_current_desktop;
 #endif
-static Atom xa_net_active_window;
+Atom xa_net_active_window;
 static Atom xa_net_supporting_wm_check;
 Atom xa_net_request_frame_extents;
 
