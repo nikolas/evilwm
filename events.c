@@ -385,6 +385,26 @@ static void handle_client_message(XClientMessageEvent *e) {
 		LOG_LEAVE();
 		return;
 	}
+#ifdef VWM
+	if (e->message_type == xa_net_wm_desktop) {
+		/* Only do this if it came from direct user action */
+		if (e->data.l[1] == 2) {
+			if (!is_sticky(c)
+					&& valid_vdesk(e->data.l[0])
+					&& c->vdesk != e->data.l[0]) {
+				c->vdesk = e->data.l[0];
+				if (c->vdesk == s->vdesk) {
+					unhide(c, NO_RAISE);
+				} else {
+					hide(c);
+				}
+				ewmh_set_net_wm_desktop(c);
+			}
+		}
+		LOG_LEAVE();
+		return;
+	}
+#endif
 	if (e->message_type == xa_net_wm_state) {
 		int i, maximise_hv = 0;
 		/* Message can contain up to two state changes: */

@@ -41,6 +41,7 @@ static Atom xa_net_wm_action_stick;
 static Atom xa_net_wm_action_maximize_horz;
 static Atom xa_net_wm_action_maximize_vert;
 static Atom xa_net_wm_action_fullscreen;
+static Atom xa_net_wm_action_change_desktop;
 static Atom xa_net_wm_pid;
 Atom xa_net_frame_extents;
 
@@ -79,6 +80,7 @@ void ewmh_init(void) {
 	xa_net_wm_action_maximize_horz = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_HORZ", False);
 	xa_net_wm_action_maximize_vert = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_VERT", False);
 	xa_net_wm_action_fullscreen = XInternAtom(dpy, "_NET_WM_ACTION_FULLSCREEN", False);
+	xa_net_wm_action_change_desktop = XInternAtom(dpy, "_NET_WM_ACTION_CHANGE_DESKTOP", False);
 	xa_net_wm_pid = XInternAtom(dpy, "_NET_WM_PID", False);
 	xa_net_frame_extents = XInternAtom(dpy, "_NET_FRAME_EXTENTS", False);
 }
@@ -121,6 +123,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_wm_action_maximize_horz,
 		xa_net_wm_action_maximize_vert,
 		xa_net_wm_action_fullscreen,
+		xa_net_wm_action_change_desktop,
 		xa_net_frame_extents,
 	};
 #ifdef VWM
@@ -176,6 +179,7 @@ void ewmh_init_client(Client *c) {
 		xa_net_wm_action_maximize_horz,
 		xa_net_wm_action_maximize_vert,
 		xa_net_wm_action_fullscreen,
+		xa_net_wm_action_change_desktop,
 		/* nelements reduced to omit this if not possible: */
 		xa_net_wm_action_resize,
 	};
