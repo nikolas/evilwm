@@ -180,51 +180,64 @@ static void handle_button_event(XButtonEvent *e) {
 }
 #endif
 
+static void do_window_changes(int value_mask, XWindowChanges *wc, Client *c,
+		int gravity) {
+	ungravitate(c);
+	if (value_mask & CWX) c->x = wc->x;
+	if (value_mask & CWY) c->y = wc->y;
+	if (value_mask & CWWidth) {
+		c->width = wc->width;
+		if (c->width < c->min_width)
+			c->width = c->min_width;
+		if (c->max_width && c->width > c->max_width)
+			c->width = c->max_width;
+	}
+	if (value_mask & CWHeight) {
+		c->height = wc->height;
+		if (c->height < c->min_height)
+			c->height = c->min_height;
+		if (c->max_height && c->height > c->max_height)
+			c->height = c->max_height;
+	}
+	if (c->x == 0 && c->width >= DisplayWidth(dpy, c->screen->screen)) {
+		c->x -= c->border;
+	}
+	if (c->y == 0 && c->height >= DisplayHeight(dpy, c->screen->screen)) {
+		c->y -= c->border;
+	}
+	gravitate(c, gravity);
+	wc->x = c->x - c->border;
+	wc->y = c->y - c->border;
+	wc->border_width = c->border;
+	XConfigureWindow(dpy, c->parent, value_mask, wc);
+	XMoveResizeWindow(dpy, c->window, 0, 0, c->width, c->height);
+	if ((value_mask & (CWX|CWY)) && !(value_mask & (CWWidth|CWHeight))) {
+		send_config(c);
+	}
+}
+
 static void handle_configure_request(XConfigureRequestEvent *e) {
 	Client *c = find_client(e->window);
 	XWindowChanges wc;
-	unsigned int value_mask = e->value_mask;
 
-	wc.sibling = e->above;
-	wc.stack_mode = e->detail;
+	wc.x = e->x;
+	wc.y = e->y;
 	wc.width = e->width;
 	wc.height = e->height;
+	wc.border_width = 0;
+	wc.sibling = e->above;
+	wc.stack_mode = e->detail;
 	if (c) {
-		ungravitate(c);
-		if (value_mask & CWWidth) c->width = e->width;
-		if (value_mask & CWHeight) c->height = e->height;
-		if (value_mask & CWX) c->x = e->x;
-		if (value_mask & CWY) c->y = e->y;
-		if (value_mask & CWStackMode && value_mask & CWSibling) {
+		if (e->value_mask & CWStackMode && e->value_mask & CWSibling) {
 			Client *sibling = find_client(e->above);
 			if (sibling) {
 				wc.sibling = sibling->parent;
 			}
 		}
-		if (c->x == 0 && c->width >= DisplayWidth(dpy, c->screen->screen)) {
-			c->x -= c->border;
-		}
-		if (c->y == 0 && c->height >= DisplayHeight(dpy, c->screen->screen)) {
-			c->y -= c->border;
-		}
-		gravitate(c);
-
-		wc.x = c->x - c->border;
-		wc.y = c->y - c->border;
-		wc.border_width = c->border;
-		LOG_XENTER("XConfigureWindow(parent=%lx, value_mask=%lx)", (unsigned int)c->parent, value_mask);
-		XConfigureWindow(dpy, c->parent, value_mask, &wc);
-		LOG_XLEAVE();
-		XMoveResizeWindow(dpy, c->window, 0, 0, c->width, c->height);
-		if ((value_mask & (CWX|CWY)) && !(value_mask & (CWWidth|CWHeight))) {
-			send_config(c);
-		}
-		wc.border_width = 0;
+		do_window_changes(e->value_mask, &wc, c, 0);
 	} else {
-		wc.x = c ? 0 : e->x;
-		wc.y = c ? 0 : e->y;
-		LOG_XENTER("XConfigureWindow(window=%lx, value_mask=%lx)", (unsigned int)e->window, value_mask);
-		XConfigureWindow(dpy, e->window, value_mask, &wc);
+		LOG_XENTER("XConfigureWindow(window=%lx, value_mask=%lx)", (unsigned int)e->window, e->value_mask);
+		XConfigureWindow(dpy, e->window, e->value_mask, &wc);
 		LOG_XLEAVE();
 	}
 }
@@ -335,6 +348,15 @@ static void handle_client_message(XClientMessageEvent *e) {
 	}
 #endif
 	c = find_client(e->window);
+	if (!c && e->message_type == xa_net_request_frame_extents) {
+		ewmh_set_net_frame_extents(e->window);
+		LOG_LEAVE();
+		return;
+	}
+	if (!c) {
+		LOG_LEAVE();
+		return;
+	}
 	if (e->message_type == xa_net_active_window) {
 		/* Only do this if it came from direct user action */
 		if (e->data.l[0] == 2) {
@@ -346,8 +368,20 @@ static void handle_client_message(XClientMessageEvent *e) {
 		LOG_LEAVE();
 		return;
 	}
-	if (!c && e->message_type == xa_net_request_frame_extents) {
-		ewmh_set_net_frame_extents(e->window);
+	if (e->message_type == xa_net_moveresize_window) {
+		/* Only do this if it came from direct user action */
+		int source_indication = (e->data.l[0] >> 12) & 3;
+		if (source_indication == 2) {
+			int value_mask = (e->data.l[0] >> 8) & 0x0f;
+			int gravity = e->data.l[0] & 0xff;
+			XWindowChanges wc;
+
+			wc.x = e->data.l[1];
+			wc.y = e->data.l[2];
+			wc.width = e->data.l[3];
+			wc.height = e->data.l[4];
+			do_window_changes(value_mask, &wc, c, gravity);
+		}
 		LOG_LEAVE();
 		return;
 	}

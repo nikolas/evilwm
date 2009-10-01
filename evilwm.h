@@ -98,8 +98,8 @@ typedef struct {
 		unsigned int dui; \
 		XQueryPointer(dpy, root, &dw, &dw, xp, yp, &di, &di, &dui); \
 	} while (0)
-#define gravitate(c) gravitate_client(c, 1)
-#define ungravitate(c) gravitate_client(c, -1)
+#define gravitate(c,g) gravitate_client(c, 1, g)
+#define ungravitate(c) gravitate_client(c, -1, c->win_gravity)
 
 #define is_sticky(c) (c->sticky)
 #define add_sticky(c) c->sticky = 1
@@ -146,6 +146,7 @@ struct Client {
 	int             max_width, max_height;
 	int             width_inc, height_inc;
 	int             base_width, base_height;
+	int             win_gravity_hint;
 	int             win_gravity;
 	int             old_border;
 #ifdef VWM
@@ -202,6 +203,9 @@ extern Atom xa_evilwm_unmaximised_vert;
 extern Atom xa_net_current_desktop;
 #endif
 extern Atom xa_net_active_window;
+
+/* EWMH: Other Root Window Messages */
+extern Atom xa_net_moveresize_window;
 extern Atom xa_net_request_frame_extents;
 
 /* EWMH: Application Window Properties */
@@ -245,7 +249,7 @@ extern int wm_exit;
 /* client.c */
 
 Client *find_client(Window w);
-void gravitate_client(Client *c, int sign);
+void gravitate_client(Client *c, int sign, int gravity);
 void select_client(Client *c);
 #ifdef VWM
 void fix_client(Client *c, int action);

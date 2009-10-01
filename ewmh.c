@@ -17,6 +17,9 @@ Atom xa_net_current_desktop;
 #endif
 Atom xa_net_active_window;
 static Atom xa_net_supporting_wm_check;
+
+/* Other Root Window Messages */
+Atom xa_net_moveresize_window;
 Atom xa_net_request_frame_extents;
 
 /* Application Window Properties */
@@ -32,6 +35,8 @@ Atom xa_net_wm_state_maximized_vert;
 Atom xa_net_wm_state_maximized_horz;
 Atom xa_net_wm_state_fullscreen;
 static Atom xa_net_wm_allowed_actions;
+static Atom xa_net_wm_action_move;
+static Atom xa_net_wm_action_resize;
 static Atom xa_net_wm_action_stick;
 static Atom xa_net_wm_action_maximize_horz;
 static Atom xa_net_wm_action_maximize_vert;
@@ -50,6 +55,9 @@ void ewmh_init(void) {
 #endif
 	xa_net_active_window = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	xa_net_supporting_wm_check = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
+
+	/* Other Root Window Messages */
+	xa_net_moveresize_window = XInternAtom(dpy, "_NET_MOVERESIZE_WINDOW", False);
 	xa_net_request_frame_extents = XInternAtom(dpy, "_NET_REQUEST_FRAME_EXTENTS", False);
 
 	/* Application Window Properties */
@@ -65,6 +73,8 @@ void ewmh_init(void) {
 	xa_net_wm_state_maximized_horz = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
 	xa_net_wm_state_fullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
 	xa_net_wm_allowed_actions = XInternAtom(dpy, "_NET_WM_ALLOWED_ACTIONS", False);
+	xa_net_wm_action_move = XInternAtom(dpy, "_NET_WM_ACTION_MOVE", False);
+	xa_net_wm_action_resize = XInternAtom(dpy, "_NET_WM_ACTION_RESIZE", False);
 	xa_net_wm_action_stick = XInternAtom(dpy, "_NET_WM_ACTION_STICK", False);
 	xa_net_wm_action_maximize_horz = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_HORZ", False);
 	xa_net_wm_action_maximize_vert = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_VERT", False);
@@ -84,6 +94,8 @@ void ewmh_init_screen(ScreenInfo *s) {
 #endif
 		xa_net_active_window,
 		xa_net_supporting_wm_check,
+
+		xa_net_moveresize_window,
 		xa_net_request_frame_extents,
 
 #ifdef VWM
@@ -101,6 +113,8 @@ void ewmh_init_screen(ScreenInfo *s) {
 		 * as they'll already be listed per-client in the
 		 * _NET_WM_ALOWED_ACTIONS property, but EWMH spec is unclear.
 		 * */
+		xa_net_wm_action_move,
+		xa_net_wm_action_resize,
 #ifdef VWM
 		xa_net_wm_action_stick,
 #endif
@@ -155,17 +169,25 @@ void ewmh_deinit_screen(ScreenInfo *s) {
 
 void ewmh_init_client(Client *c) {
 	Atom allowed_actions[] = {
+		xa_net_wm_action_move,
 #ifdef VWM
 		xa_net_wm_action_stick,
 #endif
 		xa_net_wm_action_maximize_horz,
 		xa_net_wm_action_maximize_vert,
-		xa_net_wm_action_fullscreen
+		xa_net_wm_action_fullscreen,
+		/* nelements reduced to omit this if not possible: */
+		xa_net_wm_action_resize,
 	};
+	int nelements = sizeof(allowed_actions) / sizeof(Atom);
+	/* Omit resize element if resizing not possible: */
+	if (c->max_width && c->max_width == c->min_width
+			&& c->max_height && c->max_height == c->min_height)
+		nelements--;
 	XChangeProperty(dpy, c->window, xa_net_wm_allowed_actions,
 			XA_ATOM, 32, PropModeReplace,
 			(unsigned char *)&allowed_actions,
-			sizeof(allowed_actions) / sizeof(Atom));
+			nelements);
 }
 
 void ewmh_deinit_client(Client *c) {

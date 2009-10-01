@@ -267,7 +267,7 @@ static void init_geometry(Client *c) {
 		/* The reparent that is to come would trigger an unmap event */
 		c->ignore_unmap++;
 	}
-	gravitate(c);
+	gravitate(c, 0);
 }
 
 static void reparent(Client *c) {
@@ -332,10 +332,11 @@ long get_wm_normal_hints(Client *c) {
 		c->min_height = c->base_height + c->height_inc;
 	}
 	if (flags & PWinGravity) {
-		c->win_gravity = size->win_gravity;
+		c->win_gravity_hint = size->win_gravity;
 	} else {
-		c->win_gravity = NorthWestGravity;
+		c->win_gravity_hint = NorthWestGravity;
 	}
+	c->win_gravity = c->win_gravity_hint;
 	XFree(size);
 	return flags;
 }

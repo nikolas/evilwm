@@ -52,13 +52,18 @@ void send_config(Client *c) {
 	XSendEvent(dpy, c->window, False, StructureNotifyMask, (XEvent *)&ce);
 }
 
-/* Support for 'gravitating' clients based on their original
- * border width and configured window manager frame width. */
-void gravitate_client(Client *c, int sign) {
+/* Support for 'gravitating' clients based on their original border width and
+ * configured window manager frame width.  If the 'gravity' arg is non-zero,
+ * the win_gravity hint read when the client was initialised is used.  Set sign
+ * = 1 to gravitate or sign = -1 to reverse the process. */
+void gravitate_client(Client *c, int sign, int gravity) {
 	int d0 = sign * c->border;
 	int d1 = sign * c->old_border;
 	int d2 = sign * (2*c->old_border - c->border);
-	switch (c->win_gravity) {
+	if (gravity == 0)
+		gravity = c->win_gravity_hint;
+	c->win_gravity = gravity;
+	switch (gravity) {
 		case NorthGravity:
 			c->x += d1;
 			c->y += d0;
