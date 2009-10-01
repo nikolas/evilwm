@@ -132,7 +132,7 @@ static void handle_key_event(XKeyEvent *e) {
 			ewmh_lower_client(c);
 			break;
 		case KEY_INFO:
-			show_info(c, key);
+			show_info(c, e->keycode);
 			break;
 		case KEY_MAX:
 			maximise_client(c, NET_WM_STATE_TOGGLE, MAXIMISE_HORZ|MAXIMISE_VERT);

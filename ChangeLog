@@ -5,6 +5,7 @@ Thu Oct  1 2009
   Similar to ConfigureRequests but including optional alternate gravity.
   * Accept _NET_WM_DESKTOP client message
   * Accept _NET_CLOSE_WINDOW client message
+  * Make show_info check for keycode instead of specific keysym
 
 Wed Sep 30 2009
   * Include actions in _NET_SUPPORTED

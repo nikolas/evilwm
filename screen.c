@@ -161,7 +161,7 @@ void sweep(Client *c) {
 }
 #endif
 
-void show_info(Client *c, KeySym key) {
+void show_info(Client *c, unsigned int keycode) {
 	XEvent ev;
 	XKeyboardState keyboard;
 
@@ -175,7 +175,7 @@ void show_info(Client *c, KeySym key) {
 #endif
 	do {
 		XMaskEvent(dpy, KeyReleaseMask, &ev);
-	} while (XKeycodeToKeysym(dpy,ev.xkey.keycode,0) != key);
+	} while (ev.xkey.keycode != keycode);
 #ifdef INFOBANNER
 	remove_info_window();
 #else

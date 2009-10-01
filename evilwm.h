@@ -283,7 +283,7 @@ long get_wm_normal_hints(Client *c);
 void drag(Client *c);
 void moveresize(Client *c);
 void maximise_client(Client *c, int action, int hv);
-void show_info(Client *c, KeySym key);
+void show_info(Client *c, unsigned int keycode);
 void sweep(Client *c);
 void unhide(Client *c, int raise_win);
 void next(void);
