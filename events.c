@@ -368,6 +368,14 @@ static void handle_client_message(XClientMessageEvent *e) {
 		LOG_LEAVE();
 		return;
 	}
+	if (e->message_type == xa_net_close_window) {
+		/* Only do this if it came from direct user action */
+		if (e->data.l[1] == 2) {
+			send_wm_delete(c, 0);
+		}
+		LOG_LEAVE();
+		return;
+	}
 	if (e->message_type == xa_net_moveresize_window) {
 		/* Only do this if it came from direct user action */
 		int source_indication = (e->data.l[0] >> 12) & 3;

@@ -19,6 +19,7 @@ Atom xa_net_active_window;
 static Atom xa_net_supporting_wm_check;
 
 /* Other Root Window Messages */
+Atom xa_net_close_window;
 Atom xa_net_moveresize_window;
 Atom xa_net_request_frame_extents;
 
@@ -42,6 +43,7 @@ static Atom xa_net_wm_action_maximize_horz;
 static Atom xa_net_wm_action_maximize_vert;
 static Atom xa_net_wm_action_fullscreen;
 static Atom xa_net_wm_action_change_desktop;
+static Atom xa_net_wm_action_close;
 static Atom xa_net_wm_pid;
 Atom xa_net_frame_extents;
 
@@ -58,6 +60,7 @@ void ewmh_init(void) {
 	xa_net_supporting_wm_check = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
 
 	/* Other Root Window Messages */
+	xa_net_close_window = XInternAtom(dpy, "_NET_CLOSE_WINDOW", False);
 	xa_net_moveresize_window = XInternAtom(dpy, "_NET_MOVERESIZE_WINDOW", False);
 	xa_net_request_frame_extents = XInternAtom(dpy, "_NET_REQUEST_FRAME_EXTENTS", False);
 
@@ -81,6 +84,7 @@ void ewmh_init(void) {
 	xa_net_wm_action_maximize_vert = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_VERT", False);
 	xa_net_wm_action_fullscreen = XInternAtom(dpy, "_NET_WM_ACTION_FULLSCREEN", False);
 	xa_net_wm_action_change_desktop = XInternAtom(dpy, "_NET_WM_ACTION_CHANGE_DESKTOP", False);
+	xa_net_wm_action_close = XInternAtom(dpy, "_NET_WM_ACTION_CLOSE", False);
 	xa_net_wm_pid = XInternAtom(dpy, "_NET_WM_PID", False);
 	xa_net_frame_extents = XInternAtom(dpy, "_NET_FRAME_EXTENTS", False);
 }
@@ -97,6 +101,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_active_window,
 		xa_net_supporting_wm_check,
 
+		xa_net_close_window,
 		xa_net_moveresize_window,
 		xa_net_request_frame_extents,
 
@@ -124,6 +129,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_wm_action_maximize_vert,
 		xa_net_wm_action_fullscreen,
 		xa_net_wm_action_change_desktop,
+		xa_net_wm_action_close,
 		xa_net_frame_extents,
 	};
 #ifdef VWM
@@ -180,6 +186,7 @@ void ewmh_init_client(Client *c) {
 		xa_net_wm_action_maximize_vert,
 		xa_net_wm_action_fullscreen,
 		xa_net_wm_action_change_desktop,
+		xa_net_wm_action_close,
 		/* nelements reduced to omit this if not possible: */
 		xa_net_wm_action_resize,
 	};
