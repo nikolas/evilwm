@@ -416,7 +416,7 @@ void next(void) {
 #ifdef VWM
 	/* NOTE: Checking against newc->screen->vdesk implies we can Alt+Tab
 	 * across screen boundaries.  Is this what we want? */
-	while (newc->vdesk != newc->screen->vdesk);
+	while (newc->vdesk != newc->screen->vdesk || (newc->is_dock && !newc->screen->docks_visible));
 #else
 	while (0);
 #endif
