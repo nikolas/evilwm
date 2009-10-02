@@ -13,6 +13,9 @@ static Atom xa_net_client_list;
 static Atom xa_net_client_list_stacking;
 #ifdef VWM
 static Atom xa_net_number_of_desktops;
+#endif
+static Atom xa_net_desktop_geometry;
+#ifdef VWM
 Atom xa_net_current_desktop;
 #endif
 Atom xa_net_active_window;
@@ -54,6 +57,9 @@ void ewmh_init(void) {
 	xa_net_client_list_stacking = XInternAtom(dpy, "_NET_CLIENT_LIST_STACKING", False);
 #ifdef VWM
 	xa_net_number_of_desktops = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
+#endif
+	xa_net_desktop_geometry = XInternAtom(dpy, "_NET_DESKTOP_GEOMETRY", False);
+#ifdef VWM
 	xa_net_current_desktop = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
 #endif
 	xa_net_active_window = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
@@ -96,6 +102,9 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_client_list_stacking,
 #ifdef VWM
 		xa_net_number_of_desktops,
+#endif
+		xa_net_desktop_geometry,
+#ifdef VWM
 		xa_net_current_desktop,
 #endif
 		xa_net_active_window,
@@ -136,6 +145,10 @@ void ewmh_init_screen(ScreenInfo *s) {
 	unsigned long num_desktops = 8;
 	unsigned long vdesk = s->vdesk;
 #endif
+	unsigned long desktop_geometry[2] = { 
+		DisplayWidth(dpy, s->screen),
+		DisplayHeight(dpy, s->screen)
+	};
 	s->supporting = XCreateSimpleWindow(dpy, s->root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, s->root, xa_net_supported,
 			XA_ATOM, 32, PropModeReplace,
@@ -145,6 +158,11 @@ void ewmh_init_screen(ScreenInfo *s) {
 	XChangeProperty(dpy, s->root, xa_net_number_of_desktops,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&num_desktops, 1);
+#endif
+	XChangeProperty(dpy, s->root, xa_net_desktop_geometry,
+			XA_CARDINAL, 32, PropModeReplace,
+			(unsigned char *)&desktop_geometry, 2);
+#ifdef VWM
 	XChangeProperty(dpy, s->root, xa_net_current_desktop,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&vdesk, 1);
@@ -169,6 +187,9 @@ void ewmh_deinit_screen(ScreenInfo *s) {
 	XDeleteProperty(dpy, s->root, xa_net_client_list_stacking);
 #ifdef VWM
 	XDeleteProperty(dpy, s->root, xa_net_number_of_desktops);
+#endif
+	XDeleteProperty(dpy, s->root, xa_net_desktop_geometry);
+#ifdef VWM
 	XDeleteProperty(dpy, s->root, xa_net_current_desktop);
 #endif
 	XDeleteProperty(dpy, s->root, xa_net_active_window);

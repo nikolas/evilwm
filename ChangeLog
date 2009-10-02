@@ -1,5 +1,8 @@
 *** Changes between 1.0.1 and 1.1.0:
 
+Fri Oct  2 2009
+  * Set _NET_DESKTOP_GEOMETRY property
+
 Thu Oct  1 2009
   * Accept _NET_MOVERESIZE_WINDOW client message
   Similar to ConfigureRequests but including optional alternate gravity.
