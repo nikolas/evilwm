@@ -457,7 +457,8 @@ void switch_vdesk(ScreenInfo *s, int v) {
 			hidden++;
 #endif
 		} else if (c->vdesk == v) {
-			unhide(c, NO_RAISE);
+			if (!c->is_dock || s->docks_visible)
+				unhide(c, NO_RAISE);
 #ifdef DEBUG
 			raised++;
 #endif
