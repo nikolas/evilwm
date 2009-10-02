@@ -15,6 +15,7 @@ static Atom xa_net_client_list_stacking;
 static Atom xa_net_number_of_desktops;
 #endif
 static Atom xa_net_desktop_geometry;
+static Atom xa_net_desktop_viewport;
 #ifdef VWM
 Atom xa_net_current_desktop;
 #endif
@@ -59,6 +60,7 @@ void ewmh_init(void) {
 	xa_net_number_of_desktops = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
 #endif
 	xa_net_desktop_geometry = XInternAtom(dpy, "_NET_DESKTOP_GEOMETRY", False);
+	xa_net_desktop_viewport = XInternAtom(dpy, "_NET_DESKTOP_VIEWPORT", False);
 #ifdef VWM
 	xa_net_current_desktop = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
 #endif
@@ -104,6 +106,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_number_of_desktops,
 #endif
 		xa_net_desktop_geometry,
+		xa_net_desktop_viewport,
 #ifdef VWM
 		xa_net_current_desktop,
 #endif
@@ -149,6 +152,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 		DisplayWidth(dpy, s->screen),
 		DisplayHeight(dpy, s->screen)
 	};
+	unsigned long desktop_viewport[2] = { 0, 0 };
 	s->supporting = XCreateSimpleWindow(dpy, s->root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, s->root, xa_net_supported,
 			XA_ATOM, 32, PropModeReplace,
@@ -162,6 +166,9 @@ void ewmh_init_screen(ScreenInfo *s) {
 	XChangeProperty(dpy, s->root, xa_net_desktop_geometry,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&desktop_geometry, 2);
+	XChangeProperty(dpy, s->root, xa_net_desktop_viewport,
+			XA_CARDINAL, 32, PropModeReplace,
+			(unsigned char *)&desktop_viewport, 2);
 #ifdef VWM
 	XChangeProperty(dpy, s->root, xa_net_current_desktop,
 			XA_CARDINAL, 32, PropModeReplace,
@@ -189,6 +196,7 @@ void ewmh_deinit_screen(ScreenInfo *s) {
 	XDeleteProperty(dpy, s->root, xa_net_number_of_desktops);
 #endif
 	XDeleteProperty(dpy, s->root, xa_net_desktop_geometry);
+	XDeleteProperty(dpy, s->root, xa_net_desktop_viewport);
 #ifdef VWM
 	XDeleteProperty(dpy, s->root, xa_net_current_desktop);
 #endif
