@@ -26,9 +26,7 @@ static void handle_key_event(XKeyEvent *e) {
 	KeySym key = XKeycodeToKeysym(dpy,e->keycode,0);
 	Client *c;
 	int width_inc, height_inc;
-#ifdef VWM
 	ScreenInfo *current_screen = find_current_screen();
-#endif
 
 	switch(key) {
 		case KEY_NEW:
@@ -46,6 +44,9 @@ static void handle_key_event(XKeyEvent *e) {
 				XUngrabKeyboard(dpy, CurrentTime);
 			}
 			ewmh_select_client(current);
+			break;
+		case KEY_DOCK_TOGGLE:
+			set_docks_visible(current_screen, !current_screen->docks_visible);
 			break;
 #ifdef VWM
 		case XK_1: case XK_2: case XK_3: case XK_4:

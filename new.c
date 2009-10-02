@@ -209,6 +209,16 @@ static void init_geometry(Client *c) {
 	}
 #endif
 
+	/* Determine if client thinks of itself as a dock */
+	c->is_dock = 0;
+	if ( (aprop = get_property(c->window, xa_net_wm_window_type, XA_ATOM, &nitems)) ) {
+		for (i = 0; i < nitems; i++) {
+			if (aprop[i] == xa_net_wm_window_type_dock)
+				c->is_dock = 1;
+		}
+		XFree(lprop);
+	}
+
 	/* Get current window attributes */
 	LOG_XENTER("XGetWindowAttributes(window=%lx)", c->window);
 	XGetWindowAttributes(dpy, c->window, &attr);

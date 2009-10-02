@@ -33,6 +33,8 @@ static Atom xa_net_wm_name;
 #ifdef VWM
 Atom xa_net_wm_desktop;
 #endif
+Atom xa_net_wm_window_type;
+Atom xa_net_wm_window_type_dock;
 Atom xa_net_wm_state;
 #ifdef VWM
 Atom xa_net_wm_state_sticky;
@@ -79,6 +81,8 @@ void ewmh_init(void) {
 #ifdef VWM
 	xa_net_wm_desktop = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
 #endif
+	xa_net_wm_window_type = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
+	xa_net_wm_window_type_dock = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
 	xa_net_wm_state = XInternAtom(dpy, "_NET_WM_STATE", False);
 #ifdef VWM
 	xa_net_wm_state_sticky = XInternAtom(dpy, "_NET_WM_STATE_STICKY", False);
@@ -123,6 +127,8 @@ void ewmh_init_screen(ScreenInfo *s) {
 #ifdef VWM
 		xa_net_wm_desktop,
 #endif
+		xa_net_wm_window_type,
+		xa_net_wm_window_type_dock,
 		xa_net_wm_state,
 #ifdef VWM
 		xa_net_wm_state_sticky,

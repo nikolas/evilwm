@@ -126,6 +126,7 @@ struct ScreenInfo {
 	XColor fc;
 #endif
 	char *display;
+	int docks_visible;
 };
 
 /* client structure */
@@ -153,6 +154,7 @@ struct Client {
 	int             vdesk;
 	int             sticky;
 #endif
+	int             is_dock;
 	int             remove;  /* set when client needs to be removed */
 };
 
@@ -213,6 +215,8 @@ extern Atom xa_net_request_frame_extents;
 #ifdef VWM
 extern Atom xa_net_wm_desktop;
 #endif
+extern Atom xa_net_wm_window_type;
+extern Atom xa_net_wm_window_type_dock;
 extern Atom xa_net_wm_state;
 #ifdef VWM
 extern Atom xa_net_wm_state_sticky;
@@ -291,6 +295,7 @@ void next(void);
 void hide(Client *c);
 void switch_vdesk(ScreenInfo *s, int v);
 #endif
+void set_docks_visible(ScreenInfo *s, int is_visible);
 ScreenInfo *find_screen(Window root);
 ScreenInfo *find_current_screen(void);
 void grab_keys_for_screen(ScreenInfo *s);

@@ -4,6 +4,8 @@ Fri Oct  2 2009
   * Set _NET_DESKTOP_GEOMETRY property
   * Set _NET_DESKTOP_VIEWPORT property
   * Set _NET_WORKAREA property
+  * Add ability to toggle visible state of docks with Ctrl+Alt+D
+  Usually apps like pagers or launch bars.
 
 Thu Oct  1 2009
   * Accept _NET_MOVERESIZE_WINDOW client message

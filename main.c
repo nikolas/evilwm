@@ -355,6 +355,7 @@ static void setup_display(void) {
 
 		XChangeWindowAttributes(dpy, screens[i].root, CWEventMask, &attr);
 		grab_keys_for_screen(&screens[i]);
+		screens[i].docks_visible = 1;
 
 		/* scan all the windows on this screen */
 		LOG_XENTER("XQueryTree(screen=%d)", i);

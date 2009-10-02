@@ -470,6 +470,28 @@ void switch_vdesk(ScreenInfo *s, int v) {
 }
 #endif /* def VWM */
 
+void set_docks_visible(ScreenInfo *s, int is_visible) {
+	struct list *iter;
+
+	LOG_ENTER("set_docks_visible(screen=%d, is_visible=%d)", s->screen, is_visible);
+	s->docks_visible = is_visible;
+	for (iter = clients_tab_order; iter; iter = iter->next) {
+		Client *c = iter->data;
+		if (c->screen != s)
+			continue;
+		if (c->is_dock) {
+			if (is_visible) {
+				if (is_sticky(c) || (c->vdesk == s->vdesk)) {
+					unhide(c, RAISE);
+				}
+			} else {
+				hide(c);
+			}
+		}
+	}
+	LOG_LEAVE();
+}
+
 ScreenInfo *find_screen(Window root) {
 	int i;
 	for (i = 0; i < num_screens; i++) {
@@ -511,7 +533,8 @@ static KeySym keys_to_grab[] = {
 	KEY_NEW, KEY_KILL,
 	KEY_TOPLEFT, KEY_TOPRIGHT, KEY_BOTTOMLEFT, KEY_BOTTOMRIGHT,
 	KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP,
-	KEY_LOWER, KEY_ALTLOWER, KEY_INFO, KEY_MAXVERT, KEY_MAX
+	KEY_LOWER, KEY_ALTLOWER, KEY_INFO, KEY_MAXVERT, KEY_MAX,
+	KEY_DOCK_TOGGLE
 };
 #define NUM_GRABS (int)(sizeof(keys_to_grab) / sizeof(KeySym))
 
