@@ -20,6 +20,7 @@ static Atom xa_net_desktop_viewport;
 Atom xa_net_current_desktop;
 #endif
 Atom xa_net_active_window;
+static Atom xa_net_workarea;
 static Atom xa_net_supporting_wm_check;
 
 /* Other Root Window Messages */
@@ -65,6 +66,7 @@ void ewmh_init(void) {
 	xa_net_current_desktop = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
 #endif
 	xa_net_active_window = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
+	xa_net_workarea = XInternAtom(dpy, "_NET_WORKAREA", False);
 	xa_net_supporting_wm_check = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
 
 	/* Other Root Window Messages */
@@ -111,6 +113,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_current_desktop,
 #endif
 		xa_net_active_window,
+		xa_net_workarea,
 		xa_net_supporting_wm_check,
 
 		xa_net_close_window,
@@ -148,11 +151,10 @@ void ewmh_init_screen(ScreenInfo *s) {
 	unsigned long num_desktops = 8;
 	unsigned long vdesk = s->vdesk;
 #endif
-	unsigned long desktop_geometry[2] = { 
-		DisplayWidth(dpy, s->screen),
-		DisplayHeight(dpy, s->screen)
-	};
-	unsigned long desktop_viewport[2] = { 0, 0 };
+	unsigned long workarea[4] = {
+		0, 0,
+		DisplayWidth(dpy, s->screen), DisplayHeight(dpy, s->screen)
+       	};
 	s->supporting = XCreateSimpleWindow(dpy, s->root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, s->root, xa_net_supported,
 			XA_ATOM, 32, PropModeReplace,
@@ -165,15 +167,18 @@ void ewmh_init_screen(ScreenInfo *s) {
 #endif
 	XChangeProperty(dpy, s->root, xa_net_desktop_geometry,
 			XA_CARDINAL, 32, PropModeReplace,
-			(unsigned char *)&desktop_geometry, 2);
+			(unsigned char *)&workarea[2], 2);
 	XChangeProperty(dpy, s->root, xa_net_desktop_viewport,
 			XA_CARDINAL, 32, PropModeReplace,
-			(unsigned char *)&desktop_viewport, 2);
+			(unsigned char *)&workarea[0], 2);
 #ifdef VWM
 	XChangeProperty(dpy, s->root, xa_net_current_desktop,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&vdesk, 1);
 #endif
+	XChangeProperty(dpy, s->root, xa_net_workarea,
+			XA_CARDINAL, 32, PropModeReplace,
+			(unsigned char *)&workarea, 4);
 	XChangeProperty(dpy, s->root, xa_net_supporting_wm_check,
 			XA_WINDOW, 32, PropModeReplace,
 			(unsigned char *)&s->supporting, 1);
@@ -201,6 +206,7 @@ void ewmh_deinit_screen(ScreenInfo *s) {
 	XDeleteProperty(dpy, s->root, xa_net_current_desktop);
 #endif
 	XDeleteProperty(dpy, s->root, xa_net_active_window);
+	XDeleteProperty(dpy, s->root, xa_net_workarea);
 	XDeleteProperty(dpy, s->root, xa_net_supporting_wm_check);
 	XDestroyWindow(dpy, s->supporting);
 }
