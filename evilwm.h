@@ -281,6 +281,7 @@ void handle_signal(int signo);
 
 void make_new_client(Window w, ScreenInfo *s);
 long get_wm_normal_hints(Client *c);
+void get_window_type(Client *c);
 
 /* screen.c */
 

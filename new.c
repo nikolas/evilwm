@@ -209,15 +209,7 @@ static void init_geometry(Client *c) {
 	}
 #endif
 
-	/* Determine if client thinks of itself as a dock */
-	c->is_dock = 0;
-	if ( (aprop = get_property(c->window, xa_net_wm_window_type, XA_ATOM, &nitems)) ) {
-		for (i = 0; i < nitems; i++) {
-			if (aprop[i] == xa_net_wm_window_type_dock)
-				c->is_dock = 1;
-		}
-		XFree(lprop);
-	}
+	get_window_type(c);
 
 	/* Get current window attributes */
 	LOG_XENTER("XGetWindowAttributes(window=%lx)", c->window);
@@ -349,6 +341,20 @@ long get_wm_normal_hints(Client *c) {
 	c->win_gravity = c->win_gravity_hint;
 	XFree(size);
 	return flags;
+}
+
+/* Determine if client thinks of itself as a dock */
+void get_window_type(Client *c) {
+	Atom *aprop;
+	unsigned long nitems, i;
+	c->is_dock = 0;
+	if ( (aprop = get_property(c->window, xa_net_wm_window_type, XA_ATOM, &nitems)) ) {
+		for (i = 0; i < nitems; i++) {
+			if (aprop[i] == xa_net_wm_window_type_dock)
+				c->is_dock = 1;
+		}
+		XFree(aprop);
+	}
 }
 
 static void *get_property(Window w, Atom property, Atom req_type,
