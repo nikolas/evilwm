@@ -16,6 +16,7 @@ evilwm \- Minimalist Window Manager for X
 [ \fB\-altmask\fP \fImodifier\fP ]
 [ [ \fB\-app\fP \fIname/class\fP ]
 [ \fB\-g\fP \fIgeometry\fP ]
+[ \fB\-dock\fP ] ]...
 [ \fB\-v\fP \fIvdesk\fP ]
 [ \fB\-s\fP ] ]...
 [ \fB\-nosoliddrag\fP ]
@@ -138,13 +139,17 @@ mod5.
 \-app \fIname/class\fP
 match an application by instance name and class (for help in finding
 these, use the \fBxprop\fP tool to extract the \fIWM_CLASS\fP property).
-Subsequent \fI\-g\fP, \fI\-s\fP and \fI\-v\fP options will apply to
-this match.
+Subsequent \fI\-g\fP, \fI\-dock\fP, \fI\-s\fP and \fI\-v\fP options will apply
+to this match.
 .TP
 \-g, -geometry \fIgeometry\fP
 apply a geometry (using a standard X geometry string) to applications matching
 the last
 .I \-app.
+.TP
+\-dock
+specify that application should be considered to be a dock, even if it lacks
+the appropriate property.
 .TP
 \-v, -vdesk \fIvdesk\fP
 specify a default virtual desktop for applications matching the last

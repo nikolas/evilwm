@@ -165,6 +165,7 @@ struct Application {
 	int geometry_mask;
 	int x, y;
 	unsigned int width, height;
+	int is_dock;
 #ifdef VWM
 	int vdesk;
 	int sticky;

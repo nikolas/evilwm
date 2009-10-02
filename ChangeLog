@@ -6,6 +6,7 @@ Fri Oct  2 2009
   * Set _NET_WORKAREA property
   * Add ability to toggle visible state of docks with Ctrl+Alt+D
   Usually apps like pagers or launch bars.
+  * Add -dock option to force app to be considered a dock
 
 Thu Oct  1 2009
   * Accept _NET_MOVERESIZE_WINDOW client message

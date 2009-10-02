@@ -78,6 +78,7 @@ int wm_exit;
 
 static void set_app(const char *arg);
 static void set_app_geometry(const char *arg);
+static void set_app_dock(void);
 #ifdef VWM
 static void set_app_vdesk(const char *arg);
 static void set_app_sticky(void);
@@ -100,6 +101,7 @@ static struct xconfig_option evilwm_options[] = {
 	{ XCONFIG_CALL_1,   "app",          &set_app },
 	{ XCONFIG_CALL_1,   "geometry",     &set_app_geometry },
 	{ XCONFIG_CALL_1,   "g",            &set_app_geometry },
+	{ XCONFIG_CALL_0,   "dock",         &set_app_dock },
 #ifdef VWM
 	{ XCONFIG_CALL_1,   "vdesk",        &set_app_vdesk },
 	{ XCONFIG_CALL_1,   "v",            &set_app_vdesk },
@@ -127,11 +129,12 @@ static void helptext(void) {
 " [-bg background] [-bw borderwidth]\n"
 "              [-mask1 modifiers] [-mask2 modifiers] [-altmask modifiers]\n"
 "              [-snap num]"
+" [-app name/class] [-g geometry] [-dock]\n"
 #ifdef VWM
-" [-app name/class] [-g geometry] [-v vdesk] [-s]"
+"              [-v vdesk] [-s]"
 #endif
 #ifdef SOLIDDRAG
-"\n              [-nosoliddrag]"
+" [-nosoliddrag]"
 #endif
 " [-V]"
 	);
@@ -382,6 +385,7 @@ static void set_app(const char *arg) {
 	char *tmp;
 	new->res_name = new->res_class = NULL;
 	new->geometry_mask = 0;
+	new->is_dock = 0;
 #ifdef VWM
 	new->vdesk = -1;
 	new->sticky = 0;
@@ -405,6 +409,13 @@ static void set_app_geometry(const char *arg) {
 		Application *app = applications->data;
 		app->geometry_mask = XParseGeometry(arg,
 				&app->x, &app->y, &app->width, &app->height);
+	}
+}
+
+static void set_app_dock(void) {
+	if (applications) {
+		Application *app = applications->data;
+		app->is_dock = 1;
 	}
 }
 
