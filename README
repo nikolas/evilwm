@@ -16,6 +16,7 @@ FEATURES
  * Virtual desktops.
  * Small binary size (even with everything turned on).
  * Reasonable EWMH support (though not yet fully compliant).
+ * Configuration file read on startup.
 
 
 INSTALLATION
@@ -25,13 +26,8 @@ Please see the file INSTALL for details on building evilwm.
 
 STARTING EVILWM
 
-If you use a session manager from GNOME or KDE or something like that,
-you'll have to read its documentation to see how to set which window
-manager it uses.
-
-However if you're just using a standard X desktop, you can start evilwm
-by just changing your ~/.xinitrc file.  Here's a pretty standard sample
-file:
+If you're using a standard X desktop, you can start evilwm by just
+changing your ~/.xinitrc file.  Here's a pretty standard sample file:
 
 -----CUT HERE-----
 [ -f $HOME/.Xdefaults ] && xrdb $HOME/.Xdefaults
@@ -45,6 +41,14 @@ you kill it, your session dies).  You could change it around and have
 evilwm be your magic process if you prefer.  Also note that it sets the
 cursor shape and background colour with standard X tools (evilwm won't
 do this for you - the tools already exist!).
+
+If you use the GNOME session manager, you can configure it to
+use evilwm as its window manager.  Run gconf-editor and set the
+key /desktop/gnome/session/required_components/windowmanager
+to "evilwm".  It is probably also a good idea to set the key
+/desktop/gnome/session/required_components/filemanager to an empty string,
+as nautilus (the default) will try to create its own desktop backdrop as
+a full-screen window, and evilwm does not treat these windows specially.
 
 
 CONTROLS
@@ -70,6 +74,7 @@ Y, U, B, N	Move window to top-left, top-right, bottom-left or
 I		Show information about current window.
 Equals		Maximise current window vertically (toggle).
 X		Maximise current window (toggle).
+D		Toggle visible state of docks (e.g., pagers and launch bars).
 
 If compiled with virtual desktop support, these functions are also
 available:
