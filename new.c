@@ -152,8 +152,6 @@ void make_new_client(Window w, ScreenInfo *s) {
 		unhide(c, RAISE);
 #ifndef MOUSE
 		select_client(c);
-		setmouse(c->window, c->width + c->border - 1,
-				c->height + c->border - 1);
 		discard_enter_events();
 #endif
 	}

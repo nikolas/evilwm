@@ -155,8 +155,6 @@ move_client:
 	if (abs(c->y) == c->border && c->oldh != 0)
 		c->y = 0;
 	moveresize(c);
-	setmouse(c->window, c->width + c->border - 1,
-			c->height + c->border - 1);
 	discard_enter_events();
 	return;
 }

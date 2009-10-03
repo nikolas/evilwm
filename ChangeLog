@@ -2,6 +2,8 @@
 
 Sat Oct  3 2009
   * Accept _NET_RESTACK_WINDOW client message
+  * Remove unnecessary pointer warps
+  Kept for resizing.
 
 Fri Oct  2 2009
   * Set _NET_DESKTOP_GEOMETRY property

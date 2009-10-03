@@ -423,9 +423,6 @@ void next(void) {
 		return;
 	unhide(newc, RAISE);
 	select_client(newc);
-	setmouse(newc->window, 0, 0);
-	setmouse(newc->window, newc->width + newc->border - 1,
-			newc->height + newc->border - 1);
 	discard_enter_events();
 }
 
