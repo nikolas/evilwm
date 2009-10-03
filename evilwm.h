@@ -210,6 +210,7 @@ extern Atom xa_net_active_window;
 /* EWMH: Other Root Window Messages */
 extern Atom xa_net_close_window;
 extern Atom xa_net_moveresize_window;
+extern Atom xa_net_restack_window;
 extern Atom xa_net_request_frame_extents;
 
 /* EWMH: Application Window Properties */

@@ -26,6 +26,7 @@ static Atom xa_net_supporting_wm_check;
 /* Other Root Window Messages */
 Atom xa_net_close_window;
 Atom xa_net_moveresize_window;
+Atom xa_net_restack_window;
 Atom xa_net_request_frame_extents;
 
 /* Application Window Properties */
@@ -74,6 +75,7 @@ void ewmh_init(void) {
 	/* Other Root Window Messages */
 	xa_net_close_window = XInternAtom(dpy, "_NET_CLOSE_WINDOW", False);
 	xa_net_moveresize_window = XInternAtom(dpy, "_NET_MOVERESIZE_WINDOW", False);
+	xa_net_restack_window = XInternAtom(dpy, "_NET_RESTACK_WINDOW", False);
 	xa_net_request_frame_extents = XInternAtom(dpy, "_NET_REQUEST_FRAME_EXTENTS", False);
 
 	/* Application Window Properties */
@@ -122,6 +124,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 
 		xa_net_close_window,
 		xa_net_moveresize_window,
+		xa_net_restack_window,
 		xa_net_request_frame_extents,
 
 #ifdef VWM

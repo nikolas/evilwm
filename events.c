@@ -399,6 +399,18 @@ static void handle_client_message(XClientMessageEvent *e) {
 		LOG_LEAVE();
 		return;
 	}
+	if (e->message_type == xa_net_restack_window) {
+		/* Only do this if it came from direct user action */
+		if (e->data.l[0] == 2) {
+			XWindowChanges wc;
+
+			wc.sibling = e->data.l[1];
+			wc.stack_mode = e->data.l[2];
+			do_window_changes(CWSibling | CWStackMode, &wc, c, c->win_gravity);
+		}
+		LOG_LEAVE();
+		return;
+	}
 #ifdef VWM
 	if (e->message_type == xa_net_wm_desktop) {
 		/* Only do this if it came from direct user action */
