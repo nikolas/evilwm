@@ -93,10 +93,12 @@ install: evilwm
 	if [ -f evilwm.exe ]; then mv evilwm.exe evilwm; fi
 	$(INSTALL_DIR) $(prefix)/bin
 	$(INSTALL_DIR) $(prefix)/share/man/man1
+	$(INSTALL_DIR) $(prefix)/share/applications
 	$(INSTALL_DIR) $(prefix)/share/xsessions
 	$(INSTALL_PROGRAM) evilwm $(prefix)/bin
 	$(INSTALL_FILE) evilwm.1 $(prefix)/share/man/man1
-	$(INSTALL_FILE) evilwm.desktop $(prefix)/share/xsessions
+	$(INSTALL_FILE) applications.desktop $(prefix)/share/applications
+	$(INSTALL_FILE) xsession.desktop $(prefix)/share/xsessions
 
 dist:
 	darcs dist --dist-name $(distname)
