@@ -204,24 +204,23 @@ static void snap_client(Client *c) {
 	dx = dy = opt_snap;
 	for (iter = clients_tab_order; iter; iter = iter->next) {
 		ci = iter->data;
-		if (ci != c
-				&& (ci->screen == c->screen)
+		if (ci == c) continue;
+		if (ci->screen != ci->screen) continue;
 #ifdef VWM
-				&& (ci->vdesk == c->vdesk)
+		if (ci->vdesk != c->vdesk) continue;
 #endif
-				) {
-			if (ci->y - ci->border - c->border - c->height - c->y <= opt_snap && c->y - c->border - ci->border - ci->height - ci->y <= opt_snap) {
-				dx = absmin(dx, ci->x + ci->width - c->x + c->border + ci->border);
-				dx = absmin(dx, ci->x + ci->width - c->x - c->width);
-				dx = absmin(dx, ci->x - c->x - c->width - c->border - ci->border);
-				dx = absmin(dx, ci->x - c->x);
-			}
-			if (ci->x - ci->border - c->border - c->width - c->x <= opt_snap && c->x - c->border - ci->border - ci->width - ci->x <= opt_snap) {
-				dy = absmin(dy, ci->y + ci->height - c->y + c->border + ci->border);
-				dy = absmin(dy, ci->y + ci->height - c->y - c->height);
-				dy = absmin(dy, ci->y - c->y - c->height - c->border - ci->border);
-				dy = absmin(dy, ci->y - c->y);
-			}
+		if (ci->is_dock && !c->screen->docks_visible) continue;
+		if (ci->y - ci->border - c->border - c->height - c->y <= opt_snap && c->y - c->border - ci->border - ci->height - ci->y <= opt_snap) {
+			dx = absmin(dx, ci->x + ci->width - c->x + c->border + ci->border);
+			dx = absmin(dx, ci->x + ci->width - c->x - c->width);
+			dx = absmin(dx, ci->x - c->x - c->width - c->border - ci->border);
+			dx = absmin(dx, ci->x - c->x);
+		}
+		if (ci->x - ci->border - c->border - c->width - c->x <= opt_snap && c->x - c->border - ci->border - ci->width - ci->x <= opt_snap) {
+			dy = absmin(dy, ci->y + ci->height - c->y + c->border + ci->border);
+			dy = absmin(dy, ci->y + ci->height - c->y - c->height);
+			dy = absmin(dy, ci->y - c->y - c->height - c->border - ci->border);
+			dy = absmin(dy, ci->y - c->y);
 		}
 	}
 	if (abs(dx) < opt_snap)
