@@ -37,16 +37,12 @@ Atom xa_net_wm_desktop;
 Atom xa_net_wm_window_type;
 Atom xa_net_wm_window_type_dock;
 Atom xa_net_wm_state;
-#ifdef VWM
-Atom xa_net_wm_state_sticky;
-#endif
 Atom xa_net_wm_state_maximized_vert;
 Atom xa_net_wm_state_maximized_horz;
 Atom xa_net_wm_state_fullscreen;
 static Atom xa_net_wm_allowed_actions;
 static Atom xa_net_wm_action_move;
 static Atom xa_net_wm_action_resize;
-static Atom xa_net_wm_action_stick;
 static Atom xa_net_wm_action_maximize_horz;
 static Atom xa_net_wm_action_maximize_vert;
 static Atom xa_net_wm_action_fullscreen;
@@ -86,16 +82,12 @@ void ewmh_init(void) {
 	xa_net_wm_window_type = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
 	xa_net_wm_window_type_dock = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
 	xa_net_wm_state = XInternAtom(dpy, "_NET_WM_STATE", False);
-#ifdef VWM
-	xa_net_wm_state_sticky = XInternAtom(dpy, "_NET_WM_STATE_STICKY", False);
-#endif
 	xa_net_wm_state_maximized_vert = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	xa_net_wm_state_maximized_horz = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
 	xa_net_wm_state_fullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
 	xa_net_wm_allowed_actions = XInternAtom(dpy, "_NET_WM_ALLOWED_ACTIONS", False);
 	xa_net_wm_action_move = XInternAtom(dpy, "_NET_WM_ACTION_MOVE", False);
 	xa_net_wm_action_resize = XInternAtom(dpy, "_NET_WM_ACTION_RESIZE", False);
-	xa_net_wm_action_stick = XInternAtom(dpy, "_NET_WM_ACTION_STICK", False);
 	xa_net_wm_action_maximize_horz = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_HORZ", False);
 	xa_net_wm_action_maximize_vert = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_VERT", False);
 	xa_net_wm_action_fullscreen = XInternAtom(dpy, "_NET_WM_ACTION_FULLSCREEN", False);
@@ -133,9 +125,6 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_wm_window_type,
 		xa_net_wm_window_type_dock,
 		xa_net_wm_state,
-#ifdef VWM
-		xa_net_wm_state_sticky,
-#endif
 		xa_net_wm_state_maximized_vert,
 		xa_net_wm_state_maximized_horz,
 		xa_net_wm_state_fullscreen,
@@ -146,9 +135,6 @@ void ewmh_init_screen(ScreenInfo *s) {
 		 * */
 		xa_net_wm_action_move,
 		xa_net_wm_action_resize,
-#ifdef VWM
-		xa_net_wm_action_stick,
-#endif
 		xa_net_wm_action_maximize_horz,
 		xa_net_wm_action_maximize_vert,
 		xa_net_wm_action_fullscreen,
@@ -223,9 +209,6 @@ void ewmh_deinit_screen(ScreenInfo *s) {
 void ewmh_init_client(Client *c) {
 	Atom allowed_actions[] = {
 		xa_net_wm_action_move,
-#ifdef VWM
-		xa_net_wm_action_stick,
-#endif
 		xa_net_wm_action_maximize_horz,
 		xa_net_wm_action_maximize_vert,
 		xa_net_wm_action_fullscreen,
@@ -322,20 +305,15 @@ void ewmh_set_net_active_window(Client *c) {
 
 #ifdef VWM
 void ewmh_set_net_wm_desktop(Client *c) {
-	unsigned long vdesk = c->vdesk;
 	XChangeProperty(dpy, c->window, xa_net_wm_desktop,
 			XA_CARDINAL, 32, PropModeReplace,
-			(unsigned char *)&vdesk, 1);
+			(unsigned char *)&c->vdesk, 1);
 }
 #endif
 
 void ewmh_set_net_wm_state(Client *c) {
-	Atom state[4];
+	Atom state[3];
 	int i = 0;
-#ifdef VWM
-	if (is_sticky(c))
-		state[i++] = xa_net_wm_state_sticky;
-#endif
 	if (c->oldh)
 		state[i++] = xa_net_wm_state_maximized_vert;
 	if (c->oldw)

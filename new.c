@@ -130,8 +130,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 				moveresize(c);
 				if (a->is_dock) c->is_dock = 1;
 #ifdef VWM
-				if (a->vdesk != -1) c->vdesk = a->vdesk;
-				c->sticky = a->sticky;
+				if (a->vdesk != VDESK_NONE) c->vdesk = a->vdesk;
 #endif
 			}
 			aiter = aiter->next;
@@ -146,7 +145,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	/* Only map the window frame (and thus the window) if it's supposed
 	 * to be visible on this virtual desktop. */
 #ifdef VWM
-	if (s->vdesk == c->vdesk)
+	if (is_fixed(c) || c->vdesk == s->vdesk)
 #endif
 	{
 		unhide(c, RAISE);
@@ -176,9 +175,7 @@ static void init_geometry(Client *c) {
 	unsigned long nitems;
 	PropMwmHints *mprop;
 #ifdef VWM
-	unsigned long i;
 	unsigned long *lprop;
-	Atom *aprop;
 #endif
 
 	if ( (mprop = get_property(c->window, mwm_hints, mwm_hints, &nitems)) ) {
@@ -197,14 +194,6 @@ static void init_geometry(Client *c) {
 		if (nitems && valid_vdesk(lprop[0]))
 			c->vdesk = lprop[0];
 		XFree(lprop);
-	}
-	remove_sticky(c);
-	if ( (aprop = get_property(c->window, xa_net_wm_state, XA_ATOM, &nitems)) ) {
-		for (i = 0; i < nitems; i++) {
-			if (aprop[i] == xa_net_wm_state_sticky)
-				add_sticky(c);
-		}
-		XFree(aprop);
 	}
 #endif
 

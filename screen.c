@@ -372,7 +372,6 @@ void maximise_client(Client *c, int action, int hv) {
 	discard_enter_events();
 }
 
-#ifdef VWM
 void hide(Client *c) {
 	/* This will generate an unmap event.  Tell event handler
 	 * to ignore it. */
@@ -382,7 +381,6 @@ void hide(Client *c) {
 	LOG_XLEAVE();
 	set_wm_state(c, IconicState);
 }
-#endif
 
 void unhide(Client *c, int raise_win) {
 	if (raise_win) {
@@ -427,7 +425,7 @@ void next(void) {
 }
 
 #ifdef VWM
-void switch_vdesk(ScreenInfo *s, int v) {
+void switch_vdesk(ScreenInfo *s, unsigned int v) {
 	struct list *iter;
 #ifdef DEBUG
 	int hidden = 0, raised = 0;
@@ -436,17 +434,13 @@ void switch_vdesk(ScreenInfo *s, int v) {
 	if (v == s->vdesk)
 		return;
 	LOG_ENTER("switch_vdesk(screen=%d, from=%d, to=%d)", s->screen, s->vdesk, v);
-	if (current && !is_sticky(current)) {
+	if (current && !is_fixed(current)) {
 		select_client(NULL);
 	}
 	for (iter = clients_tab_order; iter; iter = iter->next) {
 		Client *c = iter->data;
 		if (c->screen != s)
 			continue;
-		if (is_sticky(c) && c->vdesk != v) {
-			c->vdesk = v;
-			ewmh_set_net_wm_desktop(c);
-		}
 		if (c->vdesk == s->vdesk) {
 			hide(c);
 #ifdef DEBUG
@@ -478,9 +472,10 @@ void set_docks_visible(ScreenInfo *s, int is_visible) {
 			continue;
 		if (c->is_dock) {
 			if (is_visible) {
-				if (is_sticky(c) || (c->vdesk == s->vdesk)) {
+#ifdef VWM
+				if (is_fixed(c) || (c->vdesk == s->vdesk))
+#endif
 					unhide(c, RAISE);
-				}
 			} else {
 				hide(c);
 			}

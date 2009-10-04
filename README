@@ -79,7 +79,7 @@ D		Toggle visible state of docks (e.g., pagers and launch bars).
 If compiled with virtual desktop support, these functions are also
 available:
 
-F		Fix or unfix window (toggle its 'sticky' status).
+F		Fix or unfix window.
 1 - 8		Switch virtual desktop.
 Left		Previous virtual desktop.
 Right		Next virtual desktop.

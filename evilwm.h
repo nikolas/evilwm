@@ -55,8 +55,11 @@ typedef struct {
 
 /* readability stuff */
 
+#define VDESK_NONE  (0xfffffffe)
+#define VDESK_FIXED (0xffffffff)
+#define VDESK_MAX   (7)
 #define KEY_TO_VDESK(key) ((key) - XK_1)
-#define valid_vdesk(v) ((unsigned)(v) <= KEY_TO_VDESK(XK_8))
+#define valid_vdesk(v) ((v) == VDESK_FIXED || (v) <= VDESK_MAX)
 
 #define RAISE           1
 #define NO_RAISE        0       /* for unhide() */
@@ -101,10 +104,9 @@ typedef struct {
 #define gravitate(c,g) gravitate_client(c, 1, g)
 #define ungravitate(c) gravitate_client(c, -1, c->win_gravity)
 
-#define is_sticky(c) (c->sticky)
-#define add_sticky(c) c->sticky = 1
-#define remove_sticky(c) c->sticky = 0
-#define toggle_sticky(c) c->sticky = !c->sticky
+#define is_fixed(c) (c->vdesk == VDESK_FIXED)
+#define add_fixed(c) c->vdesk = VDESK_FIXED
+#define remove_fixed(c) c->vdesk = c->screen->vdesk
 
 #define discard_enter_events() do { \
 		XEvent dummy; \
@@ -122,7 +124,7 @@ struct ScreenInfo {
 	GC invert_gc;
 	XColor fg, bg;
 #ifdef VWM
-	int vdesk;
+	unsigned int vdesk;
 	XColor fc;
 #endif
 	char *display;
@@ -151,8 +153,7 @@ struct Client {
 	int             win_gravity;
 	int             old_border;
 #ifdef VWM
-	int             vdesk;
-	int             sticky;
+	unsigned long   vdesk;
 #endif
 	int             is_dock;
 	int             remove;  /* set when client needs to be removed */
@@ -167,8 +168,7 @@ struct Application {
 	unsigned int width, height;
 	int is_dock;
 #ifdef VWM
-	int vdesk;
-	int sticky;
+	unsigned long vdesk;
 #endif
 };
 
@@ -220,9 +220,6 @@ extern Atom xa_net_wm_desktop;
 extern Atom xa_net_wm_window_type;
 extern Atom xa_net_wm_window_type_dock;
 extern Atom xa_net_wm_state;
-#ifdef VWM
-extern Atom xa_net_wm_state_sticky;
-#endif
 extern Atom xa_net_wm_state_maximized_vert;
 extern Atom xa_net_wm_state_maximized_horz;
 extern Atom xa_net_wm_state_fullscreen;
@@ -259,7 +256,7 @@ Client *find_client(Window w);
 void gravitate_client(Client *c, int sign, int gravity);
 void select_client(Client *c);
 #ifdef VWM
-void fix_client(Client *c, int action);
+void client_to_vdesk(Client *c, unsigned int vdesk);
 #endif
 void remove_client(Client *c);
 void send_config(Client *c);
@@ -294,9 +291,9 @@ void show_info(Client *c, unsigned int keycode);
 void sweep(Client *c);
 void unhide(Client *c, int raise_win);
 void next(void);
-#ifdef VWM
 void hide(Client *c);
-void switch_vdesk(ScreenInfo *s, int v);
+#ifdef VWM
+void switch_vdesk(ScreenInfo *s, unsigned int v);
 #endif
 void set_docks_visible(ScreenInfo *s, int is_visible);
 ScreenInfo *find_screen(Window root);

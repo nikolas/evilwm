@@ -106,7 +106,7 @@ void select_client(Client *c) {
 	if (c) {
 		unsigned long bpixel;
 #ifdef VWM
-		if (is_sticky(c))
+		if (is_fixed(c))
 			bpixel = c->screen->fc.pixel;
 		else
 #endif
@@ -120,15 +120,17 @@ void select_client(Client *c) {
 }
 
 #ifdef VWM
-void fix_client(Client *c, int action) {
-	switch (action) {
-		default:
-		case NET_WM_STATE_REMOVE: remove_sticky(c); break;
-		case NET_WM_STATE_ADD:    add_sticky(c); break;
-		case NET_WM_STATE_TOGGLE: toggle_sticky(c); break;
+void client_to_vdesk(Client *c, unsigned int vdesk) {
+	if (valid_vdesk(vdesk)) {
+		c->vdesk = vdesk;
+		if (c->vdesk == c->screen->vdesk || c->vdesk == VDESK_FIXED) {
+			unhide(c, NO_RAISE);
+		} else {
+			hide(c);
+		}
+		ewmh_set_net_wm_desktop(c);
+		select_client(current);
 	}
-	select_client(c);
-	ewmh_set_net_wm_state(c);
 }
 #endif
 

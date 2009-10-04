@@ -1,4 +1,4 @@
-.TH evilwm 1 "October 2, 2009" "" ""
+.TH evilwm 1 "October 4, 2009" "" ""
 .SH NAME
 evilwm \- Minimalist Window Manager for X
 .SH SYNOPSIS
@@ -15,10 +15,10 @@ evilwm \- Minimalist Window Manager for X
 [ \fB\-mask2\fP \fImodifiers\fP ]
 [ \fB\-altmask\fP \fImodifier\fP ]
 [ [ \fB\-app\fP \fIname/class\fP ]
-[ \fB\-g\fP \fIgeometry\fP ]
-[ \fB\-dock\fP ] ]...
-[ \fB\-v\fP \fIvdesk\fP ]
-[ \fB\-s\fP ] ]...
+[ \fB\-geometry\fP \fIgeometry\fP ]
+[ \fB\-dock\fP ]
+[ \fB\-vdesk\fP \fIvdesk\fP ]
+[ \fB\-fixed\fP ] ]...
 [ \fB\-nosoliddrag\fP ]
 [ \fB\-V\fP ]
 .SH DESCRIPTION
@@ -139,8 +139,8 @@ mod5.
 \-app \fIname/class\fP
 match an application by instance name and class (for help in finding
 these, use the \fBxprop\fP tool to extract the \fIWM_CLASS\fP property).
-Subsequent \fI\-g\fP, \fI\-dock\fP, \fI\-s\fP and \fI\-v\fP options will apply
-to this match.
+Subsequent \fI\-geometry\fP, \fI\-dock\fP, \fI\-vdesk\fP and \fI\-fixed\fP
+options will apply to this match.
 .TP
 \-g, -geometry \fIgeometry\fP
 apply a geometry (using a standard X geometry string) to applications matching
@@ -156,8 +156,9 @@ specify a default virtual desktop for applications matching the last
 .I \-app.
 Note that desktops are numbered from 0.
 .TP
-\-s, -sticky
-specify that application is to start with a sticky client window.
+\-f, -fixed
+specify that application is to start with a fixed client window (\fI\-s\fP is
+also accepted to be compatible with previous versions).
 .TP
 \-nosoliddrag
 draw a window outline while moving or resizing.

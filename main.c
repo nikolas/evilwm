@@ -81,7 +81,7 @@ static void set_app_geometry(const char *arg);
 static void set_app_dock(void);
 #ifdef VWM
 static void set_app_vdesk(const char *arg);
-static void set_app_sticky(void);
+static void set_app_fixed(void);
 #endif
 
 static struct xconfig_option evilwm_options[] = {
@@ -105,8 +105,9 @@ static struct xconfig_option evilwm_options[] = {
 #ifdef VWM
 	{ XCONFIG_CALL_1,   "vdesk",        &set_app_vdesk },
 	{ XCONFIG_CALL_1,   "v",            &set_app_vdesk },
-	{ XCONFIG_CALL_0,   "sticky",       &set_app_sticky },
-	{ XCONFIG_CALL_0,   "s",            &set_app_sticky },
+	{ XCONFIG_CALL_0,   "fixed",        &set_app_fixed },
+	{ XCONFIG_CALL_0,   "f",            &set_app_fixed },
+	{ XCONFIG_CALL_0,   "s",            &set_app_fixed },
 #endif
 #ifdef SOLIDDRAG
 	{ XCONFIG_BOOL,     "nosoliddrag",  &no_solid_drag },
@@ -387,8 +388,7 @@ static void set_app(const char *arg) {
 	new->geometry_mask = 0;
 	new->is_dock = 0;
 #ifdef VWM
-	new->vdesk = -1;
-	new->sticky = 0;
+	new->vdesk = VDESK_NONE;
 #endif
 	if ((tmp = strchr(arg, '/'))) {
 		*(tmp++) = 0;
@@ -421,17 +421,17 @@ static void set_app_dock(void) {
 
 #ifdef VWM
 static void set_app_vdesk(const char *arg) {
-	int v = atoi(arg);
+	unsigned int v = atoi(arg);
 	if (applications && valid_vdesk(v)) {
 		Application *app = applications->data;
 		app->vdesk = v;
 	}
 }
 
-static void set_app_sticky(void) {
+static void set_app_fixed(void) {
 	if (applications) {
 		Application *app = applications->data;
-		app->sticky = 1;
+		app->vdesk = VDESK_FIXED;
 	}
 }
 #endif

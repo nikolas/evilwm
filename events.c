@@ -54,13 +54,13 @@ static void handle_key_event(XKeyEvent *e) {
 			switch_vdesk(current_screen, KEY_TO_VDESK(key));
 			break;
 		case KEY_PREVDESK:
-			if (current_screen->vdesk > KEY_TO_VDESK(XK_1)) {
+			if (current_screen->vdesk > 0) {
 				switch_vdesk(current_screen,
 						current_screen->vdesk - 1);
 			}
 			break;
 		case KEY_NEXTDESK:
-			if (current_screen->vdesk < KEY_TO_VDESK(XK_8)) {
+			if (current_screen->vdesk < VDESK_MAX) {
 				switch_vdesk(current_screen,
 						current_screen->vdesk + 1);
 			}
@@ -143,7 +143,11 @@ static void handle_key_event(XKeyEvent *e) {
 			break;
 #ifdef VWM
 		case KEY_FIX:
-			fix_client(c, NET_WM_STATE_TOGGLE);
+			if (is_fixed(c)) {
+				client_to_vdesk(c, current_screen->vdesk);
+			} else {
+				client_to_vdesk(c, VDESK_FIXED);
+			}
 			break;
 #endif
 		default: break;
@@ -247,7 +251,7 @@ static void handle_map_request(XMapRequestEvent *e) {
 	LOG_ENTER("handle_map_request(window=%lx)", e->window);
 	if (c) {
 #ifdef VWM
-		if (c->vdesk != c->screen->vdesk)
+		if (!is_fixed(c) && c->vdesk != c->screen->vdesk)
 			switch_vdesk(c->screen, c->vdesk);
 #endif
 		unhide(c, RAISE);
@@ -297,7 +301,11 @@ static void handle_property_change(XPropertyEvent *e) {
 			LOG_DEBUG("geometry=%dx%d+%d+%d\n", c->width, c->height, c->x, c->y);
 		} else if (e->atom == xa_net_wm_window_type) {
 			get_window_type(c);
-			if (!c->is_dock && (is_sticky(c) || (c->vdesk == c->screen->vdesk))) {
+			if (!c->is_dock
+#ifdef VWM
+					&& (is_fixed(c) || (c->vdesk == c->screen->vdesk))
+#endif
+					) {
 				unhide(c, NO_RAISE);
 			}
 		}
@@ -310,7 +318,7 @@ static void handle_enter_event(XCrossingEvent *e) {
 
 	if ((c = find_client(e->window))) {
 #ifdef VWM
-		if (c->vdesk != c->screen->vdesk)
+		if (!is_fixed(c) && c->vdesk != c->screen->vdesk)
 			return;
 #endif
 		select_client(c);
@@ -413,17 +421,7 @@ static void handle_client_message(XClientMessageEvent *e) {
 	if (e->message_type == xa_net_wm_desktop) {
 		/* Only do this if it came from direct user action */
 		if (e->data.l[1] == 2) {
-			if (!is_sticky(c)
-					&& valid_vdesk(e->data.l[0])
-					&& c->vdesk != e->data.l[0]) {
-				c->vdesk = e->data.l[0];
-				if (c->vdesk == s->vdesk) {
-					unhide(c, NO_RAISE);
-				} else {
-					hide(c);
-				}
-				ewmh_set_net_wm_desktop(c);
-			}
+			client_to_vdesk(c, e->data.l[0]);
 		}
 		LOG_LEAVE();
 		return;
@@ -433,11 +431,6 @@ static void handle_client_message(XClientMessageEvent *e) {
 		int i, maximise_hv = 0;
 		/* Message can contain up to two state changes: */
 		for (i = 1; i <= 2; i++) {
-#ifdef VWM
-			if ((Atom)e->data.l[i] == xa_net_wm_state_sticky) {
-				fix_client(c, e->data.l[0]);
-			} else
-#endif
 			if ((Atom)e->data.l[i] == xa_net_wm_state_maximized_vert) {
 				maximise_hv |= MAXIMISE_VERT;
 			} else if ((Atom)e->data.l[i] == xa_net_wm_state_maximized_horz) {
