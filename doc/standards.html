@@ -1,0 +1,225 @@
+<html>
+
+<head>
+<title>evilwm - standards support</title>
+</head>
+
+<body>
+<h1>evilwm standards support</h1>
+
+<p>evilwm (1.1 pre-release) supports a subset of the
+<a href='http://www.freedesktop.org/'>X Desktop Group</a>'s
+<a href='http://standards.freedesktop.org/wm-spec/wm-spec-1.3.html'>Extended
+Window Manager Hints (EWMH), version 1.3</a>.  This page lists what is
+supported, what is not yet supported and where ambiguities have not yet been
+resolved.</p>
+
+<ul>
+<li><a href='#ewmh-root'>EWMH root window properties (and related messages)</a></li>
+<li><a href='#ewmh-other-root'>Other EWMH root window messages</a></li>
+<li><a href='#ewmh-app'>EWMH application window properties</a></li>
+<li><a href='#ewmh-unsupported'>Unsupported EWMH properties</a></li>
+</ul>
+
+<h2 id='ewmh-root'>EWMH root window properties (and related messages)</h2>
+
+<dl>
+
+<dt>_NET_SUPPORTED</dt>
+<dd>This property is set on each managed root window, and lists all EWMH atoms
+used within evilwm. This includes all the relevant _NET_WM_ACTION atoms,
+although I'm not sure it makes sense to include those, as they get listed under
+the similar per-client _NET_WM_ALLOWED_ACTIONS property.</dd>
+
+<dt>_NET_CLIENT_LIST</dt>
+<dd>_NET_CLIENT_LIST and _NET_CLIENT_LIST_STACKING are kept up to date.</dd>
+
+<dt>_NET_NUMBER_OF_DESKTOPS</dt>
+<dd>This is currently always set to 8 (the number of virtual desktops evilwm
+has historically supported).  Clients cannot yet alter this value, though I
+intend to add that ability.</dd>
+
+<dt>_NET_DESKTOP_GEOMETRY</dt>
+<dd>Set to the display geometry.  Modifying not allowed.</dd>
+
+<dt>_NET_DESKTOP_VIEWPORT</dt>
+<dd>Always set to (0,0).</dd>
+
+<dt>_NET_CURRENT_DESKTOP</dt>
+<dd>Property is supported, and client messages requesting desktop change are
+accepted.</dd>
+
+<dt>_NET_ACTIVE_WINDOW</dt>
+<dd>Property is supported, and client messages requesting a change of active
+window are accepted if their source indication suggests they came as a result
+of direct user action.</dd>
+
+<dt>_NET_WORKAREA</dt>
+<dd>Currently always indicates the entire display as work area (does not
+calculate anything based on struts).</dd>
+
+<dt>_NET_SUPPORTING_WM_CHECK</dt>
+<dd>Will refer to evilwm's supporting window.</dd>
+
+</dl>
+
+<h2 id='ewmh-other-root'>Other EWMH root window messages</h2>
+
+<dl>
+
+<dt>_NET_CLOSE_WINDOW</dt>
+<dd>Message is respected if source indication suggests it came from direct user
+action.</dd>
+
+<dt>_NET_MOVERESIZE_WINDOW</dt>
+<dd>Message is respected if source indication suggests it came from direct user
+action.</dd>
+
+<dt>_NET_RESTACK_WINDOW</dt>
+<dd>Message is respected if source indication suggests it came from direct user
+action.</dd>
+
+<dt>_NET_REQUEST_FRAME_EXTENTS</dt>
+<dd>evilwm always estimates the configured border width for each frame edge.  A
+better value could be determined by analysing the window hints in the same way
+as creating a new window, but it's only got to be an estimate, so I've not done
+that yet.</dd>
+
+</dl>
+
+<h2 id='ewmh-app'>EWMH application window properties</h2>
+
+<dl>
+
+<dt>_NET_WM_NAME</dt>
+<dd>This is set to "evilwm" on the supporting window, but not currently
+consulted for client window titles (the title in WM_NAME is used instead).</dd>
+
+<dt>_NET_WM_DESKTOP</dt>
+<dd>This is maintained on all client windows.  On virtual desktop change,
+this property is changed for any "fixed" windows to be the new virtual
+desktop.  It is also accepted as a client message indicating user action
+to change a window's current virtual desktop.</dd>
+
+<dt>_NET_WM_WINDOW_TYPE</dt>
+<dd>These window types affect behaviour:
+   <dl>
+   <dt>_NET_WM_WINDOW_TYPE_DOCK</dt>
+   <dd>Applications that declare themselves to be a dock can have their
+   visibility toggled with a key combination.</dd>
+   </dl>
+</dd>
+
+<dt>_NET_WM_STATE</dt>
+<dd>Some states are supported:
+   <dl>
+   <dt>_NET_WM_STATE_MAXIMIZED_VERT</dt>
+   <dt>_NET_WM_STATE_MAXIMIZED_HORZ</dt>
+   <dt>_NET_WM_STATE_FULLSCREEN</dt>
+   <dd>Currently, as evilwm does not calculate any sort of "work area", the
+   fullscreen hint is considered equivalent to having both the vertically and
+   horizontally maximised hints set.  These hints are respected on initial
+   management of a window, and clients can send _NET_WM_STATE messages
+   to change them.</dd>
+   </dl>
+</dd>
+
+<dt>_NET_WM_ALLOWED_ACTIONS</dt>
+<dd>Some actions are allowed:
+   <dl>
+   <dt>_NET_WM_ACTION_MOVE</dt>
+   <dt>_NET_WM_ACTION_RESIZE</dt>
+   <dd>Listed only if window is capable of being resized (min height != max
+   height).</dd>
+   <dt>_NET_WM_ACTION_MAXIMIZE_HORZ</dt>
+   <dt>_NET_WM_ACTION_MAXIMIZE_VERT</dt>
+   <dt>_NET_WM_ACTION_FULLSCREEN</dt>
+   <dd>As noted above, requesting fullscreen is currently equivalent to
+   requesting both vertical and horizonal maximisation.</dd>
+   <dt>_NET_WM_ACTION_CHANGE_DESKTOP</dt>
+   <dt>_NET_WM_ACTION_CLOSE</dt>
+   </dl>
+</dd>
+
+<dt>_NET_WM_PID</dt>
+<dd>This property is set on the supporting window, but is not consulted when
+dealing with client windows.  Additionally, the WM_CLIENT_MACHINE property
+is not yet set.</dd>
+
+<dt>_NET_FRAME_EXTENTS</dt>
+<dd>Each frame extent is set to the border width that applies to the
+client.</dd>
+
+</dl>
+
+<h2 id='ewmh-unsupported'>Unsupported EWMH properties</h2>
+
+<dl>
+<dt>_NET_DESKTOP_NAMES</dt>
+<dt>_NET_VIRTUAL_ROOTS</dt>
+<dd>evilwm does not use virtual root windows.</dd>
+<dt>_NET_DESKTOP_LAYOUT</dt>
+<dt>_NET_SHOWING_DESKTOP</dt>
+<dd>evilwm does not have a "showing the desktop" mode.</dd>
+</dl>
+
+<dl>
+<dt>_NET_WM_MOVERESIZE</dt>
+</dl>
+
+<dl>
+<dt>_NET_WM_VISIBLE_NAME</dt>
+<dd>The real WM_NAME is displayed when requested.</dd>
+<dt>_NET_WM_ICON_NAME</dt>
+<dt>_NET_WM_VISIBLE_ICON_NAME</dt>
+<dd>evilwm does not support iconification.</dd>
+<dt>_NET_WM_WINDOW_TYPE</dt>
+<dd>These window types are unsupported:
+   <dl>
+   <dt>_NET_WM_WINDOW_TYPE_DESKTOP</dt>
+   <dt>_NET_WM_WINDOW_TYPE_TOOLBAR</dt>
+   <dt>_NET_WM_WINDOW_TYPE_MENU</dt>
+   <dt>_NET_WM_WINDOW_TYPE_UTILITY</dt>
+   <dt>_NET_WM_WINDOW_TYPE_SPLASH</dt>
+   <dt>_NET_WM_WINDOW_TYPE_DIALOG</dt>
+   <dt>_NET_WM_WINDOW_TYPE_NORMAL</dt>
+   </dl>
+</dd>
+<dt>_NET_WM_STATE</dt>
+<dd>These states are unsupported:
+   <dl>
+   <dt>_NET_WM_STATE_MODAL</dt>
+   <dt>_NET_WM_STATE_STICKY</dt>
+   <dt>_NET_WM_STATE_SHADED</dt>
+   <dt>_NET_WM_STATE_SKIP_TASKBAR</dt>
+   <dt>_NET_WM_STATE_SKIP_PAGER</dt>
+   <dt>_NET_WM_STATE_HIDDEN</dt>
+   <dt>_NET_WM_STATE_ABOVE</dt>
+   <dt>_NET_WM_STATE_BELOW</dt>
+   <dt>_NET_WM_STATE_DEMANDS_ATTENTION</dt>
+   </dl>
+</dd>
+<dt>_NET_WM_ALLOWED_ACTIONS</dt>
+<dd>These actions are unsupported:
+   <dl>
+   <dt>_NET_WM_ACTION_MINIMIZE</dt>
+   <dt>_NET_WM_ACTION_SHADE</dt>
+   <dt>_NET_WM_ACTION_STICK</dt>
+   </dl>
+</dd>
+<dt>_NET_WM_STRUT</dt>
+<dt>_NET_WM_STRUT_PARTIAL</dt>
+<dt>_NET_WM_ICON_GEOMETRY</dt>
+<dt>_NET_WM_ICON</dt>
+<dt>_NET_WM_HANDLED_ICONS</dt>
+<dd>evilwm does not support iconification.</dd>
+<dt>_NET_WM_USER_TIME</dt>
+</dl>
+
+<dl>
+<dt>_NET_WM_PING</dt>
+<dt>_NET_WM_SYNC_REQUEST</dt>
+</dl>
+
+</body>
+</html>
