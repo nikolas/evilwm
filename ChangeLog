@@ -4,6 +4,7 @@ Tue Oct  6 2009
   * Remove xsession file
   Possible to get going from gdm without one.  Keep applications
   .desktop file though, so can use as GNOME WM.
+  * Mostly new Makefile
 
 Sun Oct  4 2009
   * Change the way fixed windows are represented
