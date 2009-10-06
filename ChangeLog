@@ -1,5 +1,10 @@
 *** Changes between 1.0.1 and 1.1.0:
 
+Tue Oct  6 2009
+  * Remove xsession file
+  Possible to get going from gdm without one.  Keep applications
+  .desktop file though, so can use as GNOME WM.
+
 Sun Oct  4 2009
   * Change the way fixed windows are represented
   Also clean up terminology: use "fixed" instead of "sticky":  EWMH uses
