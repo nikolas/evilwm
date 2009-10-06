@@ -12,37 +12,37 @@ desktopfilesdir = $(datarootdir)/applications
 # Features
 
 # Uncomment to enable info banner on holding Ctrl+Alt+I.
-CPPFLAGS += -DINFOBANNER
+OPT_CPPFLAGS += -DINFOBANNER
 
 # Uncomment to show the same banner on moves and resizes.  Can be SLOW!
-#CPPFLAGS += -DINFOBANNER_MOVERESIZE
+#OPT_CPPFLAGS += -DINFOBANNER_MOVERESIZE
 
 # Uncomment for mouse support.  Recommended.
-CPPFLAGS += -DMOUSE
+OPT_CPPFLAGS += -DMOUSE
 
 # Uncomment to support the Xrandr extension (thanks, Yura Semashko).
-CPPFLAGS += -DRANDR
-LDLIBS   += -lXrandr
+OPT_CPPFLAGS += -DRANDR
+OPT_LDLIBS   += -lXrandr
 
 # Uncomment to support shaped windows.
-CPPFLAGS += -DSHAPE
-LDLIBS   += -lXext
+OPT_CPPFLAGS += -DSHAPE
+OPT_LDLIBS   += -lXext
 
 # Uncomment to enable solid window drags.  This can be slow on old systems.
-CPPFLAGS += -DSOLIDDRAG
+OPT_CPPFLAGS += -DSOLIDDRAG
 
 # Uncomment to compile in certain text messages like help.  Recommended.
-CPPFLAGS += -DSTDIO
+OPT_CPPFLAGS += -DSTDIO
 
 # Uncomment to support virtual desktops.
-CPPFLAGS += -DVWM
+OPT_CPPFLAGS += -DVWM
 
 # Uncomment to use Ctrl+Alt+q instead of Ctrl+Alt+Escape.  Useful for Cygwin.
-#CPPFLAGS += -DKEY_KILL=XK_q
+#OPT_CPPFLAGS += -DKEY_KILL=XK_q
 
 # Uncomment to include whatever debugging messages I've left in this release.
-#CPPFLAGS += -DDEBUG   # miscellaneous debugging
-#CPPFLAGS += -DXDEBUG  # show some X calls
+#OPT_CPPFLAGS += -DDEBUG   # miscellaneous debugging
+#OPT_CPPFLAGS += -DXDEBUG  # show some X calls
 
 ############################################################################
 # Include file and library paths
@@ -51,7 +51,7 @@ CPPFLAGS += -DVWM
 # system, but some other OSs still require extra information:
 
 # Solaris 10:
-#CPPFLAGS += -I/usr/X11/include
+#OPT_CPPFLAGS += -I/usr/X11/include
 #LDFLAGS  += -R/usr/X11/lib -L/usr/X11/lib
 
 # Solaris <= 9 doesn't support RANDR feature above, so disable it there
@@ -97,10 +97,10 @@ all: evilwm$(EXEEXT)
 $(OBJS): $(HEADERS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(EVILWM_CPPFLAGS) -c $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(OPT_CPPFLAGS) $(EVILWM_CPPFLAGS) -c $<
 
 evilwm$(EXEEXT): $(OBJS)
-	$(CC) -o $@ $(OBJS) $(LDFLAGS) $(EVILWM_LDLIBS) $(LDLIBS)
+	$(CC) -o $@ $(OBJS) $(LDFLAGS) $(OPT_LDLIBS) $(EVILWM_LDLIBS) $(LDLIBS)
 
 .PHONY: install
 install: evilwm$(EXEEXT)
