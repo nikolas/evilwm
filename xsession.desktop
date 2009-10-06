@@ -1,6 +1,0 @@
-[Desktop Entry]
-Encoding=UTF-8
-Name=evilwm
-Comment=evilwm - minimalist window manager
-Exec=evilwm
-Type=XSession
