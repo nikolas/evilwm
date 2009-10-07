@@ -1,5 +1,10 @@
 *** Changes between 1.0.1 and 1.1.0:
 
+Wed Oct  7 2009
+  * Maintain allocated memory for lists of windows
+  Lets us change _NET_CLIENT_LIST properties in one hit, avoiding confusion
+  with pagers that respond to every update.
+
 Tue Oct  6 2009
   * Remove xsession file
   Possible to get going from gdm without one.  Keep applications
