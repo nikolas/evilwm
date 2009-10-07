@@ -194,6 +194,7 @@ void remove_client(Client *c) {
 	 * soon enough, otherwise: */
 	if (c->remove) {
 		ewmh_set_net_client_list(c->screen);
+		ewmh_set_net_client_list_stacking(c->screen);
 	}
 
 	if (current == c)

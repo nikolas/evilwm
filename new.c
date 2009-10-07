@@ -141,6 +141,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	}
 	ewmh_init_client(c);
 	ewmh_set_net_client_list(c->screen);
+	ewmh_set_net_client_list_stacking(c->screen);
 
 	/* Only map the window frame (and thus the window) if it's supposed
 	 * to be visible on this virtual desktop. */
