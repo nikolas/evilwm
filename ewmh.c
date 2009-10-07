@@ -41,6 +41,7 @@ Atom xa_net_wm_state;
 Atom xa_net_wm_state_maximized_vert;
 Atom xa_net_wm_state_maximized_horz;
 Atom xa_net_wm_state_fullscreen;
+Atom xa_net_wm_state_hidden;
 static Atom xa_net_wm_allowed_actions;
 static Atom xa_net_wm_action_move;
 static Atom xa_net_wm_action_resize;
@@ -92,6 +93,7 @@ void ewmh_init(void) {
 	xa_net_wm_state_maximized_vert = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	xa_net_wm_state_maximized_horz = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
 	xa_net_wm_state_fullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	xa_net_wm_state_hidden = XInternAtom(dpy, "_NET_WM_STATE_HIDDEN", False);
 	xa_net_wm_allowed_actions = XInternAtom(dpy, "_NET_WM_ALLOWED_ACTIONS", False);
 	xa_net_wm_action_move = XInternAtom(dpy, "_NET_WM_ACTION_MOVE", False);
 	xa_net_wm_action_resize = XInternAtom(dpy, "_NET_WM_ACTION_RESIZE", False);
@@ -136,6 +138,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_wm_state_maximized_vert,
 		xa_net_wm_state_maximized_horz,
 		xa_net_wm_state_fullscreen,
+		xa_net_wm_state_hidden,
 		xa_net_wm_allowed_actions,
 		/* Not sure if it makes any sense including every action here
 		 * as they'll already be listed per-client in the
