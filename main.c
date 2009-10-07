@@ -102,6 +102,7 @@ static struct xconfig_option evilwm_options[] = {
 };
 
 static void setup_display(void);
+static void setup_screens(void);
 static void *xmalloc(size_t size);
 static unsigned int parse_modifiers(char *s);
 
@@ -174,6 +175,7 @@ int main(int argc, char *argv[]) {
 	sigaction(SIGHUP, &act, NULL);
 
 	setup_display();
+	setup_screens();
 
 	event_main_loop();
 
@@ -212,15 +214,26 @@ static void *xmalloc(size_t size) {
 	return ptr;
 }
 
+/* set up DISPLAY environment variable to use */
+static char* screen_to_display_str(int num) {
+	char *ds = DisplayString(dpy);
+	char *display = xmalloc(14 + strlen(ds));
+	strcpy(display, "DISPLAY=");
+	strcat(display, ds);
+	char *colon = strrchr(display, ':');
+	if (!colon || num_screens < 2)
+		return display;
+
+	char *dot = strchr(colon, '.');
+	if (!dot)
+		dot = colon + strlen(colon);
+	snprintf(dot, 5, ".%d", num);
+
+	return display;
+}
+
 static void setup_display(void) {
-	XGCValues gv;
-	XSetWindowAttributes attr;
-	XColor dummy;
 	XModifierKeymap *modmap;
-	/* used in scanning windows (XQueryTree) */
-	unsigned int i, j, nwins;
-	Window dw1, dw2, *wins;
-	XWindowAttributes winattr;
 
 	LOG_ENTER("setup_display()");
 
@@ -229,6 +242,7 @@ static void setup_display(void) {
 		LOG_ERROR("can't open display %s\n", opt_display);
 		exit(1);
 	}
+
 	XSetErrorHandler(handle_xerror);
 	/* XSynchronize(dpy, True); */
 
@@ -248,8 +262,8 @@ static void setup_display(void) {
 	/* find out which modifier is NumLock - we'll use this when grabbing
 	 * every combination of modifiers we can think of */
 	modmap = XGetModifierMapping(dpy);
-	for (i = 0; i < 8; i++) {
-		for (j = 0; j < (unsigned int)modmap->max_keypermod; j++) {
+	for (unsigned i = 0; i < 8; i++) {
+		for (unsigned j = 0; j < (unsigned int)modmap->max_keypermod; j++) {
 			if (modmap->modifiermap[i*modmap->max_keypermod+j] == XKeysymToKeycode(dpy, XK_Num_Lock)) {
 				numlockmask = (1<<i);
 				LOG_DEBUG("XK_Num_Lock is (1<<0x%02x)\n", i);
@@ -257,15 +271,6 @@ static void setup_display(void) {
 		}
 	}
 	XFreeModifiermap(modmap);
-
-	/* set up GC parameters - same for each screen */
-	gv.function = GXinvert;
-	gv.subwindow_mode = IncludeInferiors;
-	gv.line_width = 1;  /* opt_bw */
-	gv.font = font->fid;
-
-	/* set up root window attributes - same for each screen */
-	attr.event_mask = ChildMask | EnterWindowMask | ColormapChangeMask;
 
 	/* SHAPE extension? */
 #ifdef SHAPE
@@ -284,30 +289,33 @@ static void setup_display(void) {
 		}
 	}
 #endif
+	LOG_LEAVE();
+}
 
-	/* now set up each screen in turn */
+/* now set up each screen in turn */
+static void setup_screens(void) {
+	LOG_ENTER("setup_screens()");
+
 	num_screens = ScreenCount(dpy);
 	if (num_screens < 0) {
 		LOG_ERROR("Can't count screens\n");
 		exit(1);
 	}
-	screens = xmalloc(num_screens * sizeof(ScreenInfo));
-	for (i = 0; i < (unsigned int)num_screens; i++) {
-		char *ds, *colon, *dot;
-		ds = DisplayString(dpy);
-		/* set up DISPLAY environment variable to use */
-		colon = strrchr(ds, ':');
-		screens[i].display = xmalloc(14 + strlen(ds));
-		strcpy(screens[i].display, "DISPLAY=");
-		strcat(screens[i].display, ds);
-		if (colon && num_screens > 1) {
-			colon = strrchr(screens[i].display, ':');
-			dot = strchr(colon, '.');
-			if (!dot)
-				dot = colon + strlen(colon);
-			snprintf(dot, 5, ".%d", i);
-		}
 
+	/* set up GC parameters - same for each screen */
+	XGCValues gv;
+	gv.function = GXinvert;
+	gv.subwindow_mode = IncludeInferiors;
+	gv.line_width = 1;  /* opt_bw */
+	gv.font = font->fid;
+
+	/* set up root window attributes - same for each screen */
+	XSetWindowAttributes attr;
+	attr.event_mask = ChildMask | EnterWindowMask | ColormapChangeMask;
+
+	screens = xmalloc(num_screens * sizeof(ScreenInfo));
+	for (int i = 0; i < num_screens; i++) {
+		screens[i].display = screen_to_display_str(i);
 		screens[i].screen = i;
 		screens[i].root = RootWindow(dpy, i);
 #ifdef RANDR
@@ -317,6 +325,7 @@ static void setup_display(void) {
 #endif
 		screens[i].vdesk = KEY_TO_VDESK(XK_1);
 
+		XColor dummy;
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_fg, &screens[i].fg, &dummy);
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_bg, &screens[i].bg, &dummy);
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_fc, &screens[i].fc, &dummy);
@@ -329,10 +338,13 @@ static void setup_display(void) {
 
 		/* scan all the windows on this screen */
 		LOG_XENTER("XQueryTree(screen=%d)", i);
+		unsigned nwins;
+		Window dw1, dw2, *wins;
 		XQueryTree(dpy, screens[i].root, &dw1, &dw2, &wins, &nwins);
 		LOG_XDEBUG("%d windows\n", nwins);
 		LOG_XLEAVE();
-		for (j = 0; j < nwins; j++) {
+		for (unsigned j = 0; j < nwins; j++) {
+			XWindowAttributes winattr;
 			XGetWindowAttributes(dpy, wins[j], &winattr);
 			if (!winattr.override_redirect && winattr.map_state == IsViewable)
 				make_new_client(wins[j], &screens[i]);
