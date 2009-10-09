@@ -421,6 +421,10 @@ void next(void) {
 		return;
 	unhide(newc, RAISE);
 	select_client(newc);
+#ifdef WARP_POINTER
+	setmouse(newc->window, newc->width + newc->border - 1,
+			newc->height + newc->border - 1);
+#endif
 	discard_enter_events();
 }
 
