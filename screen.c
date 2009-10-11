@@ -130,8 +130,6 @@ static int absmin(int a, int b) {
 
 static void snap_client(Client *c) {
 	int dx, dy;
-	int dpy_width = DisplayWidth(dpy, c->screen->screen);
-	int dpy_height = DisplayHeight(dpy, c->screen->screen);
 	struct list *iter;
 	Client *ci;
 	/* client in screen co-ordinates */
@@ -172,14 +170,14 @@ static void snap_client(Client *c) {
 	/* snap to screen border */
 	if (abs(c->nx - c->border) < opt_snap) c->nx = c->border;
 	if (abs(c->ny - c->border) < opt_snap) c->ny = c->border;
-	if (abs(c->nx + c->width + c->border - dpy_width) < opt_snap)
-		c->nx = dpy_width - c->width - c->border;
-	if (abs(c->ny + c->height + c->border - dpy_height) < opt_snap)
-		c->ny = dpy_height - c->height - c->border;
+	if (abs(c->nx + c->width + c->border - c->phy->width) < opt_snap)
+		c->nx = c->phy->width - c->width - c->border;
+	if (abs(c->ny + c->height + c->border - c->phy->height) < opt_snap)
+		c->ny = c->phy->height - c->height - c->border;
 
-	if (abs(c->nx) == c->border && c->width == dpy_width)
+	if (abs(c->nx) == c->border && c->width == c->phy->width)
 		c->nx = 0;
-	if (abs(c->ny) == c->border && c->height == dpy_height)
+	if (abs(c->ny) == c->border && c->height == c->phy->height)
 		c->ny = 0;
 }
 
