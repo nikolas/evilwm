@@ -21,6 +21,7 @@ Atom mwm_hints;
 /* evilwm atoms */
 Atom xa_evilwm_unmaximised_horz;
 Atom xa_evilwm_unmaximised_vert;
+Atom xa_evilwm_current_desktops;
 
 /* Root Window Properties (and Related Messages) */
 static Atom xa_net_supported;
@@ -78,6 +79,7 @@ void ewmh_init(void) {
 	/* evilwm atoms */
 	xa_evilwm_unmaximised_horz = XInternAtom(dpy, "_EVILWM_UNMAXIMISED_HORZ", False);
 	xa_evilwm_unmaximised_vert = XInternAtom(dpy, "_EVILWM_UNMAXIMISED_VERT", False);
+	xa_evilwm_current_desktops = XInternAtom(dpy, "_EVILWM_CURRENT_DESKTOPS", False);
 
 	/*
 	 * extended windowmanager hints
@@ -166,7 +168,6 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_frame_extents,
 	};
 	unsigned long num_desktops = opt_vdesks;
-	unsigned long vdesk = s->physical->vdesk;
 	s->supporting = XCreateSimpleWindow(dpy, s->root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, s->root, xa_net_supported,
 			XA_ATOM, 32, PropModeReplace,
@@ -175,9 +176,6 @@ void ewmh_init_screen(ScreenInfo *s) {
 	XChangeProperty(dpy, s->root, xa_net_number_of_desktops,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&num_desktops, 1);
-	XChangeProperty(dpy, s->root, xa_net_current_desktop,
-			XA_CARDINAL, 32, PropModeReplace,
-			(unsigned char *)&vdesk, 1);
 	XChangeProperty(dpy, s->root, xa_net_supporting_wm_check,
 			XA_WINDOW, 32, PropModeReplace,
 			(unsigned char *)&s->supporting, 1);
@@ -191,6 +189,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&pid, 1);
 	ewmh_set_screen_workarea(s);
+	ewmh_set_net_current_desktop(s);
 }
 
 void ewmh_deinit_screen(ScreenInfo *s) {
@@ -293,6 +292,13 @@ void ewmh_set_net_current_desktop(ScreenInfo *s) {
 	XChangeProperty(dpy, s->root, xa_net_current_desktop,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&vdesk, 1);
+	unsigned long vdesks[s->num_physical];
+	for (unsigned i = 0; i < (unsigned) s->num_physical; i++) {
+		vdesks[i] = s->physical[i].vdesk;
+	}
+	XChangeProperty(dpy, s->root, xa_evilwm_current_desktops,
+	                XA_CARDINAL, 32, PropModeReplace,
+	                (unsigned char *)&vdesks, s->num_physical);
 }
 
 void ewmh_set_net_active_window(Client *c) {

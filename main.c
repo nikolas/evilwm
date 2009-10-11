@@ -331,9 +331,18 @@ static void setup_screens(void) {
 		screens[i].screen = i;
 		screens[i].root = RootWindow(dpy, i);
 		probe_screen(&screens[i]);
+
+		unsigned long vdesks_num;
+		unsigned long *vdesks = get_property(screens[i].root, xa_evilwm_current_desktops, XA_CARDINAL, &vdesks_num);
+
 		for (int j = 0; j < screens[i].num_physical; j++) {
-			screens[i].physical[j].vdesk = KEY_TO_VDESK(XK_1) + MIN(opt_vdesks, (unsigned)j);
+			if (vdesks && vdesks_num > (unsigned) j)
+				screens[i].physical[j].vdesk = vdesks[j];
+			else
+				screens[i].physical[j].vdesk = KEY_TO_VDESK(XK_1) + MIN(opt_vdesks, (unsigned)j);
 		}
+
+		if (vdesks) XFree(vdesks);
 
 #ifdef RANDR
 		if (have_randr) {

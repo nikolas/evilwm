@@ -221,6 +221,7 @@ extern Atom mwm_hints;
 /* evilwm atoms */
 extern Atom xa_evilwm_unmaximised_horz;
 extern Atom xa_evilwm_unmaximised_vert;
+extern Atom xa_evilwm_current_desktops;
 
 /* EWMH: Root Window Properties (and Related Messages) */
 extern Atom xa_net_current_desktop;
