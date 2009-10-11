@@ -154,6 +154,8 @@ struct Client {
 	int             border;
 	int             oldx, oldy, oldw, oldh;  /* used when maximising */
 
+	XPoint          cog; /* client's centre of gravity */
+
 	int             min_width, min_height;
 	int             max_width, max_height;
 	int             width_inc, height_inc;
@@ -273,6 +275,8 @@ void send_wm_delete(Client *c, int kill_client);
 void set_wm_state(Client *c, int state);
 void set_shape(Client *c);
 void *get_property(Window w, Atom property, Atom req_type, unsigned long *nitems_return);
+void client_calc_cog(Client *c);
+void client_calc_phy(Client *c);
 
 /* events.c */
 

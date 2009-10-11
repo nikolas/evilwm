@@ -2,6 +2,7 @@
  * Copyright (C) 1999-2011 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -56,10 +57,13 @@ void sweep(Client *c) {
 				recalculate_sweep(c, old_cx, old_cy, ev.xmotion.x, ev.xmotion.y, ev.xmotion.state & altmask);
 				c->nx -= c->phy->xoff;
 				c->ny -= c->phy->yoff;
+				client_calc_cog(c);
+				client_calc_phy(c);
 				annotate_update(c, &annotate_sweep_ctx);
 				break;
 			case ButtonRelease:
 				annotate_remove(c, &annotate_sweep_ctx);
+				client_calc_phy(c);
 				XUngrabPointer(dpy, CurrentTime);
 				moveresizeraise(c);
 				/* In case maximise state has changed: */
@@ -181,8 +185,8 @@ static void snap_client(Client *c) {
 void drag(Client *c) {
 	XEvent ev;
 	int x1, y1; /* pointer position at start of grab in screen co-ordinates */
-	int old_cx = c->nx;
-	int old_cy = c->ny;
+	int old_screen_x = client_to_Xcoord(c,x);
+	int old_screen_y = client_to_Xcoord(c,y);;
 
 	if (!grab_pointer(c->screen->root, MouseMask, move_curs)) return;
 	client_raise(c);
@@ -195,8 +199,10 @@ void drag(Client *c) {
 				if (ev.xmotion.root != c->screen->root)
 					break;
 				annotate_preupdate(c, &annotate_drag_ctx);
-				c->nx = old_cx + (ev.xmotion.x - x1);
-				c->ny = old_cy + (ev.xmotion.y - y1);
+				int screen_x = old_screen_x + (ev.xmotion.x - x1);
+				int screen_y = old_screen_y + (ev.xmotion.y - y1);
+				client_update_screenpos(c, screen_x, screen_y);
+				client_calc_phy(c);
 				if (opt_snap && !(ev.xmotion.state & altmask))
 					snap_client(c);
 
@@ -250,7 +256,7 @@ void maximise_client(Client *c, int action, int hv) {
 				c->oldx = c->nx;
 				c->oldw = c->width;
 				c->nx = 0;
-				c->width = DisplayWidth(dpy, c->screen->screen);
+				c->width = c->phy->width;
 				props[0] = c->oldx;
 				props[1] = c->oldw;
 				XChangeProperty(dpy, c->window, xa_evilwm_unmaximised_horz,
@@ -275,7 +281,7 @@ void maximise_client(Client *c, int action, int hv) {
 				c->oldy = c->ny;
 				c->oldh = c->height;
 				c->ny = 0;
-				c->height = DisplayHeight(dpy, c->screen->screen);
+				c->height = c->phy->height;
 				props[0] = c->oldy;
 				props[1] = c->oldh;
 				XChangeProperty(dpy, c->window, xa_evilwm_unmaximised_vert,
@@ -284,6 +290,9 @@ void maximise_client(Client *c, int action, int hv) {
 			}
 		}
 	}
+	/* xinerama: update the client's centre of gravity
+	 *  NB, the client doesn't change physical screen */
+	client_calc_cog(c);
 	ewmh_set_net_wm_state(c);
 	moveresizeraise(c);
 	discard_enter_events(c);
@@ -428,6 +437,7 @@ void fix_screen_after_resize(ScreenInfo *s, int oldw, int oldh) {
 			/* vert normal: update y pos */
 			c->ny = scale_pos(newh, oldh, c->ny, c->height + c->border);
 		}
+		client_calc_cog(c);
 		moveresize(c);
 	}
 }
@@ -453,14 +463,38 @@ ScreenInfo *find_current_screen(void) {
 }
 
 /** find_physical_screen:
- *   Given a logical screen, find which physical screen the point (@x,@y)
- *   resides
+ *   Given a logical screen, find which physical screen the point
+ *   (@screen_x,@screen_y) resides.
+ *
+ *   If the point isn't on a physical screen, finds the closest screen
+ *   centre.
  */
-PhysicalScreen *find_physical_screen(ScreenInfo *screen, int x, int y) {
-	/* xinerama-todo: This will need to search the physical screen list */
-	(void)x;
-	(void)y;
-	return screen->physical;
+PhysicalScreen *find_physical_screen(ScreenInfo *screen, int screen_x, int screen_y) {
+	PhysicalScreen *phy = NULL;
+
+	/* Find if (screen_x,y) is on any physical screen */
+	for (unsigned i = 0; i < (unsigned) screen->num_physical; i++) {
+		phy = &screen->physical[i];
+		if (screen_x >= phy->xoff && screen_x <= phy->xoff + phy->width
+		&&  screen_y >= phy->yoff && screen_y <= phy->yoff + phy->height)
+			return phy;
+	}
+
+	/* fall back to finding the closest screen minimum distance between the
+	 * physical screen centre to (screen_x,y) */
+	int val = INT_MAX;
+	for (unsigned i = 0; i < (unsigned) screen->num_physical; i++) {
+		PhysicalScreen *p = &screen->physical[i];
+
+		int dx = screen_x - p->xoff - p->width/2;
+		int dy = screen_y - p->yoff - p->height/2;
+
+		if (dx * dx + dy * dy < val) {
+			val = dx * dx + dy * dy;
+			phy = p;
+		}
+	}
+	return phy;
 }
 
 static void grab_keysym(Window w, unsigned int mask, KeySym keysym) {

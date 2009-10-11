@@ -324,6 +324,7 @@ static void setup_screens(void) {
 		screens[i].physical->yoff = 0;
 		screens[i].physical->width = DisplayWidth(dpy, i);
 		screens[i].physical->height = DisplayHeight(dpy, i);
+
 #ifdef RANDR
 		if (have_randr) {
 			XRRSelectInput(dpy, screens[i].root, RRScreenChangeNotifyMask);

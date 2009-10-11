@@ -112,16 +112,16 @@ static void handle_key_event(XKeyEvent *e) {
 			c->ny = c->border;
 			goto move_client;
 		case KEY_TOPRIGHT:
-			c->nx = c->phy->width - c->width-c->border;
+			c->nx = c->phy->width - c->width - c->border;
 			c->ny = c->border;
 			goto move_client;
 		case KEY_BOTTOMLEFT:
 			c->nx = c->border;
-			c->ny = c->phy->height - c->height-c->border;
+			c->ny = c->phy->height - c->height - c->border;
 			goto move_client;
 		case KEY_BOTTOMRIGHT:
-			c->nx = c->phy->width - c->width-c->border;
-			c->ny = c->phy->height - c->height-c->border;
+			c->nx = c->phy->width - c->width - c->border;
+			c->ny = c->phy->height - c->height - c->border;
 			goto move_client;
 		case KEY_KILL:
 			send_wm_delete(c, e->state & altmask);
@@ -157,6 +157,8 @@ move_client:
 		c->nx = 0;
 	if (abs(c->ny) == c->border && c->oldh != 0)
 		c->ny = 0;
+	client_calc_cog(c);
+	client_calc_phy(c);
 	moveresizeraise(c);
 #ifdef WARP_POINTER
 	setmouse(c->window, c->width + c->border - 1,
@@ -256,6 +258,10 @@ static void do_window_changes(int value_mask, XWindowChanges *wc, Client *c,
 			value_mask |= CWX|CWY;
 			gravitate_border(c, c->border);
 		}
+		/* Recalculate the centre of gravity if resized */
+		/* This may change the display to which the client belongs */
+		client_calc_cog(c);
+		client_calc_phy(c);
 	}
 	wc->x = client_to_Xcoord(c,x) - c->border;
 	wc->y = client_to_Xcoord(c,y) - c->border;

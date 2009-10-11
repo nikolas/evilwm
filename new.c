@@ -245,12 +245,17 @@ static void init_geometry(Client *c) {
 		c->height = c->min_height;
 		send_config(c);
 	}
+	client_calc_cog(c);
+
+	/* Calculate client position (and physical screen) */
 	if ((attr.map_state == IsViewable)
 			|| (size_flags & (/*PPosition |*/ USPosition))) {
 		client_update_screenpos(c, attr.x, attr.y);
 	} else {
 		int x, y;
 		get_mouse_position(&x, &y, c->screen->root);
+		/* The client will belong to the physical screen the mouse
+		 * is currently on. */
 		c->phy = find_physical_screen(c->screen, x, y);
 		x -= c->phy->xoff;
 		y -= c->phy->yoff;

@@ -66,15 +66,31 @@ void client_lower(Client *c) {
 	ewmh_set_net_client_list_stacking(c->screen);
 }
 
-/** client_update_screenpos:
+/** client_calc_cog:
+ *   Calculate the centre of gravity for a particular client
+ */
+void client_calc_cog(Client *c) {
+	c->cog.x = c->width/2;
+	c->cog.y = c->height/2;
+	/* xxx: handle shaped windows oneday */
+}
+
+/** client_update_phy:
  *   Update the client's notion of which physical screen it belongs.
- *   Normalizes the client coordinates to be in phy-coordinates
+ */
+void client_calc_phy(Client *c) {
+	client_update_screenpos(c, client_to_Xcoord(c,x), client_to_Xcoord(c,y));
+}
+
+/** client_update_screenpos:
+ *   Update the client's position using screen coordinates and
+ *   the client's notion of which physical screen it belongs.
  *  NB, this routine must be used when translating from X11 screen co-ordinates
  */
 void client_update_screenpos(Client *c, int screen_x, int screen_y) {
-	c->phy = find_physical_screen(c->screen, screen_x, screen_y);
-	client_from_Xcoord(c, x, screen_x);
-	client_from_Xcoord(c, y, screen_y);
+	c->phy = find_physical_screen(c->screen, screen_x + c->cog.x, screen_y + c->cog.y);
+	c->nx = screen_x - c->phy->xoff;
+	c->ny = screen_y - c->phy->yoff;
 }
 
 void set_wm_state(Client *c, int state) {
