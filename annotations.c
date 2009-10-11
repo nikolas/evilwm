@@ -113,16 +113,19 @@ static void infobanner_update(Client *c) {
 		iwinh += nameh;
 	}
 
-	iwinx = client_to_Xcoord(c,x) + c->border + c->width - iwinw;
-	iwiny = client_to_Xcoord(c,y) - c->border;
-	if (iwinx + iwinw > DisplayWidth(dpy, c->screen->screen))
-		iwinx = DisplayWidth(dpy, c->screen->screen) - iwinw;
+	iwinx = c->nx + c->border + c->width - iwinw;
+	iwiny = c->ny - c->border;
+	if (iwinx + iwinw > c->phy->width)
+		iwinx = c->phy->width - iwinw;
 	if (iwinx < 0)
 		iwinx = 0;
-	if (iwiny + iwinh > DisplayHeight(dpy, c->screen->screen))
-		iwiny = DisplayHeight(dpy, c->screen->screen) - iwinh;
+	if (iwiny + iwinh > c->phy->height)
+		iwiny = c->phy->height - iwinh;
 	if (iwiny < 0)
 		iwiny = 0;
+	/* convert to X11 logical screen co-ordinates */
+	iwinx += c->phy->xoff;
+	iwiny += c->phy->yoff;
 	XMoveResizeWindow(dpy, info_window, iwinx, iwiny, iwinw, iwinh);
 	XClearWindow(dpy, info_window);
 	if (name) {
