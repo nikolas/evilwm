@@ -18,6 +18,8 @@
 #include <X11/extensions/Xinerama.h>
 #endif
 
+#include <stdbool.h>
+
 #ifndef __GNUC__
 # define  __attribute__(x)
 #endif
@@ -315,7 +317,7 @@ void maximise_client(Client *c, int action, int hv);
 void show_info(Client *c, unsigned int keycode);
 void sweep(Client *c);
 void next(void);
-void switch_vdesk(ScreenInfo *s, PhysicalScreen *p, unsigned int v);
+bool switch_vdesk(ScreenInfo *s, PhysicalScreen *p, unsigned int v);
 void set_docks_visible(ScreenInfo *s, int is_visible);
 ScreenInfo *find_screen(Window root);
 ScreenInfo *find_current_screen(void);

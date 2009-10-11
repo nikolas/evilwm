@@ -3,7 +3,6 @@
  * see README for license and other details. */
 
 #include <limits.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -335,18 +334,18 @@ void next(void) {
  *  Switch the virtual desktop on physical screen @p of logical screen @s
  *  to @v
  */
-void switch_vdesk(ScreenInfo *s, PhysicalScreen *p, unsigned int v) {
+bool switch_vdesk(ScreenInfo *s, PhysicalScreen *p, unsigned int v) {
 	struct list *iter;
 #ifdef DEBUG
 	int hidden = 0, raised = 0;
 #endif
 	if (!valid_vdesk(v) && v != VDESK_NONE)
-		return;
+		return false;
 
 	/* no-op if a physical screen is already displaying @v */
 	for (unsigned i = 0; i < (unsigned) s->num_physical; i++) {
 		if (v == s->physical[i].vdesk)
-			return;
+			return false;
 	}
 
 	LOG_ENTER("switch_vdesk(screen=%d, from=%u, to=%u)", s->screen, p->vdesk, v);
@@ -383,6 +382,8 @@ void switch_vdesk(ScreenInfo *s, PhysicalScreen *p, unsigned int v) {
 	ewmh_set_net_current_desktop(s);
 	LOG_DEBUG("%d hidden, %d raised\n", hidden, raised);
 	LOG_LEAVE();
+
+	return true;
 }
 
 void set_docks_visible(ScreenInfo *s, int is_visible) {

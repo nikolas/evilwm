@@ -56,13 +56,17 @@ static void handle_key_event(XKeyEvent *e) {
 			switch_vdesk(current_screen, current_phy, KEY_TO_VDESK(key));
 			break;
 		case KEY_PREVDESK:
-			if (current_phy->vdesk > 0) {
-				switch_vdesk(current_screen, current_phy, current_phy->vdesk - 1);
+			/* Find next avaliable vdesk */
+			for (unsigned i = current_phy->vdesk - 1; i < opt_vdesks ; i--) {
+				if (switch_vdesk(current_screen, current_phy, i))
+					break;
 			}
 			break;
 		case KEY_NEXTDESK:
-			if (current_phy->vdesk < VDESK_MAX) {
-				switch_vdesk(current_screen, current_phy, current_phy->vdesk + 1);
+			/* Find prev avaliable vdesk */
+			for (unsigned i = current_phy->vdesk + 1; i < opt_vdesks; i++) {
+				if (switch_vdesk(current_screen, current_phy, i))
+					break;
 			}
 			break;
 		case KEY_TOGGLEDESK:
