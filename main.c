@@ -331,13 +331,15 @@ static void setup_screens(void) {
 		screens[i].screen = i;
 		screens[i].root = RootWindow(dpy, i);
 		probe_screen(&screens[i]);
+		for (int j = 0; j < screens[i].num_physical; j++) {
+			screens[i].physical[j].vdesk = KEY_TO_VDESK(XK_1) + MIN(opt_vdesks, (unsigned)j);
+		}
 
 #ifdef RANDR
 		if (have_randr) {
 			XRRSelectInput(dpy, screens[i].root, RRScreenChangeNotifyMask);
 		}
 #endif
-		screens[i].vdesk = KEY_TO_VDESK(XK_1);
 
 		XColor dummy;
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_fg, &screens[i].fg, &dummy);

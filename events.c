@@ -26,7 +26,9 @@ static void handle_key_event(XKeyEvent *e) {
 	KeySym key = XKeycodeToKeysym(dpy,e->keycode,0);
 	Client *c;
 	int width_inc, height_inc;
-	ScreenInfo *current_screen = find_current_screen();
+	ScreenInfo *current_screen;
+	PhysicalScreen *current_phy;
+	find_current_screen_and_phy(&current_screen, &current_phy);
 
 	switch(key) {
 		case KEY_NEW:
@@ -51,22 +53,20 @@ static void handle_key_event(XKeyEvent *e) {
 		case XK_1: case XK_2: case XK_3: case XK_4:
 		case XK_5: case XK_6: case XK_7: case XK_8:
 		case XK_9: case XK_0:
-			switch_vdesk(current_screen, KEY_TO_VDESK(key));
+			switch_vdesk(current_screen, current_phy, KEY_TO_VDESK(key));
 			break;
 		case KEY_PREVDESK:
-			if (current_screen->vdesk > 0) {
-				switch_vdesk(current_screen,
-						current_screen->vdesk - 1);
+			if (current_phy->vdesk > 0) {
+				switch_vdesk(current_screen, current_phy, current_phy->vdesk - 1);
 			}
 			break;
 		case KEY_NEXTDESK:
-			if (current_screen->vdesk < VDESK_MAX) {
-				switch_vdesk(current_screen,
-						current_screen->vdesk + 1);
+			if (current_phy->vdesk < VDESK_MAX) {
+				switch_vdesk(current_screen, current_phy, current_phy->vdesk + 1);
 			}
 			break;
 		case KEY_TOGGLEDESK:
-			switch_vdesk(current_screen, current_screen->old_vdesk);
+			switch_vdesk(current_screen, current_phy, current_screen->old_vdesk);
 			break;
 		default: break;
 	}
@@ -144,7 +144,7 @@ static void handle_key_event(XKeyEvent *e) {
 			break;
 		case KEY_FIX:
 			if (is_fixed(c)) {
-				client_to_vdesk(c, current_screen->vdesk);
+				client_to_vdesk(c, c->phy->vdesk);
 			} else {
 				client_to_vdesk(c, VDESK_FIXED);
 			}
@@ -307,8 +307,8 @@ static void handle_map_request(XMapRequestEvent *e) {
 
 	LOG_ENTER("handle_map_request(window=%lx)", e->window);
 	if (c) {
-		if (!is_fixed(c) && c->vdesk != c->screen->vdesk)
-			switch_vdesk(c->screen, c->vdesk);
+		if (!is_fixed(c) && c->vdesk != c->phy->vdesk)
+			switch_vdesk(c->screen, c->phy, c->vdesk);
 		client_show(c);
 		client_raise(c);
 	} else {
@@ -357,7 +357,7 @@ static void handle_property_change(XPropertyEvent *e) {
 			LOG_DEBUG("geometry=%dx%d\n", c->width, c->height);
 		} else if (e->atom == xa_net_wm_window_type) {
 			get_window_type(c);
-			if (!c->is_dock && (is_fixed(c) || (c->vdesk == c->screen->vdesk))) {
+			if (!c->is_dock && (is_fixed(c) || (c->vdesk == c->phy->vdesk))) {
 				client_show(c);
 			}
 		}
@@ -369,7 +369,7 @@ static void handle_enter_event(XCrossingEvent *e) {
 	Client *c;
 
 	if ((c = find_client(e->window))) {
-		if (!is_fixed(c) && c->vdesk != c->screen->vdesk)
+		if (!is_fixed(c) && c->vdesk != c->phy->vdesk)
 			return;
 		select_client(c);
 		ewmh_select_client(c);
@@ -412,7 +412,7 @@ static void handle_client_message(XClientMessageEvent *e) {
 	LOG_ENTER("handle_client_message(window=%lx, format=%d, type=%s)", e->window, e->format, debug_atom_name(e->message_type));
 
 	if (e->message_type == xa_net_current_desktop) {
-		switch_vdesk(s, e->data.l[0]);
+		switch_vdesk(s, s->physical, e->data.l[0]);
 		LOG_LEAVE();
 		return;
 	}

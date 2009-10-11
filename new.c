@@ -160,7 +160,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 
 	/* Only map the window frame (and thus the window) if it's supposed
 	 * to be visible on this virtual desktop. */
-	if (is_fixed(c) || c->vdesk == s->vdesk)
+	if (should_be_mapped(c))
 	{
 		client_show(c);
 		client_raise(c);
@@ -196,16 +196,6 @@ static void init_geometry(Client *c) {
 			c->border = 0;
 		}
 		XFree(mprop);
-	}
-
-	c->vdesk = c->screen->vdesk;
-	if ( (lprop = get_property(c->window, xa_net_wm_desktop, XA_CARDINAL, &nitems)) ) {
-		/* NB, Xlib not only returns a 32bit value in a long (which may
-		 * not be 32bits), it also sign extends the 32bit value */
-		if (nitems && valid_vdesk(lprop[0] & UINT32_MAX)) {
-			c->vdesk = lprop[0] & UINT32_MAX;
-		}
-		XFree(lprop);
 	}
 
 	get_window_type(c);
@@ -273,6 +263,27 @@ static void init_geometry(Client *c) {
 	c->ny += c->old_border;
 	gravitate_border(c, -c->old_border);
 	gravitate_border(c, c->border);
+
+	c->vdesk = c->phy->vdesk;
+	if ( (lprop = get_property(c->window, xa_net_wm_desktop, XA_CARDINAL, &nitems)) ) {
+		/* NB, Xlib not only returns a 32bit value in a long (which may
+		 * not be 32bits), it also sign extends the 32bit value */
+		if (nitems && valid_vdesk(lprop[0] & UINT32_MAX)) {
+			c->vdesk = lprop[0] & UINT32_MAX;
+		}
+		XFree(lprop);
+	}
+	/* When restarting the window manager, there may be a mismatch between
+	 * the mapped virtual desktops of the old WM and those of the new. */
+	if (attr.map_state == IsViewable && c->vdesk != c->phy->vdesk) {
+		for (unsigned i = 0; i < (unsigned) c->screen->num_physical; i++) {
+			if (c->vdesk != c->screen->physical[i].vdesk)
+				continue;
+			/* Update client to be on the correct phy */
+			c->phy = &c->screen->physical[i];
+			break;
+		}
+	}
 }
 
 static void reparent(Client *c) {

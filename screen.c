@@ -145,7 +145,7 @@ static void snap_client(Client *c) {
 
 		if (ci == c) continue;
 		if (ci->screen != c->screen) continue;
-		if (!is_fixed(ci) && ci->vdesk != c->screen->vdesk) continue;
+		if (!is_fixed(ci) && ci->vdesk != c->phy->vdesk) continue;
 		if (ci->is_dock && !c->screen->docks_visible) continue;
 		if (ci_screen_y - ci->border - c->border - c->height - c_screen_y <= opt_snap
 		&& c_screen_y - c->border - ci->border - ci->height - ci_screen_y <= opt_snap) {
@@ -316,7 +316,7 @@ void next(void) {
 	}
 	/* NOTE: Checking against newc->screen->vdesk implies we can Alt+Tab
 	 * across screen boundaries.  Is this what we want? */
-	while ((!is_fixed(newc) && (newc->vdesk != newc->screen->vdesk)) || newc->is_dock);
+	while ((!is_fixed(newc) && (newc->vdesk != newc->phy->vdesk)) || newc->is_dock);
 
 	if (!newc)
 		return;
@@ -330,7 +330,11 @@ void next(void) {
 	discard_enter_events(newc);
 }
 
-void switch_vdesk(ScreenInfo *s, unsigned int v) {
+/** switch_vdesk:
+ *  Switch the virtual desktop on physical screen @p of logical screen @s
+ *  to @v
+ */
+void switch_vdesk(ScreenInfo *s, PhysicalScreen *p, unsigned int v) {
 	struct list *iter;
 #ifdef DEBUG
 	int hidden = 0, raised = 0;
@@ -338,9 +342,13 @@ void switch_vdesk(ScreenInfo *s, unsigned int v) {
 	if (!valid_vdesk(v))
 		return;
 
-	if (v == s->vdesk)
-		return;
-	LOG_ENTER("switch_vdesk(screen=%d, from=%d, to=%d)", s->screen, s->vdesk, v);
+	/* no-op if a physical screen is already displaying @v */
+	for (unsigned i = 0; i < (unsigned) s->num_physical; i++) {
+		if (v == s->physical[i].vdesk)
+			return;
+	}
+
+	LOG_ENTER("switch_vdesk(screen=%d, from=%u, to=%u)", s->screen, p->vdesk, v);
 	if (current && !is_fixed(current)) {
 		select_client(NULL);
 	}
@@ -348,12 +356,18 @@ void switch_vdesk(ScreenInfo *s, unsigned int v) {
 		Client *c = iter->data;
 		if (c->screen != s)
 			continue;
-		if (c->vdesk == s->vdesk) {
+		if (c->vdesk == p->vdesk) {
 			client_hide(c);
 #ifdef DEBUG
 			hidden++;
 #endif
 		} else if (c->vdesk == v) {
+			/* NB, vdesk may not be on the same physical screen as previously,
+			 * so move windows onto the physical screen */
+			if (c->phy != p) {
+				c->phy = p;
+				moveresize(c);
+			}
 			if (!c->is_dock || s->docks_visible)
 				client_show(c);
 #ifdef DEBUG
@@ -362,8 +376,8 @@ void switch_vdesk(ScreenInfo *s, unsigned int v) {
 		}
 	}
 	/* cache the value of the current vdesk, so that user may toggle back to it */
-	s->old_vdesk = s->vdesk;
-	s->vdesk = v;
+	s->old_vdesk = p->vdesk;
+	p->vdesk = v;
 	ewmh_set_net_current_desktop(s);
 	LOG_DEBUG("%d hidden, %d raised\n", hidden, raised);
 	LOG_LEAVE();
@@ -380,7 +394,7 @@ void set_docks_visible(ScreenInfo *s, int is_visible) {
 			continue;
 		if (c->is_dock) {
 			if (is_visible) {
-				if (is_fixed(c) || (c->vdesk == s->vdesk)) {
+				if (is_fixed(c) || (c->vdesk == c->phy->vdesk)) {
 					client_show(c);
 					client_raise(c);
 				}
@@ -470,13 +484,22 @@ ScreenInfo *find_screen(Window root) {
 }
 
 ScreenInfo *find_current_screen(void) {
+	ScreenInfo *current_screen;
+	find_current_screen_and_phy(&current_screen, NULL);
+	return current_screen;
+}
+
+void find_current_screen_and_phy(ScreenInfo **current_screen, PhysicalScreen **current_phy) {
 	Window cur_root, dw;
 	int di;
 	unsigned int dui;
+	int x,y;
 
 	/* XQueryPointer is useful for getting the current pointer root */
-	XQueryPointer(dpy, screens[0].root, &cur_root, &dw, &di, &di, &di, &di, &dui);
-	return find_screen(cur_root);
+	XQueryPointer(dpy, screens[0].root, &cur_root, &dw, &x, &y, &di, &di, &dui);
+	*current_screen = find_screen(cur_root);
+	if (current_phy)
+		*current_phy = find_physical_screen(*current_screen, x, y);
 }
 
 /** find_physical_screen:

@@ -54,7 +54,7 @@ void client_lower(Client *c) {
 		below = iter->data;
 		if (below == c)
 			return;
-		if (below->screen == c->screen && (is_fixed(below) || below->vdesk == c->screen->vdesk))
+		if (below->screen == c->screen && (is_fixed(below) || below->vdesk == c->phy->vdesk))
 			break;
 	}
 	if (!iter) return;
@@ -80,6 +80,11 @@ void client_calc_cog(Client *c) {
  */
 void client_calc_phy(Client *c) {
 	client_update_screenpos(c, client_to_Xcoord(c,x), client_to_Xcoord(c,y));
+	/* if the client changes physical screens, the vdesk changes too */
+	if (c->vdesk != VDESK_FIXED && c->vdesk != c->phy->vdesk) {
+		c->vdesk = c->phy->vdesk;
+		ewmh_set_net_wm_desktop(c);
+	}
 }
 
 /** client_update_screenpos:
@@ -185,10 +190,13 @@ void select_client(Client *c) {
 	ewmh_set_net_active_window(c);
 }
 
+/** client_to_vdesk:
+ *   Send a client to a particular vdesk, mapping/unmapping it as required.
+ */
 void client_to_vdesk(Client *c, unsigned int vdesk) {
 	if (valid_vdesk(vdesk)) {
 		c->vdesk = vdesk;
-		if (c->vdesk == c->screen->vdesk || c->vdesk == VDESK_FIXED) {
+		if (is_fixed(c) || c->vdesk == c->phy->vdesk) {
 			client_show(c);
 		} else {
 			client_hide(c);

@@ -166,7 +166,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_frame_extents,
 	};
 	unsigned long num_desktops = opt_vdesks;
-	unsigned long vdesk = s->vdesk;
+	unsigned long vdesk = s->physical->vdesk;
 	s->supporting = XCreateSimpleWindow(dpy, s->root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, s->root, xa_net_supported,
 			XA_ATOM, 32, PropModeReplace,
@@ -289,7 +289,7 @@ void ewmh_set_net_client_list_stacking(ScreenInfo *s) {
 }
 
 void ewmh_set_net_current_desktop(ScreenInfo *s) {
-	unsigned long vdesk = s->vdesk;
+	unsigned long vdesk = s->physical->vdesk;
 	XChangeProperty(dpy, s->root, xa_net_current_desktop,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&vdesk, 1);

@@ -25,6 +25,9 @@
 #include "keymap.h"
 #include "list.h"
 
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+
 /* Required for interpreting MWM hints: */
 #define _XA_MWM_HINTS           "_MOTIF_WM_HINTS"
 #define PROP_MWM_HINTS_ELEMENTS 3
@@ -123,6 +126,7 @@ struct PhysicalScreen {
 	int yoff; /* y pos of the physical screen in logical screen coordinates */
 	int width; /* width of the screen */
 	int height; /* height of the screen */
+	unsigned int vdesk; /* virtual desktop displayed on this physical screen */
 };
 
 typedef struct ScreenInfo ScreenInfo;
@@ -132,11 +136,10 @@ struct ScreenInfo {
 	Window supporting;  /* Dummy window for EWMH */
 	GC invert_gc;
 	XColor fg, bg;
-	unsigned int vdesk;
 	XColor fc;
-	unsigned old_vdesk; /* most recently unmapped vdesk, so user may toggle back to it */
 	char *display;
 	int docks_visible;
+	unsigned int old_vdesk; /* most recently unmapped vdesk, so user may toggle back to it */
 
 	int num_physical; /* Number of entries in @physical@ */
 	PhysicalScreen *physical; /* Physical screens that make up this screen */
@@ -312,11 +315,12 @@ void maximise_client(Client *c, int action, int hv);
 void show_info(Client *c, unsigned int keycode);
 void sweep(Client *c);
 void next(void);
-void switch_vdesk(ScreenInfo *s, unsigned int v);
+void switch_vdesk(ScreenInfo *s, PhysicalScreen *p, unsigned int v);
 void set_docks_visible(ScreenInfo *s, int is_visible);
 void fix_screen_after_resize(ScreenInfo *s);
 ScreenInfo *find_screen(Window root);
 ScreenInfo *find_current_screen(void);
+void find_current_screen_and_phy(ScreenInfo **current_screen, PhysicalScreen **current_phy);
 PhysicalScreen *find_physical_screen(ScreenInfo *screen, int x, int y);
 void grab_keys_for_screen(ScreenInfo *s);
 void probe_screen(ScreenInfo *s);
@@ -350,3 +354,15 @@ void annotate_create(Client *c, struct annotate_ctx *a);
 void annotate_preupdate(Client *c, struct annotate_ctx *a);
 void annotate_update(Client *c, struct annotate_ctx *a);
 void annotate_remove(Client *c, struct annotate_ctx *a);
+
+/* defines */
+static inline int should_be_mapped(Client *c) {
+	if (is_fixed(c))
+		return 1;
+	/* xxx, dock */
+	for (unsigned i = 0; i < (unsigned) c->screen->num_physical; i++) {
+		if (c->vdesk == c->screen->physical[i].vdesk)
+			return 1;
+	}
+	return 0;
+}
