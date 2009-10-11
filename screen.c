@@ -79,7 +79,7 @@ static void draw_outline(Client *c) {
 
 	XDrawRectangle(dpy, c->screen->root, c->screen->invert_gc,
 		c->x - c->border, c->y - c->border,
-		c->width + c->border, c->height + c->border);
+		c->width + 2*c->border-1, c->height + 2*c->border-1);
 
 #ifndef INFOBANNER_MOVERESIZE
 	snprintf(buf, sizeof(buf), "%dx%d+%d+%d", (c->width-c->base_width)/width_inc,
