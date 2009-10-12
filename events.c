@@ -80,7 +80,7 @@ static void handle_key_event(XKeyEvent *e) {
 				if ((c->width - width_inc) >= c->min_width)
 					c->width -= width_inc;
 			} else {
-				c->x -= 16;
+				c->nx -= 16;
 			}
 			goto move_client;
 		case KEY_DOWN:
@@ -88,7 +88,7 @@ static void handle_key_event(XKeyEvent *e) {
 				if (!c->max_height || (c->height + height_inc) <= c->max_height)
 					c->height += height_inc;
 			} else {
-				c->y += 16;
+				c->ny += 16;
 			}
 			goto move_client;
 		case KEY_UP:
@@ -96,7 +96,7 @@ static void handle_key_event(XKeyEvent *e) {
 				if ((c->height - height_inc) >= c->min_height)
 					c->height -= height_inc;
 			} else {
-				c->y -= 16;
+				c->ny -= 16;
 			}
 			goto move_client;
 		case KEY_RIGHT:
@@ -104,28 +104,24 @@ static void handle_key_event(XKeyEvent *e) {
 				if (!c->max_width || (c->width + width_inc) <= c->max_width)
 					c->width += width_inc;
 			} else {
-				c->x += 16;
+				c->nx += 16;
 			}
 			goto move_client;
 		case KEY_TOPLEFT:
-			c->x = c->border;
-			c->y = c->border;
+			c->nx = c->border;
+			c->ny = c->border;
 			goto move_client;
 		case KEY_TOPRIGHT:
-			c->x = DisplayWidth(dpy, c->screen->screen)
-				- c->width-c->border;
-			c->y = c->border;
+			c->nx = c->phy->width - c->width-c->border;
+			c->ny = c->border;
 			goto move_client;
 		case KEY_BOTTOMLEFT:
-			c->x = c->border;
-			c->y = DisplayHeight(dpy, c->screen->screen)
-				- c->height-c->border;
+			c->nx = c->border;
+			c->ny = c->phy->height - c->height-c->border;
 			goto move_client;
 		case KEY_BOTTOMRIGHT:
-			c->x = DisplayWidth(dpy, c->screen->screen)
-				- c->width-c->border;
-			c->y = DisplayHeight(dpy, c->screen->screen)
-				- c->height-c->border;
+			c->nx = c->phy->width - c->width-c->border;
+			c->ny = c->phy->height - c->height-c->border;
 			goto move_client;
 		case KEY_KILL:
 			send_wm_delete(c, e->state & altmask);
@@ -157,10 +153,10 @@ static void handle_key_event(XKeyEvent *e) {
 	}
 	return;
 move_client:
-	if (abs(c->x) == c->border && c->oldw != 0)
-		c->x = 0;
-	if (abs(c->y) == c->border && c->oldh != 0)
-		c->y = 0;
+	if (abs(c->nx) == c->border && c->oldw != 0)
+		c->nx = 0;
+	if (abs(c->ny) == c->border && c->oldh != 0)
+		c->ny = 0;
 	moveresizeraise(c);
 #ifdef WARP_POINTER
 	setmouse(c->window, c->width + c->border - 1,
@@ -191,8 +187,14 @@ static void do_window_changes(int value_mask, XWindowChanges *wc, Client *c,
 	if (gravity == 0)
 		gravity = c->win_gravity_hint;
 	c->win_gravity = gravity;
-	if (value_mask & CWX) c->x = wc->x;
-	if (value_mask & CWY) c->y = wc->y;
+
+	/* Warning: these co-ordinates are in screen co-ordinates */
+	int screen_x = client_to_Xcoord(c,x);
+	int screen_y = client_to_Xcoord(c,y);
+	if (value_mask & CWX) screen_x = wc->x;
+	if (value_mask & CWY) screen_y = wc->y;
+	client_update_screenpos(c, screen_x, screen_y);
+
 	if (value_mask & (CWWidth|CWHeight)) {
 		int dw = 0, dh = 0;
 		if (!(value_mask & (CWX|CWY))) {
@@ -223,40 +225,40 @@ static void do_window_changes(int value_mask, XWindowChanges *wc, Client *c,
 			case NorthWestGravity:
 				break;
 			case NorthGravity:
-				c->x -= (dw / 2);
+				c->nx -= (dw / 2);
 				break;
 			case NorthEastGravity:
-				c->x -= dw;
+				c->nx -= dw;
 				break;
 			case WestGravity:
-				c->y -= (dh / 2);
+				c->ny -= (dh / 2);
 				break;
 			case CenterGravity:
-				c->x -= (dw / 2);
-				c->y -= (dh / 2);
+				c->nx -= (dw / 2);
+				c->ny -= (dh / 2);
 				break;
 			case EastGravity:
-				c->x -= dw;
-				c->y -= (dh / 2);
+				c->nx -= dw;
+				c->ny -= (dh / 2);
 				break;
 			case SouthWestGravity:
-				c->y -= dh;
+				c->ny -= dh;
 				break;
 			case SouthGravity:
-				c->x -= (dw / 2);
-				c->y -= dh;
+				c->nx -= (dw / 2);
+				c->ny -= dh;
 				break;
 			case SouthEastGravity:
-				c->x -= dw;
-				c->y -= dh;
+				c->nx -= dw;
+				c->ny -= dh;
 				break;
 			}
 			value_mask |= CWX|CWY;
 			gravitate_border(c, c->border);
 		}
 	}
-	wc->x = c->x - c->border;
-	wc->y = c->y - c->border;
+	wc->x = client_to_Xcoord(c,x) - c->border;
+	wc->y = client_to_Xcoord(c,y) - c->border;
 	wc->border_width = c->border;
 	XConfigureWindow(dpy, c->parent, value_mask, wc);
 	XMoveResizeWindow(dpy, c->window, 0, 0, c->width, c->height);
@@ -346,7 +348,7 @@ static void handle_property_change(XPropertyEvent *e) {
 		LOG_ENTER("handle_property_change(window=%lx, atom=%s)", e->window, debug_atom_name(e->atom));
 		if (e->atom == XA_WM_NORMAL_HINTS) {
 			get_wm_normal_hints(c);
-			LOG_DEBUG("geometry=%dx%d+%d+%d\n", c->width, c->height, c->x, c->y);
+			LOG_DEBUG("geometry=%dx%d\n", c->width, c->height);
 		} else if (e->atom == xa_net_wm_window_type) {
 			get_window_type(c);
 			if (!c->is_dock && (is_fixed(c) || (c->vdesk == c->screen->vdesk))) {

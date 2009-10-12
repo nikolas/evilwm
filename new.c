@@ -96,7 +96,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 		int i = 0;
 		for (iter = clients_tab_order; iter; iter = iter->next)
 			i++;
-		LOG_DEBUG("new window %dx%d+%d+%d, wincount=%d\n", c->width, c->height, c->x, c->y, i);
+		LOG_DEBUG("new window %dx%d+%d+%d, wincount=%d\n", c->width, c->height, client_to_Xcoord(c,x), client_to_Xcoord(c,y), i);
 	}
 #endif
 
@@ -125,18 +125,25 @@ void make_new_client(Window w, ScreenInfo *s) {
 					c->width = a->width * c->width_inc;
 				if (a->geometry_mask & HeightValue)
 					c->height = a->height * c->height_inc;
-				if (a->geometry_mask & XValue) {
+				/* Warning: these co-ordinates are in screen co-ordinates */
+				int screen_x, screen_y;
+				if (!(a->geometry_mask & XValue)) {
+					screen_x = client_to_Xcoord(c,x);
+				} else {
 					if (a->geometry_mask & XNegative)
-						c->x = a->x + DisplayWidth(dpy, s->screen)-c->width-c->border;
+						screen_x = a->x + DisplayWidth(dpy, s->screen) - c->width - c->border;
 					else
-						c->x = a->x + c->border;
+						screen_x = a->x + c->border;
 				}
-				if (a->geometry_mask & YValue) {
+				if (!(a->geometry_mask & YValue)) {
+					screen_y = client_to_Xcoord(c,y);
+				} else {
 					if (a->geometry_mask & YNegative)
-						c->y = a->y + DisplayHeight(dpy, s->screen)-c->height-c->border;
+						screen_y = a->y + DisplayHeight(dpy, s->screen) - c->height - c->border;
 					else
-						c->y = a->y + c->border;
+						screen_y = a->y + c->border;
 				}
+				client_update_screenpos(c, screen_x, screen_y);
 				moveresizeraise(c);
 				if (a->is_dock) c->is_dock = 1;
 				if (a->vdesk != VDESK_NONE) c->vdesk = a->vdesk;
@@ -240,25 +247,25 @@ static void init_geometry(Client *c) {
 	}
 	if ((attr.map_state == IsViewable)
 			|| (size_flags & (/*PPosition |*/ USPosition))) {
-		c->x = attr.x;
-		c->y = attr.y;
+		client_update_screenpos(c, attr.x, attr.y);
 	} else {
-		int xmax = DisplayWidth(dpy, c->screen->screen);
-		int ymax = DisplayHeight(dpy, c->screen->screen);
 		int x, y;
 		get_mouse_position(&x, &y, c->screen->root);
-		c->x = (x * (xmax - c->border - c->width)) / xmax;
-		c->y = (y * (ymax - c->border - c->height)) / ymax;
+		c->phy = find_physical_screen(c->screen, x, y);
+		x -= c->phy->xoff;
+		y -= c->phy->yoff;
+		c->nx = (x * (c->phy->width - c->border - c->width)) / c->phy->width;
+		c->ny = (y * (c->phy->height - c->border - c->height)) / c->phy->height;
 		send_config(c);
 	}
 
-	LOG_DEBUG("window started as %dx%d +%d+%d\n", c->width, c->height, c->x, c->y);
+	LOG_DEBUG("window started as %dx%d +%d+%d\n", c->width, c->height, client_to_Xcoord(c,x), client_to_Xcoord(c,y));
 	if (attr.map_state == IsViewable) {
 		/* The reparent that is to come would trigger an unmap event */
 		c->ignore_unmap++;
 	}
-	c->x += c->old_border;
-	c->y += c->old_border;
+	c->nx += c->old_border;
+	c->ny += c->old_border;
 	gravitate_border(c, -c->old_border);
 	gravitate_border(c, c->border);
 }
@@ -269,7 +276,8 @@ static void reparent(Client *c) {
 	p_attr.border_pixel = c->screen->bg.pixel;
 	p_attr.override_redirect = True;
 	p_attr.event_mask = ChildMask | ButtonPressMask | EnterWindowMask;
-	c->parent = XCreateWindow(dpy, c->screen->root, c->x-c->border, c->y-c->border,
+	c->parent = XCreateWindow(dpy, c->screen->root,
+		client_to_Xcoord(c,x) - c->border, client_to_Xcoord(c,y) - c->border,
 		c->width, c->height, c->border,
 		DefaultDepth(dpy, c->screen->screen), CopyFromParent,
 		DefaultVisual(dpy, c->screen->screen),

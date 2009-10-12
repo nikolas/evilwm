@@ -92,7 +92,7 @@ static void infobanner_update(Client *c) {
 		return;
 	snprintf(buf, sizeof(buf), "%dx%d+%d+%d", (c->width-c->base_width)/width_inc,
 		(c->height-c->base_height)/height_inc,
-	        c->x, c->y);
+	        client_to_Xcoord(c,x), client_to_Xcoord(c,y));
 	iwinw = XTextWidth(font, buf, strlen(buf)) + 2;
 	iwinh = font->max_bounds.ascent + font->max_bounds.descent;
 
@@ -113,8 +113,8 @@ static void infobanner_update(Client *c) {
 		iwinh += nameh;
 	}
 
-	iwinx = c->x + c->border + c->width - iwinw;
-	iwiny = c->y - c->border;
+	iwinx = client_to_Xcoord(c,x) + c->border + c->width - iwinw;
+	iwiny = client_to_Xcoord(c,y) - c->border;
 	if (iwinx + iwinw > DisplayWidth(dpy, c->screen->screen))
 		iwinx = DisplayWidth(dpy, c->screen->screen) - iwinw;
 	if (iwinx < 0)
@@ -154,8 +154,8 @@ static void infobanner_remove(Client *c) {
  */
 
 static void xor_draw_outline(Client *c) {
-	int screen_x = c->x;
-	int screen_y = c->y;
+	int screen_x = client_to_Xcoord(c,x);
+	int screen_y = client_to_Xcoord(c,y);
 
 	XDrawRectangle(dpy, c->screen->root, c->screen->invert_gc,
 		screen_x - c->border, screen_y - c->border,
@@ -163,8 +163,8 @@ static void xor_draw_outline(Client *c) {
 }
 
 static void xor_draw_info(Client *c) {
-	int screen_x = c->x;
-	int screen_y = c->y;
+	int screen_x = client_to_Xcoord(c,x);
+	int screen_y = client_to_Xcoord(c,y);
 
 	char buf[27];
 	snprintf(buf, sizeof(buf), "%dx%d+%d+%d", (c->width-c->base_width)/c->width_inc,
@@ -228,8 +228,8 @@ static void shape_outline_create(Client *c) {
 	if (shape_outline_window != None)
 		return;
 
-	int screen_x = c->x - c->border;
-	int screen_y = c->y - c->border;
+	int screen_x = client_to_Xcoord(c,x) - c->border;
+	int screen_y = client_to_Xcoord(c,y) - c->border;
 	unsigned width = c->width + 2 * c->border;
 	unsigned height = c->height + 2 * c->border;
 
@@ -254,8 +254,8 @@ static void shape_outline_remove(Client *c) {
 }
 
 static void shape_outline_update(Client *c) {
-	int screen_x = c->x - c->border;
-	int screen_y = c->y - c->border;
+	int screen_x = client_to_Xcoord(c,x) - c->border;
+	int screen_y = client_to_Xcoord(c,y) - c->border;
 	unsigned width = c->width + 2 * c->border;
 	unsigned height = c->height + 2 * c->border;
 	XMoveResizeWindow(dpy, shape_outline_window, screen_x, screen_y, width, height);

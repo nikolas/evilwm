@@ -66,6 +66,17 @@ void client_lower(Client *c) {
 	ewmh_set_net_client_list_stacking(c->screen);
 }
 
+/** client_update_screenpos:
+ *   Update the client's notion of which physical screen it belongs.
+ *   Normalizes the client coordinates to be in phy-coordinates
+ *  NB, this routine must be used when translating from X11 screen co-ordinates
+ */
+void client_update_screenpos(Client *c, int screen_x, int screen_y) {
+	c->phy = find_physical_screen(c->screen, screen_x, screen_y);
+	client_from_Xcoord(c, x, screen_x);
+	client_from_Xcoord(c, y, screen_y);
+}
+
 void set_wm_state(Client *c, int state) {
 	/* Using "long" for the type of "data" looks wrong, but the
 	 * fine people in the X Consortium defined it this way
@@ -78,14 +89,15 @@ void set_wm_state(Client *c, int state) {
 			PropModeReplace, (unsigned char *)data, 2);
 }
 
+/* Inform the client of the current window configuration */
 void send_config(Client *c) {
 	XConfigureEvent ce;
 
 	ce.type = ConfigureNotify;
 	ce.event = c->window;
 	ce.window = c->window;
-	ce.x = c->x;
-	ce.y = c->y;
+	ce.x = client_to_Xcoord(c,x);
+	ce.y = client_to_Xcoord(c,y);
 	ce.width = c->width;
 	ce.height = c->height;
 	ce.border_width = 0;
@@ -131,12 +143,13 @@ void gravitate_border(Client *c, int bw) {
 		dy = -bw;
 		break;
 	}
-	if (c->x != 0 || c->width != DisplayWidth(dpy, c->screen->screen)) {
-		c->x += dx;
+	if (c->nx != 0 || c->width != c->phy->width) {
+		c->nx += dx;
 	}
-	if (c->y != 0 || c->height != DisplayHeight(dpy, c->screen->screen)) {
-		c->y += dy;
+	if (c->ny != 0 || c->height != c->phy->height) {
+		c->ny += dy;
 	}
+	/* XXX: do we need to recalculate phy? */
 }
 
 void select_client(Client *c) {
@@ -194,9 +207,10 @@ void remove_client(Client *c) {
 
 	gravitate_border(c, -c->border);
 	gravitate_border(c, c->old_border);
-	c->x -= c->old_border;
-	c->y -= c->old_border;
-	XReparentWindow(dpy, c->window, c->screen->root, c->x, c->y);
+	c->nx -= c->old_border;
+	c->ny -= c->old_border;
+	XReparentWindow(dpy, c->window, c->screen->root,
+	                client_to_Xcoord(c,x), client_to_Xcoord(c,y));
 	XSetWindowBorderWidth(dpy, c->window, c->old_border);
 	XRemoveFromSaveSet(dpy, c->window);
 	if (c->parent)

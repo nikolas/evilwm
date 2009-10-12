@@ -112,6 +112,16 @@ typedef struct {
 
 /* screen structure */
 
+/* The Xinerama extension informs us of the Physical Screens that
+ * make up a Logical Screen (thing with a root window) */
+typedef struct PhysicalScreen PhysicalScreen;
+struct PhysicalScreen {
+	int xoff; /* x pos of the physical screen in logical screen coordinates */
+	int yoff; /* y pos of the physical screen in logical screen coordinates */
+	int width; /* width of the screen */
+	int height; /* height of the screen */
+};
+
 typedef struct ScreenInfo ScreenInfo;
 struct ScreenInfo {
 	int screen;
@@ -124,6 +134,9 @@ struct ScreenInfo {
 	unsigned old_vdesk; /* most recently unmapped vdesk, so user may toggle back to it */
 	char *display;
 	int docks_visible;
+
+	int num_physical; /* Number of entries in @physical@ */
+	PhysicalScreen *physical; /* Physical screens that make up this screen */
 };
 
 /* client structure */
@@ -133,10 +146,11 @@ struct Client {
 	Window  window;
 	Window  parent;
 	ScreenInfo      *screen;
+	PhysicalScreen  *phy; /* the physical screen the client is on. */
 	Colormap        cmap;
 	int             ignore_unmap;
 
-	int             x, y, width, height;
+	int             nx, ny, width, height;
 	int             border;
 	int             oldx, oldy, oldw, oldh;  /* used when maximising */
 
@@ -242,12 +256,14 @@ extern volatile Window  initialising;
 extern int wm_exit;
 
 /* client.c */
-
+#define client_to_Xcoord(c,T) (c->phy-> T ## off + c-> n ## T)
+#define client_from_Xcoord(c,T,value) do { c-> n ## T = value - c->phy-> T ## off; } while (0)
 Client *find_client(Window w);
 void client_hide(Client *c);
 void client_show(Client *c);
 void client_raise(Client *c);
 void client_lower(Client *c);
+void client_update_screenpos(Client *c, int screen_x, int screen_y);
 void gravitate_border(Client *c, int bw);
 void select_client(Client *c);
 void client_to_vdesk(Client *c, unsigned int vdesk);
@@ -291,6 +307,7 @@ void set_docks_visible(ScreenInfo *s, int is_visible);
 void fix_screen_after_resize(ScreenInfo *s, int oldw, int oldh);
 ScreenInfo *find_screen(Window root);
 ScreenInfo *find_current_screen(void);
+PhysicalScreen *find_physical_screen(ScreenInfo *screen, int x, int y);
 void grab_keys_for_screen(ScreenInfo *s);
 
 /* ewmh.c */

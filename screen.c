@@ -19,7 +19,7 @@ static void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2, unsigne
 			c->width = c->min_width;
 		if (c->max_width && c->width > c->max_width)
 			c->width = c->max_width;
-		c->x = (x1 <= x2) ? x1 : x1 - c->width;
+		c->nx = (x1 <= x2) ? x1 : x1 - c->width;
 	}
 	if (force || c->oldh == 0)  {
 		c->oldh = 0;
@@ -29,14 +29,14 @@ static void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2, unsigne
 			c->height = c->min_height;
 		if (c->max_height && c->height > c->max_height)
 			c->height = c->max_height;
-		c->y = (y1 <= y2) ? y1 : y1 - c->height;
+		c->ny = (y1 <= y2) ? y1 : y1 - c->height;
 	}
 }
 
 void sweep(Client *c) {
 	XEvent ev;
-	int old_cx = c->x;
-	int old_cy = c->y;
+	int old_cx = client_to_Xcoord(c,x);
+	int old_cy = client_to_Xcoord(c,y);
 
 	if (!grab_pointer(c->screen->root, MouseMask, resize_curs)) return;
 
@@ -51,7 +51,11 @@ void sweep(Client *c) {
 				if (ev.xmotion.root != c->screen->root)
 					break;
 				annotate_preupdate(c, &annotate_sweep_ctx);
+				/* perform recalculate_sweep in Xcoordinates, then convert
+				 * back relative to the current phy */
 				recalculate_sweep(c, old_cx, old_cy, ev.xmotion.x, ev.xmotion.y, ev.xmotion.state & altmask);
+				c->nx -= c->phy->xoff;
+				c->ny -= c->phy->yoff;
 				annotate_update(c, &annotate_sweep_ctx);
 				break;
 			case ButtonRelease:
@@ -125,52 +129,60 @@ static void snap_client(Client *c) {
 	int dpy_height = DisplayHeight(dpy, c->screen->screen);
 	struct list *iter;
 	Client *ci;
+	/* client in screen co-ordinates */
+	int c_screen_x = client_to_Xcoord(c,x);
+	int c_screen_y = client_to_Xcoord(c,y);
 
 	/* snap to other windows */
 	dx = dy = opt_snap;
 	for (iter = clients_tab_order; iter; iter = iter->next) {
 		ci = iter->data;
+		int ci_screen_x = client_to_Xcoord(ci,x);
+		int ci_screen_y = client_to_Xcoord(ci,y);
+
 		if (ci == c) continue;
 		if (ci->screen != c->screen) continue;
 		if (!is_fixed(ci) && ci->vdesk != c->screen->vdesk) continue;
 		if (ci->is_dock && !c->screen->docks_visible) continue;
-		if (ci->y - ci->border - c->border - c->height - c->y <= opt_snap && c->y - c->border - ci->border - ci->height - ci->y <= opt_snap) {
-			dx = absmin(dx, ci->x + ci->width - c->x + c->border + ci->border);
-			dx = absmin(dx, ci->x + ci->width - c->x - c->width);
-			dx = absmin(dx, ci->x - c->x - c->width - c->border - ci->border);
-			dx = absmin(dx, ci->x - c->x);
+		if (ci_screen_y - ci->border - c->border - c->height - c_screen_y <= opt_snap
+		&& c_screen_y - c->border - ci->border - ci->height - ci_screen_y <= opt_snap) {
+			dx = absmin(dx, ci_screen_x + ci->width - c_screen_x + c->border + ci->border);
+			dx = absmin(dx, ci_screen_x + ci->width - c_screen_x - c->width);
+			dx = absmin(dx, ci_screen_x - c_screen_x - c->width - c->border - ci->border);
+			dx = absmin(dx, ci_screen_x - c_screen_x);
 		}
-		if (ci->x - ci->border - c->border - c->width - c->x <= opt_snap && c->x - c->border - ci->border - ci->width - ci->x <= opt_snap) {
-			dy = absmin(dy, ci->y + ci->height - c->y + c->border + ci->border);
-			dy = absmin(dy, ci->y + ci->height - c->y - c->height);
-			dy = absmin(dy, ci->y - c->y - c->height - c->border - ci->border);
-			dy = absmin(dy, ci->y - c->y);
+		if (ci_screen_x - ci->border - c->border - c->width - c_screen_x <= opt_snap
+		&& c_screen_x - c->border - ci->border - ci->width - ci_screen_x <= opt_snap) {
+			dy = absmin(dy, ci_screen_y + ci->height - c_screen_y + c->border + ci->border);
+			dy = absmin(dy, ci_screen_y + ci->height - c_screen_y - c->height);
+			dy = absmin(dy, ci_screen_y - c_screen_y - c->height - c->border - ci->border);
+			dy = absmin(dy, ci_screen_y - c_screen_y);
 		}
 	}
 	if (abs(dx) < opt_snap)
-		c->x += dx;
+		c->nx += dx;
 	if (abs(dy) < opt_snap)
-		c->y += dy;
+		c->ny += dy;
 
 	/* snap to screen border */
-	if (abs(c->x - c->border) < opt_snap) c->x = c->border;
-	if (abs(c->y - c->border) < opt_snap) c->y = c->border;
-	if (abs(c->x + c->width + c->border - dpy_width) < opt_snap)
-		c->x = dpy_width - c->width - c->border;
-	if (abs(c->y + c->height + c->border - dpy_height) < opt_snap)
-		c->y = dpy_height - c->height - c->border;
+	if (abs(c->nx - c->border) < opt_snap) c->nx = c->border;
+	if (abs(c->ny - c->border) < opt_snap) c->ny = c->border;
+	if (abs(c->nx + c->width + c->border - dpy_width) < opt_snap)
+		c->nx = dpy_width - c->width - c->border;
+	if (abs(c->ny + c->height + c->border - dpy_height) < opt_snap)
+		c->ny = dpy_height - c->height - c->border;
 
-	if (abs(c->x) == c->border && c->width == dpy_width)
-		c->x = 0;
-	if (abs(c->y) == c->border && c->height == dpy_height)
-		c->y = 0;
+	if (abs(c->nx) == c->border && c->width == dpy_width)
+		c->nx = 0;
+	if (abs(c->ny) == c->border && c->height == dpy_height)
+		c->ny = 0;
 }
 
 void drag(Client *c) {
 	XEvent ev;
-	int x1, y1;
-	int old_cx = c->x;
-	int old_cy = c->y;
+	int x1, y1; /* pointer position at start of grab in screen co-ordinates */
+	int old_cx = c->nx;
+	int old_cy = c->ny;
 
 	if (!grab_pointer(c->screen->root, MouseMask, move_curs)) return;
 	client_raise(c);
@@ -183,15 +195,15 @@ void drag(Client *c) {
 				if (ev.xmotion.root != c->screen->root)
 					break;
 				annotate_preupdate(c, &annotate_drag_ctx);
-				c->x = old_cx + (ev.xmotion.x - x1);
-				c->y = old_cy + (ev.xmotion.y - y1);
+				c->nx = old_cx + (ev.xmotion.x - x1);
+				c->ny = old_cy + (ev.xmotion.y - y1);
 				if (opt_snap && !(ev.xmotion.state & altmask))
 					snap_client(c);
 
 				if (!no_solid_drag) {
 					XMoveWindow(dpy, c->parent,
-							c->x - c->border,
-							c->y - c->border);
+					            client_to_Xcoord(c,x) - c->border,
+					            client_to_Xcoord(c,y) - c->border);
 					send_config(c);
 				}
 				annotate_update(c, &annotate_drag_ctx);
@@ -209,7 +221,8 @@ void drag(Client *c) {
 }
 
 void moveresize(Client *c) {
-	XMoveResizeWindow(dpy, c->parent, c->x - c->border, c->y - c->border,
+	XMoveResizeWindow(dpy, c->parent,
+			client_to_Xcoord(c,x) - c->border, client_to_Xcoord(c,y) - c->border,
 			c->width, c->height);
 	XMoveResizeWindow(dpy, c->window, 0, 0, c->width, c->height);
 	send_config(c);
@@ -225,7 +238,7 @@ void maximise_client(Client *c, int action, int hv) {
 		if (c->oldw) {
 			if (action == NET_WM_STATE_REMOVE
 					|| action == NET_WM_STATE_TOGGLE) {
-				c->x = c->oldx;
+				c->nx = c->oldx;
 				c->width = c->oldw;
 				c->oldw = 0;
 				XDeleteProperty(dpy, c->window, xa_evilwm_unmaximised_horz);
@@ -234,9 +247,9 @@ void maximise_client(Client *c, int action, int hv) {
 			if (action == NET_WM_STATE_ADD
 					|| action == NET_WM_STATE_TOGGLE) {
 				unsigned long props[2];
-				c->oldx = c->x;
+				c->oldx = c->nx;
 				c->oldw = c->width;
-				c->x = 0;
+				c->nx = 0;
 				c->width = DisplayWidth(dpy, c->screen->screen);
 				props[0] = c->oldx;
 				props[1] = c->oldw;
@@ -250,7 +263,7 @@ void maximise_client(Client *c, int action, int hv) {
 		if (c->oldh) {
 			if (action == NET_WM_STATE_REMOVE
 					|| action == NET_WM_STATE_TOGGLE) {
-				c->y = c->oldy;
+				c->ny = c->oldy;
 				c->height = c->oldh;
 				c->oldh = 0;
 				XDeleteProperty(dpy, c->window, xa_evilwm_unmaximised_vert);
@@ -259,9 +272,9 @@ void maximise_client(Client *c, int action, int hv) {
 			if (action == NET_WM_STATE_ADD
 					|| action == NET_WM_STATE_TOGGLE) {
 				unsigned long props[2];
-				c->oldy = c->y;
+				c->oldy = c->ny;
 				c->oldh = c->height;
-				c->y = 0;
+				c->ny = 0;
 				c->height = DisplayHeight(dpy, c->screen->screen);
 				props[0] = c->oldy;
 				props[1] = c->oldh;
@@ -404,7 +417,7 @@ void fix_screen_after_resize(ScreenInfo *s, int oldw, int oldh) {
 			c->oldx = scale_pos(neww, oldw, c->oldx, c->oldw + c->border);
 		} else {
 			/* horiz normal: update x pos */
-			c->x = scale_pos(neww, oldw, c->x, c->width + c->border);
+			c->nx = scale_pos(neww, oldw, c->nx, c->width + c->border);
 		}
 
 		if (c->oldh) {
@@ -413,7 +426,7 @@ void fix_screen_after_resize(ScreenInfo *s, int oldw, int oldh) {
 			c->oldy = scale_pos(newh, oldh, c->oldy, c->oldh + c->border);
 		} else {
 			/* vert normal: update y pos */
-			c->y = scale_pos(newh, oldh, c->y, c->height + c->border);
+			c->ny = scale_pos(newh, oldh, c->ny, c->height + c->border);
 		}
 		moveresize(c);
 	}
@@ -437,6 +450,17 @@ ScreenInfo *find_current_screen(void) {
 	/* XQueryPointer is useful for getting the current pointer root */
 	XQueryPointer(dpy, screens[0].root, &cur_root, &dw, &di, &di, &di, &di, &dui);
 	return find_screen(cur_root);
+}
+
+/** find_physical_screen:
+ *   Given a logical screen, find which physical screen the point (@x,@y)
+ *   resides
+ */
+PhysicalScreen *find_physical_screen(ScreenInfo *screen, int x, int y) {
+	/* xinerama-todo: This will need to search the physical screen list */
+	(void)x;
+	(void)y;
+	return screen->physical;
 }
 
 static void grab_keysym(Window w, unsigned int mask, KeySym keysym) {
