@@ -64,6 +64,8 @@ OPT_CPPFLAGS += -DWARP_POINTER
 #LDFLAGS  += -R/usr/X11/lib -L/usr/X11/lib
 
 # Solaris <= 9 doesn't support RANDR feature above, so disable it there
+# Solaris 9 doesn't fully implement ISO C99 libc, to suppress warnings, use:
+#OPT_CPPFLAGS += -D__EXTENSIONS__
 
 ############################################################################
 # Build tools
@@ -72,7 +74,7 @@ OPT_CPPFLAGS += -DWARP_POINTER
 CC = gcc
 
 # Override if desired:
-CFLAGS = -Os
+CFLAGS = -Os -std=c99
 WARN = -Wall -W -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual \
 	-Wshadow -Waggregate-return -Wnested-externs -Winline -Wwrite-strings \
 	-Wundef -Wsign-compare -Wmissing-prototypes -Wredundant-decls
@@ -94,8 +96,13 @@ version = 1.1.0
 distname = evilwm-$(version)
 
 # Generally shouldn't be overridden:
-EVILWM_CPPFLAGS = $(CPPFLAGS) $(OPT_CPPFLAGS) -DVERSION=\"$(version)\"
-EVILWM_CFLAGS = $(CFLAGS) $(WARN)
+#  _SVID_SOURCE for strdup and putenv
+#  _POSIX_C_SOURCE=200112L for sigaction
+EVILWM_CPPFLAGS = $(CPPFLAGS) $(OPT_CPPFLAGS) -DVERSION=\"$(version)\" \
+	-D_SVID_SOURCE=1 \
+	-D_POSIX_C_SOURCE=200112L \
+	$(NULL)
+EVILWM_CFLAGS = -std=c99 $(CFLAGS) $(WARN)
 EVILWM_LDLIBS = -lX11 $(OPT_LDLIBS) $(LDLIBS)
 
 HEADERS = evilwm.h keymap.h list.h log.h xconfig.h
