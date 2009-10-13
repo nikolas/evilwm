@@ -1,3 +1,9 @@
+# do not include any other makefiles above this line.
+THISMAKEFILE=$(lastword $(MAKEFILE_LIST))
+# allow trivial out-of-tree builds
+src_dir=$(dir $(THISMAKEFILE))
+VPATH=$(src_dir)
+
 ############################################################################
 # Installation paths
 
@@ -111,9 +117,9 @@ install: evilwm$(EXEEXT)
 	$(INSTALL_DIR) $(DESTDIR)$(bindir)
 	$(INSTALL_PROGRAM) evilwm$(EXEEXT) $(DESTDIR)$(bindir)/
 	$(INSTALL_DIR) $(DESTDIR)$(man1dir)
-	$(INSTALL_FILE) evilwm.1 $(DESTDIR)$(man1dir)/
+	$(INSTALL_FILE) $(src_dir)/evilwm.1 $(DESTDIR)$(man1dir)/
 	$(INSTALL_DIR) $(DESTDIR)$(desktopfilesdir)
-	$(INSTALL_FILE) evilwm.desktop $(DESTDIR)$(desktopfilesdir)/
+	$(INSTALL_FILE) $(src_dir)/evilwm.desktop $(DESTDIR)$(desktopfilesdir)/
 
 .PHONY: uninstall
 uninstall:
