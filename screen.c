@@ -206,7 +206,7 @@ static void snap_client(Client *c) {
 		if (ci == c) continue;
 		if (ci->screen != ci->screen) continue;
 #ifdef VWM
-		if (!is_fixed(ci) && ci->vdesk != c->vdesk) continue;
+		if (!is_fixed(ci) && ci->vdesk != c->screen->vdesk) continue;
 #endif
 		if (ci->is_dock && !c->screen->docks_visible) continue;
 		if (ci->y - ci->border - c->border - c->height - c->y <= opt_snap && c->y - c->border - ci->border - ci->height - ci->y <= opt_snap) {
