@@ -67,6 +67,9 @@ CC = gcc
 
 # Override if desired:
 CFLAGS = -Os
+WARN = -Wall -W -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual \
+	-Wshadow -Waggregate-return -Wnested-externs -Winline -Wwrite-strings \
+	-Wundef -Wsign-compare -Wmissing-prototypes -Wredundant-decls
 
 # For Cygwin:
 #EXEEXT = .exe
@@ -85,11 +88,9 @@ version = 1.1.0
 distname = evilwm-$(version)
 
 # Generally shouldn't be overridden:
-EVILWM_CPPFLAGS = -DVERSION=\"$(version)\" -Wall -W -Wstrict-prototypes \
-	-Wpointer-arith -Wcast-align -Wcast-qual -Wshadow -Waggregate-return \
-	-Wnested-externs -Winline -Wwrite-strings -Wundef -Wsign-compare \
-	-Wmissing-prototypes -Wredundant-decls
-EVILWM_LDLIBS = -lX11
+EVILWM_CPPFLAGS = $(CPPFLAGS) $(OPT_CPPFLAGS) -DVERSION=\"$(version)\"
+EVILWM_CFLAGS = $(CFLAGS) $(WARN)
+EVILWM_LDLIBS = -lX11 $(OPT_LDLIBS) $(LDLIBS)
 
 HEADERS = evilwm.h keymap.h list.h log.h xconfig.h
 OBJS = client.o events.o ewmh.o list.o main.o misc.o new.o screen.o xconfig.o
@@ -100,10 +101,10 @@ all: evilwm$(EXEEXT)
 $(OBJS): $(HEADERS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(OPT_CPPFLAGS) $(EVILWM_CPPFLAGS) -c $<
+	$(CC) $(EVILWM_CFLAGS) $(EVILWM_CPPFLAGS) -c $<
 
 evilwm$(EXEEXT): $(OBJS)
-	$(CC) -o $@ $(OBJS) $(LDFLAGS) $(OPT_LDLIBS) $(EVILWM_LDLIBS) $(LDLIBS)
+	$(CC) -o $@ $(OBJS) $(LDFLAGS) $(EVILWM_LDLIBS)
 
 .PHONY: install
 install: evilwm$(EXEEXT)
