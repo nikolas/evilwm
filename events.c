@@ -129,8 +129,7 @@ static void handle_key_event(XKeyEvent *e) {
 			send_wm_delete(c, e->state & altmask);
 			break;
 		case KEY_LOWER: case KEY_ALTLOWER:
-			XLowerWindow(dpy, c->parent);
-			ewmh_lower_client(c);
+			client_lower(c);
 			break;
 		case KEY_INFO:
 			show_info(c, e->keycode);
@@ -178,9 +177,7 @@ static void handle_button_event(XButtonEvent *e) {
 			case Button2:
 				sweep(c); break;
 			case Button3:
-				XLowerWindow(dpy, c->parent);
-				ewmh_lower_client(c);
-				break;
+				client_lower(c); break;
 			default: break;
 		}
 	}
@@ -258,7 +255,8 @@ static void handle_map_request(XMapRequestEvent *e) {
 		if (!is_fixed(c) && c->vdesk != c->screen->vdesk)
 			switch_vdesk(c->screen, c->vdesk);
 #endif
-		unhide(c, RAISE);
+		client_show(c);
+		client_raise(c);
 	} else {
 		XWindowAttributes attr;
 		XGetWindowAttributes(dpy, e->window, &attr);
@@ -310,7 +308,7 @@ static void handle_property_change(XPropertyEvent *e) {
 					&& (is_fixed(c) || (c->vdesk == c->screen->vdesk))
 #endif
 					) {
-				unhide(c, NO_RAISE);
+				client_show(c);
 			}
 		}
 		LOG_LEAVE();

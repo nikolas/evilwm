@@ -148,7 +148,8 @@ void make_new_client(Window w, ScreenInfo *s) {
 	if (is_fixed(c) || c->vdesk == s->vdesk)
 #endif
 	{
-		unhide(c, RAISE);
+		client_show(c);
+		client_raise(c);
 #ifndef MOUSE
 		select_client(c);
 #ifdef WARP_POINTER

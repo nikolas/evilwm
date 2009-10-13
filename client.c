@@ -23,6 +23,29 @@ Client *find_client(Window w) {
 	return NULL;
 }
 
+void client_hide(Client *c) {
+	c->ignore_unmap++;  /* Ignore unmap so we don't remove client */
+	XUnmapWindow(dpy, c->parent);
+	set_wm_state(c, IconicState);
+}
+
+void client_show(Client *c) {
+	XMapWindow(dpy, c->parent);
+	set_wm_state(c, NormalState);
+}
+
+void client_raise(Client *c) {
+	XRaiseWindow(dpy, c->parent);
+	clients_stacking_order = list_to_tail(clients_stacking_order, c);
+	ewmh_set_net_client_list_stacking(c->screen);
+}
+
+void client_lower(Client *c) {
+	XLowerWindow(dpy, c->parent);
+	clients_stacking_order = list_to_head(clients_stacking_order, c);
+	ewmh_set_net_client_list_stacking(c->screen);
+}
+
 void set_wm_state(Client *c, int state) {
 	/* Using "long" for the type of "data" looks wrong, but the
 	 * fine people in the X Consortium defined it this way
@@ -124,9 +147,9 @@ void client_to_vdesk(Client *c, unsigned int vdesk) {
 	if (valid_vdesk(vdesk)) {
 		c->vdesk = vdesk;
 		if (c->vdesk == c->screen->vdesk || c->vdesk == VDESK_FIXED) {
-			unhide(c, NO_RAISE);
+			client_show(c);
 		} else {
-			hide(c);
+			client_hide(c);
 		}
 		ewmh_set_net_wm_desktop(c);
 		select_client(current);

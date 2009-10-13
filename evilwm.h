@@ -253,6 +253,10 @@ extern int wm_exit;
 /* client.c */
 
 Client *find_client(Window w);
+void client_hide(Client *c);
+void client_show(Client *c);
+void client_raise(Client *c);
+void client_lower(Client *c);
 void gravitate_client(Client *c, int sign, int gravity);
 void select_client(Client *c);
 #ifdef VWM
@@ -289,9 +293,7 @@ void moveresize(Client *c);
 void maximise_client(Client *c, int action, int hv);
 void show_info(Client *c, unsigned int keycode);
 void sweep(Client *c);
-void unhide(Client *c, int raise_win);
 void next(void);
-void hide(Client *c);
 #ifdef VWM
 void switch_vdesk(ScreenInfo *s, unsigned int v);
 #endif
@@ -309,8 +311,6 @@ void ewmh_init_client(Client *c);
 void ewmh_deinit_client(Client *c);
 void ewmh_withdraw_client(Client *c);
 void ewmh_select_client(Client *c);
-void ewmh_raise_client(Client *c);
-void ewmh_lower_client(Client *c);
 void ewmh_set_net_client_list(ScreenInfo *s);
 void ewmh_set_net_client_list_stacking(ScreenInfo *s);
 #ifdef VWM

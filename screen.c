@@ -121,8 +121,7 @@ void sweep(Client *c) {
 
 	if (!grab_pointer(c->screen->root, MouseMask, resize_curs)) return;
 
-	XRaiseWindow(dpy, c->parent);
-	ewmh_raise_client(c);
+	client_raise(c);
 #ifdef INFOBANNER_MOVERESIZE
 	create_info_window(c);
 #endif
@@ -249,8 +248,7 @@ void drag(Client *c) {
 	int old_cy = c->y;
 
 	if (!grab_pointer(c->screen->root, MouseMask, move_curs)) return;
-	XRaiseWindow(dpy, c->parent);
-	ewmh_raise_client(c);
+	client_raise(c);
 	get_mouse_position(&x1, &y1, c->screen->root);
 #ifdef INFOBANNER_MOVERESIZE
 	create_info_window(c);
@@ -308,8 +306,7 @@ void drag(Client *c) {
 #endif /* def MOUSE */
 
 void moveresize(Client *c) {
-	XRaiseWindow(dpy, c->parent);
-	ewmh_raise_client(c);
+	client_raise(c);
 	XMoveResizeWindow(dpy, c->parent, c->x - c->border, c->y - c->border,
 			c->width, c->height);
 	XMoveResizeWindow(dpy, c->window, 0, 0, c->width, c->height);
@@ -372,27 +369,6 @@ void maximise_client(Client *c, int action, int hv) {
 	discard_enter_events();
 }
 
-void hide(Client *c) {
-	/* This will generate an unmap event.  Tell event handler
-	 * to ignore it. */
-	c->ignore_unmap++;
-	LOG_XENTER("XUnmapWindow(parent=%lx)", c->parent);
-	XUnmapWindow(dpy, c->parent);
-	LOG_XLEAVE();
-	set_wm_state(c, IconicState);
-}
-
-void unhide(Client *c, int raise_win) {
-	if (raise_win) {
-		XMapRaised(dpy, c->parent);
-		clients_stacking_order = list_to_tail(clients_stacking_order, c);
-		ewmh_set_net_client_list_stacking(c->screen);
-	} else {
-		XMapWindow(dpy, c->parent);
-	}
-	set_wm_state(c, NormalState);
-}
-
 void next(void) {
 	struct list *newl = list_find(clients_tab_order, current);
 	Client *newc = current;
@@ -419,7 +395,8 @@ void next(void) {
 #endif
 	if (!newc)
 		return;
-	unhide(newc, RAISE);
+	client_show(newc);
+	client_raise(newc);
 	select_client(newc);
 #ifdef WARP_POINTER
 	setmouse(newc->window, newc->width + newc->border - 1,
@@ -446,13 +423,13 @@ void switch_vdesk(ScreenInfo *s, unsigned int v) {
 		if (c->screen != s)
 			continue;
 		if (c->vdesk == s->vdesk) {
-			hide(c);
+			client_hide(c);
 #ifdef DEBUG
 			hidden++;
 #endif
 		} else if (c->vdesk == v) {
 			if (!c->is_dock || s->docks_visible)
-				unhide(c, NO_RAISE);
+				client_show(c);
 #ifdef DEBUG
 			raised++;
 #endif
@@ -477,11 +454,15 @@ void set_docks_visible(ScreenInfo *s, int is_visible) {
 		if (c->is_dock) {
 			if (is_visible) {
 #ifdef VWM
-				if (is_fixed(c) || (c->vdesk == s->vdesk))
+				if (is_fixed(c) || (c->vdesk == s->vdesk)) {
 #endif
-					unhide(c, RAISE);
+					client_show(c);
+					client_raise(c);
+#ifdef VWM
+				}
+#endif
 			} else {
-				hide(c);
+				client_hide(c);
 			}
 		}
 	}

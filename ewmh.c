@@ -248,16 +248,6 @@ void ewmh_select_client(Client *c) {
 	clients_tab_order = list_to_head(clients_tab_order, c);
 }
 
-void ewmh_raise_client(Client *c) {
-	clients_stacking_order = list_to_tail(clients_stacking_order, c);
-	ewmh_set_net_client_list_stacking(c->screen);
-}
-
-void ewmh_lower_client(Client *c) {
-	clients_stacking_order = list_to_head(clients_stacking_order, c);
-	ewmh_set_net_client_list_stacking(c->screen);
-}
-
 void ewmh_set_net_client_list(ScreenInfo *s) {
 	Window *windows = alloc_window_array();
 	struct list *iter;
