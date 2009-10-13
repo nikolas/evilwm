@@ -123,16 +123,15 @@ uninstall:
 
 .PHONY: dist
 dist:
-	darcs dist --dist-name $(distname)
-	mv $(distname).tar.gz ..
+	git archive --format=tar --output=../$(distname).tar --prefix=$(distname)/ HEAD
+	gzip -f9 ../$(distname).tar
 
 .PHONY: debuild
 debuild: dist
 	-cd ..; rm -rf $(distname)/ $(distname).orig/
 	cd ..; mv $(distname).tar.gz evilwm_$(version).orig.tar.gz
 	cd ..; tar xfz evilwm_$(version).orig.tar.gz
-	cp -a debian ../$(distname)/
-	rm -rf ../$(distname)/debian/_darcs/
+	rsync -axH debian --exclude='debian/.git/' --exclude='debian/_darcs/' ../$(distname)/
 	cd ../$(distname); debuild
 
 .PHONY: clean
