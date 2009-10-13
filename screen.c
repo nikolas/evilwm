@@ -164,6 +164,9 @@ void show_info(Client *c, unsigned int keycode) {
 	XEvent ev;
 	XKeyboardState keyboard;
 
+	if (XGrabKeyboard(dpy, c->screen->root, False, GrabModeAsync, GrabModeAsync, CurrentTime) != GrabSuccess)
+		return;
+
 	XGetKeyboardControl(dpy, &keyboard);
 	XAutoRepeatOff(dpy);
 #ifdef INFOBANNER
@@ -183,6 +186,7 @@ void show_info(Client *c, unsigned int keycode) {
 #endif
 	if (keyboard.global_auto_repeat == AutoRepeatModeOn)
 		XAutoRepeatOn(dpy);
+	XUngrabKeyboard(dpy, CurrentTime);
 }
 
 #ifdef MOUSE
