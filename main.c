@@ -244,7 +244,7 @@ static void setup_display(void) {
 	LOG_ENTER("setup_display()");
 
 	dpy = XOpenDisplay(opt_display);
-	if (!dpy) { 
+	if (!dpy) {
 		LOG_ERROR("can't open display %s\n", opt_display);
 		exit(1);
 	}

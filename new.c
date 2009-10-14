@@ -170,10 +170,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 }
 
 /* Calls XGetWindowAttributes, XGetWMHints and XGetWMNormalHints to determine
- * window's initial geometry.
- *
- * XGetWindowAttributes 
- */
+ * window's initial geometry. */
 static void init_geometry(Client *c) {
 	long size_flags;
 	XWindowAttributes attr;
