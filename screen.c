@@ -273,7 +273,7 @@ void drag(Client *c) {
 				}
 				c->x = old_cx + (ev.xmotion.x - x1);
 				c->y = old_cy + (ev.xmotion.y - y1);
-				if (opt_snap)
+				if (opt_snap && !(ev.xmotion.state & altmask))
 					snap_client(c);
 
 #ifdef INFOBANNER_MOVERESIZE

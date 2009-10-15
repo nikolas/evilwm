@@ -281,6 +281,7 @@ static void reparent(Client *c) {
 	XMapWindow(dpy, c->window);
 #ifdef MOUSE
 	grab_button(c->parent, grabmask2, AnyButton);
+	grab_button(c->parent, grabmask2 | altmask, AnyButton);
 #endif
 }
 
