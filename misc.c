@@ -24,12 +24,12 @@ void spawn(const char *const cmd[]) {
 	if (!(pid = fork())) {
 		setsid();
 		switch (fork()) {
-			/* Expect compiler warnings because of half-broken SUS
-			 * execvp prototype:  "char *const argv[]" should have
-			 * been "const char *const argv[]", but the committee
-			 * favored legacy code over modern code, and modern
-			 * compilers bark at our extra const. (LD) */
-			case 0: execvp(cmd[0], cmd+1);
+			/* execvp()'s prototype is (char *const *) suggesting that it
+			 * modifies the contents of the strings.  The prototype is this
+			 * way due to SUS maintaining compatability with older code.
+			 * However, execvp guarantees not to modify argv, so the following
+			 * cast is valid. */
+			case 0: execvp(cmd[0], (char *const *) cmd+1);
 			default: _exit(0);
 		}
 	}
