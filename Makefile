@@ -75,9 +75,14 @@ CC = gcc
 
 # Override if desired:
 CFLAGS = -Os -std=c99
-WARN = -Wall -W -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual \
+WARN = -Wall -W -Wstrict-prototypes -Wpointer-arith -Wcast-align \
 	-Wshadow -Waggregate-return -Wnested-externs -Winline -Wwrite-strings \
 	-Wundef -Wsign-compare -Wmissing-prototypes -Wredundant-decls
+
+# Enable to spot explicit casts that strip constant qualifiers.
+# generally not needed, since an explicit cast should signify
+# the programmer guarantees no undefined behaviour.
+#WARN += -Wcast-qual
 
 # For Cygwin:
 #EXEEXT = .exe
