@@ -386,6 +386,23 @@ bool switch_vdesk(ScreenInfo *s, PhysicalScreen *p, unsigned int v) {
 	return true;
 }
 
+void exchange_phy(ScreenInfo *s) {
+	if (s->num_physical != 2) {
+		/* todo: handle multiple phys */
+		return;
+	}
+	/* this action should not alter the old_vdesk, so user may still toggle to it */
+	unsigned save_old_vdesk = s->old_vdesk;
+	unsigned vdesk_a = s->physical[0].vdesk;
+	unsigned vdesk_b = s->physical[1].vdesk;
+	/* clear the vdesks to stop switch_vdesk discovering vdesk is
+	 * already mapped and ignoring the request */
+	s->physical[0].vdesk = s->physical[1].vdesk = VDESK_NONE;
+	switch_vdesk(s, &s->physical[0], vdesk_b);
+	switch_vdesk(s, &s->physical[1], vdesk_a);
+	s->old_vdesk = save_old_vdesk;
+}
+
 void set_docks_visible(ScreenInfo *s, int is_visible) {
 	struct list *iter;
 
@@ -526,6 +543,7 @@ static KeySym keys_to_grab[] = {
 #ifdef VWM
 	KEY_FIX, KEY_PREVDESK, KEY_NEXTDESK, KEY_TOGGLEDESK,
 	XK_1, XK_2, XK_3, XK_4, XK_5, XK_6, XK_7, XK_8, XK_9, XK_0,
+	KEY_EXGPHY,
 #endif
 	KEY_NEW, KEY_KILL,
 	KEY_TOPLEFT, KEY_TOPRIGHT, KEY_BOTTOMLEFT, KEY_BOTTOMRIGHT,

@@ -72,6 +72,9 @@ static void handle_key_event(XKeyEvent *e) {
 		case KEY_TOGGLEDESK:
 			switch_vdesk(current_screen, current_phy, current_screen->old_vdesk);
 			break;
+		case KEY_EXGPHY:
+			exchange_phy(current_screen);
+			break;
 		default: break;
 	}
 	c = current;

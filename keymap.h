@@ -21,6 +21,7 @@
 #define KEY_PREVDESK   XK_Left
 #define KEY_NEXTDESK   XK_Right
 #define KEY_TOGGLEDESK XK_a
+#define KEY_EXGPHY     XK_s
 /* Mixtures of Ctrl, Alt an Escape are used for things like VMWare and
  * XFree86/Cygwin, so the KILL key is an option in the Makefile  */
 #ifndef KEY_KILL

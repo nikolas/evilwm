@@ -63,6 +63,7 @@ typedef struct {
 
 /* readability stuff */
 
+#define VDESK_INVALID (0xfffffffd)
 #define VDESK_NONE  (0xfffffffe)
 #define VDESK_FIXED (0xffffffff)
 #define VDESK_MAX   (opt_vdesks - 1)
@@ -318,6 +319,7 @@ void show_info(Client *c, unsigned int keycode);
 void sweep(Client *c);
 void next(void);
 bool switch_vdesk(ScreenInfo *s, PhysicalScreen *p, unsigned int v);
+void exchange_phy(ScreenInfo *s);
 void set_docks_visible(ScreenInfo *s, int is_visible);
 ScreenInfo *find_screen(Window root);
 ScreenInfo *find_current_screen(void);

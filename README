@@ -82,6 +82,8 @@ F              Fix or unfix window.
 Left           Previous virtual desktop.
 Right          Next virtual desktop.
 A              Switch to the most recently unmapped virtual desktop.
+S              [dual-head xinerama only]
+               Exchange the [two] currently visible virtual desktops.
 
 In addition to the above, Alt+Tab can be used to cycle through windows
 on screen.
