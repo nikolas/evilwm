@@ -172,7 +172,7 @@ void show_info(Client *c, unsigned int keycode) {
 		return;
 
 	XGetKeyboardControl(dpy, &keyboard);
-	XAutoRepeatOff(dpy);
+	XChangeKeyboardControl(dpy, KBAutoRepeatMode, &(XKeyboardControl){.auto_repeat_mode = AutoRepeatModeOff});
 #ifdef INFOBANNER
 	create_info_window(c);
 #else
@@ -188,8 +188,7 @@ void show_info(Client *c, unsigned int keycode) {
 	draw_outline(c);
 	XUngrabServer(dpy);
 #endif
-	if (keyboard.global_auto_repeat == AutoRepeatModeOn)
-		XAutoRepeatOn(dpy);
+	XChangeKeyboardControl(dpy, KBAutoRepeatMode, &(XKeyboardControl){.auto_repeat_mode = keyboard.global_auto_repeat});
 	XUngrabKeyboard(dpy, CurrentTime);
 }
 
