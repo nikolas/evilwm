@@ -128,6 +128,7 @@ struct ScreenInfo {
 #ifdef VWM
 	unsigned int vdesk;
 	XColor fc;
+	unsigned old_vdesk; /* most recently unmapped vdesk, so user may toggle back to it */
 #endif
 	char *display;
 	int docks_visible;

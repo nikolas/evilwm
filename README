@@ -80,6 +80,7 @@ F              Fix or unfix window.
 1 - 8          Switch virtual desktop.
 Left           Previous virtual desktop.
 Right          Next virtual desktop.
+A              Switch to the most recently unmapped virtual desktop.
 
 In addition to the above, Alt+Tab can be used to cycle through windows
 on screen.
