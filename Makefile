@@ -123,7 +123,7 @@ uninstall:
 
 .PHONY: dist
 dist:
-	git archive --format=tar --output=../$(distname).tar --prefix=$(distname)/ HEAD
+	git archive --format=tar --prefix=$(distname)/ HEAD > ../$(distname).tar
 	gzip -f9 ../$(distname).tar
 
 .PHONY: debuild
