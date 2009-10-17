@@ -131,6 +131,68 @@ xor_template(outline);
 xor_template(info);
 
 /*
+ * XShape decoration functions
+ */
+#ifdef SHAPE
+static Window shape_outline_window = None;
+
+static void shape_outline_shape(Client *c) {
+	unsigned width = c->width + 2 * c->border;
+	unsigned height = c->height + 2 * c->border;
+
+	Region r = XCreateRegion();
+	Region r_in = XCreateRegion();
+	XRectangle rect = { .x=0, .y=0, .width = width, .height = height };
+	XUnionRectWithRegion(&rect, r, r);
+	rect.x = rect.y = 1 /* or could be: * c->border */;
+	rect.width -= 2 /* or could be: * c->border*/;
+	rect.height -= 2 /* or could be: * c->border */;
+	XUnionRectWithRegion(&rect, r_in, r_in);
+	XSubtractRegion(r, r_in, r);
+	XShapeCombineRegion(dpy, shape_outline_window, ShapeBounding, 0,0, r, ShapeSet);
+}
+
+static void shape_outline_create(Client *c) {
+	if (shape_outline_window != None)
+		return;
+
+	int screen_x = c->x - c->border;
+	int screen_y = c->y - c->border;
+	unsigned width = c->width + 2 * c->border;
+	unsigned height = c->height + 2 * c->border;
+
+	shape_outline_window =
+		XCreateWindow(dpy, c->screen->root, screen_x, screen_y, width, height, 0,
+		              CopyFromParent, InputOutput, CopyFromParent,
+		              CWSaveUnder | CWBackPixel,
+		              &(XSetWindowAttributes){
+		                  .background_pixel = c->screen->fg.pixel,
+		                  .save_under = True
+		              });
+
+	shape_outline_shape(c);
+	XMapRaised(dpy, shape_outline_window);
+}
+
+static void shape_outline_remove(Client *c) {
+	(void) c;
+	if (shape_outline_window != None)
+		XDestroyWindow(dpy, shape_outline_window);
+	shape_outline_window = None;
+}
+
+static void shape_outline_update(Client *c) {
+	int screen_x = c->x - c->border;
+	int screen_y = c->y - c->border;
+	unsigned width = c->width + 2 * c->border;
+	unsigned height = c->height + 2 * c->border;
+	XMoveResizeWindow(dpy, shape_outline_window, screen_x, screen_y, width, height);
+	shape_outline_shape(c);
+}
+
+#endif
+
+/*
  * Annotation method tables
  */
 typedef struct {
@@ -161,6 +223,17 @@ const annotate_funcs xor_outline = {
 	.remove = xor_outline_remove,
 };
 
+#ifdef SHAPE
+const annotate_funcs shape_outline = {
+	.create = shape_outline_create,
+	.preupdate = NULL,
+	.update = shape_outline_update,
+	.remove = shape_outline_remove,
+};
+#else
+# define shape_outline xor_outline
+#endif
+
 /* compile time defaults */
 #ifdef INFOBANNER
 # define ANNOTATE_INFOBANNER x11_infobanner
@@ -181,8 +254,8 @@ struct annotate_ctx {
 typedef struct annotate_ctx annotate_ctx_t;
 
 annotate_ctx_t annotate_info_ctx = { NULL, &ANNOTATE_INFOBANNER };
-annotate_ctx_t annotate_drag_ctx = { &xor_outline, &ANNOTATE_MOVERESIZE };
-annotate_ctx_t annotate_sweep_ctx = { &xor_outline, &ANNOTATE_MOVERESIZE };
+annotate_ctx_t annotate_drag_ctx = { &shape_outline, &ANNOTATE_MOVERESIZE };
+annotate_ctx_t annotate_sweep_ctx = { &shape_outline, &ANNOTATE_MOVERESIZE };
 
 /*
  * Annotation functions
