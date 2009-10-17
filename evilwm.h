@@ -325,3 +325,14 @@ void ewmh_set_net_wm_desktop(Client *c);
 unsigned int ewmh_get_net_wm_window_type(Window w);
 void ewmh_set_net_wm_state(Client *c);
 void ewmh_set_net_frame_extents(Window w);
+
+/* annotations.c */
+
+struct annotate_ctx;
+extern struct annotate_ctx annotate_info_ctx;
+extern struct annotate_ctx annotate_drag_ctx;
+extern struct annotate_ctx annotate_sweep_ctx;
+void annotate_create(Client *c, struct annotate_ctx *a);
+void annotate_preupdate(Client *c, struct annotate_ctx *a);
+void annotate_update(Client *c, struct annotate_ctx *a);
+void annotate_remove(Client *c, struct annotate_ctx *a);

@@ -8,89 +8,7 @@
 #include "evilwm.h"
 #include "log.h"
 
-#ifdef INFOBANNER
-Window info_window = None;
-
-static void create_info_window(Client *c);
-static void update_info_window(Client *c);
-static void remove_info_window(void);
 static void grab_keysym(Window w, unsigned int mask, KeySym keysym);
-
-static void create_info_window(Client *c) {
-	info_window = XCreateSimpleWindow(dpy, c->screen->root, -4, -4, 2, 2,
-			0, c->screen->fg.pixel, c->screen->fg.pixel);
-	XMapRaised(dpy, info_window);
-	update_info_window(c);
-}
-
-static void update_info_window(Client *c) {
-	char *name;
-	char buf[27];
-	int namew, iwinx, iwiny, iwinw, iwinh;
-	int width_inc = c->width_inc, height_inc = c->height_inc;
-
-	if (!info_window)
-		return;
-	snprintf(buf, sizeof(buf), "%dx%d+%d+%d", (c->width-c->base_width)/width_inc,
-		(c->height-c->base_height)/height_inc, c->x, c->y);
-	iwinw = XTextWidth(font, buf, strlen(buf)) + 2;
-	iwinh = font->max_bounds.ascent + font->max_bounds.descent;
-	XFetchName(dpy, c->window, &name);
-	if (name) {
-		namew = XTextWidth(font, name, strlen(name));
-		if (namew > iwinw)
-			iwinw = namew + 2;
-		iwinh = iwinh * 2;
-	}
-	iwinx = c->x + c->border + c->width - iwinw;
-	iwiny = c->y - c->border;
-	if (iwinx + iwinw > DisplayWidth(dpy, c->screen->screen))
-		iwinx = DisplayWidth(dpy, c->screen->screen) - iwinw;
-	if (iwinx < 0)
-		iwinx = 0;
-	if (iwiny + iwinh > DisplayHeight(dpy, c->screen->screen))
-		iwiny = DisplayHeight(dpy, c->screen->screen) - iwinh;
-	if (iwiny < 0)
-		iwiny = 0;
-	XMoveResizeWindow(dpy, info_window, iwinx, iwiny, iwinw, iwinh);
-	XClearWindow(dpy, info_window);
-	if (name) {
-		XDrawString(dpy, info_window, c->screen->invert_gc,
-				1, iwinh / 2 - 1, name, strlen(name));
-		XFree(name);
-	}
-	XDrawString(dpy, info_window, c->screen->invert_gc, 1, iwinh - 1,
-			buf, strlen(buf));
-}
-
-static void remove_info_window(void) {
-	if (info_window)
-		XDestroyWindow(dpy, info_window);
-	info_window = None;
-}
-#endif  /* INFOBANNER */
-
-#if defined(MOUSE) || !defined(INFOBANNER)
-static void draw_outline(Client *c) {
-#ifndef INFOBANNER_MOVERESIZE
-	char buf[27];
-	int width_inc = c->width_inc, height_inc = c->height_inc;
-#endif  /* ndef INFOBANNER_MOVERESIZE */
-
-	XDrawRectangle(dpy, c->screen->root, c->screen->invert_gc,
-		c->x - c->border, c->y - c->border,
-		c->width + 2*c->border-1, c->height + 2*c->border-1);
-
-#ifndef INFOBANNER_MOVERESIZE
-	snprintf(buf, sizeof(buf), "%dx%d+%d+%d", (c->width-c->base_width)/width_inc,
-			(c->height-c->base_height)/height_inc, c->x, c->y);
-	XDrawString(dpy, c->screen->root, c->screen->invert_gc,
-		c->x + c->width - XTextWidth(font, buf, strlen(buf)) - SPACE,
-		c->y + c->height - SPACE,
-		buf, strlen(buf));
-#endif  /* ndef INFOBANNER_MOVERESIZE */
-}
-#endif
 
 static void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2, unsigned force) {
 	if (force || c->oldw == 0) {
@@ -123,11 +41,7 @@ void sweep(Client *c) {
 	if (!grab_pointer(c->screen->root, MouseMask, resize_curs)) return;
 
 	client_raise(c);
-#ifdef INFOBANNER_MOVERESIZE
-	create_info_window(c);
-#endif
-	XGrabServer(dpy);
-	draw_outline(c);
+	annotate_create(c, &annotate_sweep_ctx);
 
 	setmouse(c->window, c->width, c->height);
 	for (;;) {
@@ -136,22 +50,12 @@ void sweep(Client *c) {
 			case MotionNotify:
 				if (ev.xmotion.root != c->screen->root)
 					break;
-				draw_outline(c); /* clear */
-				XUngrabServer(dpy);
+				annotate_preupdate(c, &annotate_sweep_ctx);
 				recalculate_sweep(c, old_cx, old_cy, ev.xmotion.x, ev.xmotion.y, ev.xmotion.state & altmask);
-#ifdef INFOBANNER_MOVERESIZE
-				update_info_window(c);
-#endif
-				XSync(dpy, False);
-				XGrabServer(dpy);
-				draw_outline(c);
+				annotate_update(c, &annotate_sweep_ctx);
 				break;
 			case ButtonRelease:
-				draw_outline(c); /* clear */
-				XUngrabServer(dpy);
-#ifdef INFOBANNER_MOVERESIZE
-				remove_info_window();
-#endif
+				annotate_remove(c, &annotate_sweep_ctx);
 				XUngrabPointer(dpy, CurrentTime);
 				moveresizeraise(c);
 				/* In case maximise state has changed: */
@@ -192,12 +96,7 @@ void show_info(Client *c, unsigned int keycode) {
 	 * released. */
 	XGetKeyboardControl(dpy, &keyboard);
 	XChangeKeyboardControl(dpy, KBAutoRepeatMode, &(XKeyboardControl){.auto_repeat_mode = AutoRepeatModeOff});
-#ifdef INFOBANNER
-	create_info_window(c);
-#else
-	XGrabServer(dpy);
-	draw_outline(c);
-#endif
+	annotate_create(c, &annotate_info_ctx);
 	do {
 		XMaskEvent(dpy, KeyReleaseMask, &ev);
 		if (ev.xkey.keycode != keycode)
@@ -209,12 +108,7 @@ void show_info(Client *c, unsigned int keycode) {
 		}
 		break; /* escape */
 	} while (1);
-#ifdef INFOBANNER
-	remove_info_window();
-#else
-	draw_outline(c);
-	XUngrabServer(dpy);
-#endif
+	annotate_remove(c, &annotate_info_ctx);
 	XChangeKeyboardControl(dpy, KBAutoRepeatMode, &(XKeyboardControl){.auto_repeat_mode = keyboard.global_auto_repeat});
 	XUngrabKeyboard(dpy, CurrentTime);
 }
@@ -283,50 +177,29 @@ void drag(Client *c) {
 	if (!grab_pointer(c->screen->root, MouseMask, move_curs)) return;
 	client_raise(c);
 	get_mouse_position(&x1, &y1, c->screen->root);
-#ifdef INFOBANNER_MOVERESIZE
-	create_info_window(c);
-#endif
-	if (no_solid_drag) {
-		XGrabServer(dpy);
-		draw_outline(c);
-	}
+	annotate_create(c, &annotate_drag_ctx);
 	for (;;) {
 		XMaskEvent(dpy, MouseMask, &ev);
 		switch (ev.type) {
 			case MotionNotify:
 				if (ev.xmotion.root != c->screen->root)
 					break;
-				if (no_solid_drag) {
-					draw_outline(c); /* clear */
-					XUngrabServer(dpy);
-				}
+				annotate_preupdate(c, &annotate_drag_ctx);
 				c->x = old_cx + (ev.xmotion.x - x1);
 				c->y = old_cy + (ev.xmotion.y - y1);
 				if (opt_snap && !(ev.xmotion.state & altmask))
 					snap_client(c);
 
-#ifdef INFOBANNER_MOVERESIZE
-				update_info_window(c);
-#endif
-				if (no_solid_drag) {
-					XSync(dpy, False);
-					XGrabServer(dpy);
-					draw_outline(c);
-				} else {
+				if (!no_solid_drag) {
 					XMoveWindow(dpy, c->parent,
 							c->x - c->border,
 							c->y - c->border);
 					send_config(c);
 				}
+				annotate_update(c, &annotate_drag_ctx);
 				break;
 			case ButtonRelease:
-				if (no_solid_drag) {
-					draw_outline(c); /* clear */
-					XUngrabServer(dpy);
-				}
-#ifdef INFOBANNER_MOVERESIZE
-				remove_info_window();
-#endif
+				annotate_remove(c, &annotate_drag_ctx);
 				XUngrabPointer(dpy, CurrentTime);
 				if (no_solid_drag) {
 					moveresizeraise(c);
