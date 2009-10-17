@@ -164,6 +164,24 @@ void sweep(Client *c) {
 }
 #endif
 
+/** predicate_keyrepeatpress:
+ *  predicate function for use with XCheckIfEvent.
+ *  When used with XCheckIfEvent, this function will return true if
+ *  there is a KeyPress event queued of the same keycode and time
+ *  as @arg.
+ *
+ *  @arg must be a poiner to an XEvent of type KeyRelease
+ */
+static Bool predicate_keyrepeatpress(Display *dummy, XEvent *ev, XPointer arg) {
+	(void) dummy;
+	XEvent* release_event = (XEvent*) arg;
+	if (ev->type != KeyPress)
+		return False;
+	if (release_event->xkey.keycode != ev->xkey.keycode)
+		return False;
+	return release_event->xkey.time == ev->xkey.time;
+}
+
 void show_info(Client *c, unsigned int keycode) {
 	XEvent ev;
 	XKeyboardState keyboard;
@@ -171,6 +189,9 @@ void show_info(Client *c, unsigned int keycode) {
 	if (XGrabKeyboard(dpy, c->screen->root, False, GrabModeAsync, GrabModeAsync, CurrentTime) != GrabSuccess)
 		return;
 
+	/* keyboard repeat might not have any effect, newer X servers seem to
+	 * only change the keyboard control after all keys have been physically
+	 * released. */
 	XGetKeyboardControl(dpy, &keyboard);
 	XChangeKeyboardControl(dpy, KBAutoRepeatMode, &(XKeyboardControl){.auto_repeat_mode = AutoRepeatModeOff});
 #ifdef INFOBANNER
@@ -181,7 +202,15 @@ void show_info(Client *c, unsigned int keycode) {
 #endif
 	do {
 		XMaskEvent(dpy, KeyReleaseMask, &ev);
-	} while (ev.xkey.keycode != keycode);
+		if (ev.xkey.keycode != keycode)
+			continue;
+		if (XCheckIfEvent(dpy, &ev, predicate_keyrepeatpress, (XPointer)&ev)) {
+			/* This is a key press event with the same time as the previous
+			 * key release event. */
+			continue;
+		}
+		break; /* escape */
+	} while (1);
 #ifdef INFOBANNER
 	remove_info_window();
 #else
