@@ -181,6 +181,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 /* Calls XGetWindowAttributes, XGetWMHints and XGetWMNormalHints to determine
  * window's initial geometry. */
 static void init_geometry(Client *c) {
+	int need_send_config = 0;
 	long size_flags;
 	XWindowAttributes attr;
 	unsigned long *eprop;
@@ -233,7 +234,7 @@ static void init_geometry(Client *c) {
 	} else {
 		c->width = c->min_width;
 		c->height = c->min_height;
-		send_config(c);
+		need_send_config = 1;
 	}
 	client_calc_cog(c);
 
@@ -251,7 +252,7 @@ static void init_geometry(Client *c) {
 		y -= c->phy->yoff;
 		c->nx = (x * (c->phy->width - c->border - c->width)) / c->phy->width;
 		c->ny = (y * (c->phy->height - c->border - c->height)) / c->phy->height;
-		send_config(c);
+		need_send_config = 1;
 	}
 
 	LOG_DEBUG("window started as %dx%d +%d+%d\n", c->width, c->height, client_to_Xcoord(c,x), client_to_Xcoord(c,y));
@@ -284,6 +285,9 @@ static void init_geometry(Client *c) {
 			break;
 		}
 	}
+
+	if (need_send_config)
+		send_config(c);
 }
 
 static void reparent(Client *c) {
