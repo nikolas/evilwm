@@ -7,6 +7,19 @@
 #include "evilwm.h"
 #include "log.h"
 
+/* Standard X protocol atoms */
+Atom xa_wm_state;
+Atom xa_wm_protos;
+Atom xa_wm_delete;
+Atom xa_wm_cmapwins;
+
+/* Motif atoms */
+Atom mwm_hints;
+
+/* evilwm atoms */
+Atom xa_evilwm_unmaximised_horz;
+Atom xa_evilwm_unmaximised_vert;
+
 /* Root Window Properties (and Related Messages) */
 static Atom xa_net_supported;
 static Atom xa_net_client_list;
@@ -59,6 +72,21 @@ static Window *window_array = NULL;
 static Window *alloc_window_array(void);
 
 void ewmh_init(void) {
+	/* Standard X protocol atoms */
+	xa_wm_state = XInternAtom(dpy, "WM_STATE", False);
+	xa_wm_protos = XInternAtom(dpy, "WM_PROTOCOLS", False);
+	xa_wm_delete = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+	xa_wm_cmapwins = XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
+	/* Motif atoms */
+	mwm_hints = XInternAtom(dpy, _XA_MWM_HINTS, False);
+	/* evilwm atoms */
+	xa_evilwm_unmaximised_horz = XInternAtom(dpy, "_EVILWM_UNMAXIMISED_HORZ", False);
+	xa_evilwm_unmaximised_vert = XInternAtom(dpy, "_EVILWM_UNMAXIMISED_VERT", False);
+
+	/*
+	 * extended windowmanager hints
+	 */
+
 	/* Root Window Properties (and Related Messages) */
 	xa_net_supported = XInternAtom(dpy, "_NET_SUPPORTED", False);
 	xa_net_client_list = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
