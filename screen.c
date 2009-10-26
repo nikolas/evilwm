@@ -554,7 +554,8 @@ static KeySym keys_to_grab[] = {
 #define NUM_GRABS (int)(sizeof(keys_to_grab) / sizeof(KeySym))
 
 static KeySym alt_keys_to_grab[] = {
-	KEY_KILL, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP
+	KEY_KILL, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP,
+	KEY_MAXVERT,
 };
 #define NUM_ALT_GRABS (int)(sizeof(alt_keys_to_grab) / sizeof(KeySym))
 

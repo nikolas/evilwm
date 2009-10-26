@@ -70,6 +70,7 @@ Y, U, B, N     Move window to top-left, top-right, bottom-left or
                bottom-right of screen.
 I              Show information about current window.
 Equals         Maximise current window vertically (toggle).
+               Holding Shift toggles horizontal maximization.
 X              Maximise current window (toggle).
 D              Toggle visible state of docks (e.g., pagers and launch bars).
 

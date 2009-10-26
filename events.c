@@ -141,7 +141,11 @@ static void handle_key_event(XKeyEvent *e) {
 			maximise_client(c, NET_WM_STATE_TOGGLE, MAXIMISE_HORZ|MAXIMISE_VERT);
 			break;
 		case KEY_MAXVERT:
-			maximise_client(c, NET_WM_STATE_TOGGLE, MAXIMISE_VERT);
+			if (e->state & altmask) {
+				maximise_client(c, NET_WM_STATE_TOGGLE, MAXIMISE_HORZ);
+			} else {
+				maximise_client(c, NET_WM_STATE_TOGGLE, MAXIMISE_VERT);
+			}
 			break;
 #ifdef VWM
 		case KEY_FIX:
