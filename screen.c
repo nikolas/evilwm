@@ -211,7 +211,7 @@ static void snap_client(Client *c) {
 	for (iter = clients_tab_order; iter; iter = iter->next) {
 		ci = iter->data;
 		if (ci == c) continue;
-		if (ci->screen != ci->screen) continue;
+		if (ci->screen != c->screen) continue;
 #ifdef VWM
 		if (!is_fixed(ci) && ci->vdesk != c->screen->vdesk) continue;
 #endif
