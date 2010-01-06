@@ -239,6 +239,9 @@ static void handle_configure_request(XConfigureRequestEvent *e) {
 			}
 		}
 		do_window_changes(e->value_mask, &wc, c, 0);
+		if (c == current) {
+			discard_enter_events();
+		}
 	} else {
 		LOG_XENTER("XConfigureWindow(window=%lx, value_mask=%lx)", (unsigned int)e->window, e->value_mask);
 		XConfigureWindow(dpy, e->window, e->value_mask, &wc);
