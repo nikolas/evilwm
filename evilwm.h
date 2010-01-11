@@ -101,8 +101,6 @@ typedef struct {
 		unsigned int dui; \
 		XQueryPointer(dpy, root, &dw, &dw, xp, yp, &di, &di, &dui); \
 	} while (0)
-#define gravitate(c,g) gravitate_client(c, 1, g)
-#define ungravitate(c) gravitate_client(c, -1, c->win_gravity)
 
 #define is_fixed(c) (c->vdesk == VDESK_FIXED)
 #define add_fixed(c) c->vdesk = VDESK_FIXED
@@ -257,7 +255,7 @@ void client_hide(Client *c);
 void client_show(Client *c);
 void client_raise(Client *c);
 void client_lower(Client *c);
-void gravitate_client(Client *c, int sign, int gravity);
+void gravitate_border(Client *c, int bw);
 void select_client(Client *c);
 #ifdef VWM
 void client_to_vdesk(Client *c, unsigned int vdesk);

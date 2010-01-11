@@ -75,51 +75,46 @@ void send_config(Client *c) {
 	XSendEvent(dpy, c->window, False, StructureNotifyMask, (XEvent *)&ce);
 }
 
-/* Support for 'gravitating' clients based on their original border width and
- * configured window manager frame width.  If the 'gravity' arg is non-zero,
- * the win_gravity hint read when the client was initialised is used.  Set sign
- * = 1 to gravitate or sign = -1 to reverse the process. */
-void gravitate_client(Client *c, int sign, int gravity) {
-	int d0 = sign * c->border;
-	int d1 = sign * c->old_border;
-	int d2 = sign * (2*c->old_border - c->border);
-	if (gravity == 0)
-		gravity = c->win_gravity_hint;
-	c->win_gravity = gravity;
-	switch (gravity) {
-		case NorthGravity:
-			c->x += d1;
-			c->y += d0;
-			break;
-		case NorthEastGravity:
-			c->x += d2;
-			c->y += d0;
-			break;
-		case EastGravity:
-			c->x += d2;
-			c->y += d1;
-			break;
-		case SouthEastGravity:
-			c->x += d2;
-			c->y += d2;
-			break;
-		case SouthGravity:
-			c->x += d1;
-			c->y += d2;
-			break;
-		case SouthWestGravity:
-			c->x += d0;
-			c->y += d2;
-			break;
-		case WestGravity:
-			c->x += d0;
-			c->y += d1;
-			break;
-		case NorthWestGravity:
-		default:
-			c->x += d0;
-			c->y += d0;
-			break;
+/* Shift client to show border according to window's gravity. */
+void gravitate_border(Client *c, int bw) {
+	int dx = 0, dy = 0;
+	switch (c->win_gravity) {
+	default:
+	case NorthWestGravity:
+		dx = bw;
+		dy = bw;
+		break;
+	case NorthGravity:
+		dy = bw;
+		break;
+	case NorthEastGravity:
+		dx = -bw;
+		break;
+	case EastGravity:
+		dx = -bw;
+		break;
+	case CenterGravity:
+		break;
+	case WestGravity:
+		dx = bw;
+		break;
+	case SouthWestGravity:
+		dx = bw;
+		dy = -bw;
+		break;
+	case SouthGravity:
+		dy = -bw;
+		break;
+	case SouthEastGravity:
+		dx = -bw;
+		dy = -bw;
+		break;
+	}
+	if (c->x != 0 || c->width != DisplayWidth(dpy, c->screen->screen)) {
+		c->x += dx;
+	}
+	if (c->y != 0 || c->height != DisplayHeight(dpy, c->screen->screen)) {
+		c->y += dy;
 	}
 }
 
@@ -180,7 +175,10 @@ void remove_client(Client *c) {
 		ewmh_deinit_client(c);
 	}
 
-	ungravitate(c);
+	gravitate_border(c, -c->border);
+	gravitate_border(c, c->old_border);
+	c->x -= c->old_border;
+	c->y -= c->old_border;
 	XReparentWindow(dpy, c->window, c->screen->root, c->x, c->y);
 	XSetWindowBorderWidth(dpy, c->window, c->old_border);
 	XRemoveFromSaveSet(dpy, c->window);

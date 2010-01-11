@@ -186,30 +186,73 @@ static void handle_button_event(XButtonEvent *e) {
 
 static void do_window_changes(int value_mask, XWindowChanges *wc, Client *c,
 		int gravity) {
-	ungravitate(c);
+	if (gravity == 0)
+		gravity = c->win_gravity_hint;
+	c->win_gravity = gravity;
 	if (value_mask & CWX) c->x = wc->x;
 	if (value_mask & CWY) c->y = wc->y;
-	if (value_mask & CWWidth) {
-		c->width = wc->width;
-		if (c->width < c->min_width)
-			c->width = c->min_width;
-		if (c->max_width && c->width > c->max_width)
-			c->width = c->max_width;
+	if (value_mask & (CWWidth|CWHeight)) {
+		int dw = 0, dh = 0;
+		if (!(value_mask & (CWX|CWY))) {
+			gravitate_border(c, -c->border);
+		}
+		if (value_mask & CWWidth) {
+			int neww = wc->width;
+			if (neww < c->min_width)
+				neww = c->min_width;
+			if (c->max_width && neww > c->max_width)
+				neww = c->max_width;
+			dw = neww - c->width;
+			c->width = neww;
+		}
+		if (value_mask & CWHeight) {
+			int newh = wc->height;
+			if (newh < c->min_height)
+				newh = c->min_height;
+			if (c->max_height && newh > c->max_height)
+				newh = c->max_height;
+			dh = newh - c->height;
+			c->height = newh;
+		}
+		/* only apply position fixes if not being explicitly moved */
+		if (!(value_mask & (CWX|CWY))) {
+			switch (gravity) {
+			default:
+			case NorthWestGravity:
+				break;
+			case NorthGravity:
+				c->x -= (dw / 2);
+				break;
+			case NorthEastGravity:
+				c->x -= dw;
+				break;
+			case WestGravity:
+				c->y -= (dh / 2);
+				break;
+			case CenterGravity:
+				c->x -= (dw / 2);
+				c->y -= (dh / 2);
+				break;
+			case EastGravity:
+				c->x -= dw;
+				c->y -= (dh / 2);
+				break;
+			case SouthWestGravity:
+				c->y -= dh;
+				break;
+			case SouthGravity:
+				c->x -= (dw / 2);
+				c->y -= dh;
+				break;
+			case SouthEastGravity:
+				c->x -= dw;
+				c->y -= dh;
+				break;
+			}
+			value_mask |= CWX|CWY;
+			gravitate_border(c, c->border);
+		}
 	}
-	if (value_mask & CWHeight) {
-		c->height = wc->height;
-		if (c->height < c->min_height)
-			c->height = c->min_height;
-		if (c->max_height && c->height > c->max_height)
-			c->height = c->max_height;
-	}
-	if (c->x == 0 && c->width >= DisplayWidth(dpy, c->screen->screen)) {
-		c->x -= c->border;
-	}
-	if (c->y == 0 && c->height >= DisplayHeight(dpy, c->screen->screen)) {
-		c->y -= c->border;
-	}
-	gravitate(c, gravity);
 	wc->x = c->x - c->border;
 	wc->y = c->y - c->border;
 	wc->border_width = c->border;

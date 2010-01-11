@@ -250,7 +250,7 @@ static void init_geometry(Client *c) {
 		c->x = (x * (xmax - c->border - c->width)) / xmax;
 		c->y = (y * (ymax - c->border - c->height)) / ymax;
 #else
-		c->x = c->y = c->border;
+		c->x = c->y = 0;
 #endif
 		send_config(c);
 	}
@@ -260,7 +260,10 @@ static void init_geometry(Client *c) {
 		/* The reparent that is to come would trigger an unmap event */
 		c->ignore_unmap++;
 	}
-	gravitate(c, 0);
+	c->x += c->old_border;
+	c->y += c->old_border;
+	gravitate_border(c, -c->old_border);
+	gravitate_border(c, c->border);
 }
 
 static void reparent(Client *c) {
