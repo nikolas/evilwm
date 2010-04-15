@@ -67,6 +67,9 @@ OPT_CPPFLAGS += -DWARP_POINTER
 # Solaris 9 doesn't fully implement ISO C99 libc, to suppress warnings, use:
 #OPT_CPPFLAGS += -D__EXTENSIONS__
 
+# Mac OS X:
+#LDFLAGS += -L/usr/X11R6/lib
+
 ############################################################################
 # Build tools
 
