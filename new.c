@@ -26,7 +26,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	XClassHint *class;
 	unsigned int window_type;
 
-	LOG_ENTER("make_new_client(window=%lx, screen=%d)", w, s->screen);
+	LOG_ENTER("make_new_client(window=%lx)", w);
 
 	XGrabServer(dpy);
 
@@ -50,6 +50,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 		return;
 	}
 	initialising = None;
+	LOG_DEBUG("screen=%d\n", s->screen);
 	LOG_DEBUG("name=%s\n", name ? name : "Untitled");
 	if (name)
 		XFree(name);
