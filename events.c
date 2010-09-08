@@ -115,20 +115,56 @@ static void handle_key_event(XKeyEvent *e) {
 			}
 			goto move_client;
 		case KEY_TOPLEFT:
-			c->nx = c->border;
-			c->ny = c->border;
+			if (e->state & altmask) {
+				if ( ((c->width - width_inc) >= c->min_width)
+					&&
+					((c->height - height_inc) >= c->min_height) )
+				{
+					c->width -= width_inc;
+					c->height -= height_inc;
+				}
+			} else {
+				c->x = c->border;
+				c->y = c->border;
+			}
 			goto move_client;
 		case KEY_TOPRIGHT:
-			c->nx = c->phy->width - c->width - c->border;
-			c->ny = c->border;
+			if (e->state & altmask) {
+				c->width = DisplayWidth(dpy, c->screen->screen)
+					- c->x-c->border;
+			} else {
+				c->x = DisplayWidth(dpy, c->screen->screen)
+					- c->width-c->border;
+				c->y = c->border;
+			}
 			goto move_client;
 		case KEY_BOTTOMLEFT:
-			c->nx = c->border;
-			c->ny = c->phy->height - c->height - c->border;
+			if (e->state & altmask) {
+				c->height = DisplayHeight(dpy, c->screen->screen)
+					- c->y-c->border;
+			} else {
+				c->x = c->border;
+				c->y = DisplayHeight(dpy, c->screen->screen)
+					- c->height-c->border;
+			}
 			goto move_client;
 		case KEY_BOTTOMRIGHT:
-			c->nx = c->phy->width - c->width - c->border;
-			c->ny = c->phy->height - c->height - c->border;
+			if (e->state & altmask) {
+				if ( ( !c->max_width ||
+						(c->width + width_inc) <= c->max_width
+					) && (
+					!c->max_height ||
+						(c->height + height_inc) <= c->max_height ) )
+				{
+					c->width += width_inc;
+					c->height += height_inc;
+				}
+			} else {
+				c->x = DisplayWidth(dpy, c->screen->screen)
+					- c->width-c->border;
+				c->y = DisplayHeight(dpy, c->screen->screen)
+					- c->height-c->border;
+			}
 			goto move_client;
 		case KEY_LOWER: case KEY_ALTLOWER:
 			client_lower(c);
@@ -302,7 +338,7 @@ static void handle_configure_request(XConfigureRequestEvent *e) {
 			discard_enter_events(c);
 		}
 	} else {
-		LOG_XENTER("XConfigureWindow(window=%lx, value_mask=%lx)", (unsigned int)e->window, e->value_mask);
+		LOG_XENTER("XConfigureWindow(window=%lx, value_mask=%lx)", (unsigned long)e->window, e->value_mask);
 		XConfigureWindow(dpy, e->window, e->value_mask, &wc);
 		LOG_XLEAVE();
 	}

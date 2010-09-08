@@ -561,10 +561,10 @@ void grab_keys_for_screen(ScreenInfo *s) {
 	};
 #define NUM_GRABS (int)(sizeof(keys_to_grab) / sizeof(KeySym))
 
-	const KeySym alt_keys_to_grab[] = {
-		KEY_KILL, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP,
-		KEY_MAXVERT,
-	};
+static KeySym alt_keys_to_grab[] = {
+	KEY_KILL, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP,
+	KEY_TOPLEFT, KEY_TOPRIGHT, KEY_BOTTOMLEFT, KEY_BOTTOMRIGHT
+};
 #define NUM_ALT_GRABS (int)(sizeof(alt_keys_to_grab) / sizeof(KeySym))
 
 	int i;
