@@ -349,11 +349,16 @@ long get_wm_normal_hints(Client *c) {
 		c->base_width = c->min_width;
 		c->base_height = c->min_height;
 	}
+
 	c->width_inc = c->height_inc = 1;
 	if (flags & PResizeInc) {
 		c->width_inc = size->width_inc ? size->width_inc : 1;
 		c->height_inc = size->height_inc ? size->height_inc : 1;
 	}
+	if (opt_delta > 0) {
+		c->width_inc = c->height_inc = opt_delta;
+	}
+
 	if (!(flags & PMinSize)) {
 		c->min_width = c->base_width + c->width_inc;
 		c->min_height = c->base_height + c->height_inc;

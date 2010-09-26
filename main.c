@@ -51,6 +51,7 @@ unsigned int altmask = ShiftMask;
 static const char *const def_term[] = { DEF_TERM, NULL };
 char **opt_term = (char **)def_term;
 int          opt_bw = DEF_BW;
+int          opt_delta = DEF_DELTA;
 int          opt_snap = 0;
 #ifdef SOLIDDRAG
 int          no_solid_drag = 0;  /* use solid drag by default */
@@ -88,6 +89,7 @@ static struct xconfig_option evilwm_options[] = {
 	{ XCONFIG_STRING,   "bg",           &opt_bg },
 	{ XCONFIG_STRING,   "fc",           &opt_fc },
 	{ XCONFIG_INT,      "bw",           &opt_bw },
+	{ XCONFIG_INT,      "d",            &opt_delta },
 	{ XCONFIG_STR_LIST, "term",         &opt_term },
 	{ XCONFIG_INT,      "snap",         &opt_snap },
 	{ XCONFIG_STRING,   "mask1",        &opt_grabmask1 },
@@ -131,6 +133,7 @@ static void helptext(void) {
 "              [-mask1 modifiers] [-mask2 modifiers] [-altmask modifiers]\n"
 "              [-key.kill key] [-snap num] [-numvdesks num]\n"
 "              [-app name/class] [-g geometry] [-dock] [-v vdesk] [-s]\n"
+"              [-d delta]\n"
 "             "
 #ifdef SOLIDDRAG
 " [-nosoliddrag]"

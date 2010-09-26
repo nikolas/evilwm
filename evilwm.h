@@ -53,6 +53,7 @@ typedef struct {
 #define DEF_FG          "goldenrod"
 #define DEF_BG          "grey50"
 #define DEF_BW          1
+#define DEF_DELTA       0
 #define DEF_FC          "blue"
 #define SPACE           3
 #ifdef DEBIAN
@@ -252,6 +253,7 @@ extern unsigned int     altmask;
 extern KeySym           opt_key_kill;
 extern char             **opt_term;
 extern int              opt_bw;
+extern int              opt_delta;
 extern int              opt_snap;
 #ifdef SOLIDDRAG
 extern int              no_solid_drag;
