@@ -84,15 +84,15 @@ typedef struct {
 	None, curs, CurrentTime) == GrabSuccess)
 #define grab_button(w, mask, button) do { \
 		XGrabButton(dpy, button, (mask), w, False, ButtonMask, \
-			    GrabModeAsync, GrabModeSync, None, None); \
+		            GrabModeAsync, GrabModeSync, None, None); \
 		XGrabButton(dpy, button, LockMask|(mask), w, False, ButtonMask,\
-			    GrabModeAsync, GrabModeSync, None, None); \
+		            GrabModeAsync, GrabModeSync, None, None); \
 		XGrabButton(dpy, button, numlockmask|(mask), w, False, \
-			    ButtonMask, GrabModeAsync, GrabModeSync, \
-			    None, None); \
+		            ButtonMask, GrabModeAsync, GrabModeSync, \
+		            None, None); \
 		XGrabButton(dpy, button, numlockmask|LockMask|(mask), w, False,\
-			    ButtonMask, GrabModeAsync, GrabModeSync, \
-			    None, None); \
+		            ButtonMask, GrabModeAsync, GrabModeSync, \
+		            None, None); \
 	} while (0)
 #define setmouse(w, x, y) XWarpPointer(dpy, None, w, 0, 0, 0, 0, x, y)
 #define get_mouse_position(xp,yp,root) do { \

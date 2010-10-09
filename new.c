@@ -96,8 +96,8 @@ void make_new_client(Window w, ScreenInfo *s) {
 
 #ifdef SHAPE
 	if (have_shape) {
-	    XShapeSelectInput(dpy, c->window, ShapeNotifyMask);
-	    set_shape(c);
+		XShapeSelectInput(dpy, c->window, ShapeNotifyMask);
+		set_shape(c);
 	}
 #endif
 
