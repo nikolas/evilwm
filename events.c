@@ -497,42 +497,47 @@ static void handle_client_message(XClientMessageEvent *e) {
 }
 
 void event_main_loop(void) {
-	XEvent ev;
+	union {
+		XEvent xevent;
+#ifdef SHAPE
+		XShapeEvent xshape;
+#endif
+	} ev;
 	/* main event loop here */
 	while (!wm_exit) {
-		if (interruptibleXNextEvent(&ev)) {
-			switch (ev.type) {
+		if (interruptibleXNextEvent(&ev.xevent)) {
+			switch (ev.xevent.type) {
 			case KeyPress:
-				handle_key_event(&ev.xkey); break;
+				handle_key_event(&ev.xevent.xkey); break;
 #ifdef MOUSE
 			case ButtonPress:
-				handle_button_event(&ev.xbutton); break;
+				handle_button_event(&ev.xevent.xbutton); break;
 #endif
 			case ConfigureRequest:
-				handle_configure_request(&ev.xconfigurerequest); break;
+				handle_configure_request(&ev.xevent.xconfigurerequest); break;
 			case MapRequest:
-				handle_map_request(&ev.xmaprequest); break;
+				handle_map_request(&ev.xevent.xmaprequest); break;
 			case ColormapNotify:
-				handle_colormap_change(&ev.xcolormap); break;
+				handle_colormap_change(&ev.xevent.xcolormap); break;
 			case EnterNotify:
-				handle_enter_event(&ev.xcrossing); break;
+				handle_enter_event(&ev.xevent.xcrossing); break;
 			case PropertyNotify:
-				handle_property_change(&ev.xproperty); break;
+				handle_property_change(&ev.xevent.xproperty); break;
 			case UnmapNotify:
-				handle_unmap_event(&ev.xunmap); break;
+				handle_unmap_event(&ev.xevent.xunmap); break;
 			case MappingNotify:
-				handle_mappingnotify_event(&ev.xmapping); break;
+				handle_mappingnotify_event(&ev.xevent.xmapping); break;
 			case ClientMessage:
-				handle_client_message(&ev.xclient); break;
+				handle_client_message(&ev.xevent.xclient); break;
 			default:
 #ifdef SHAPE
-				if (have_shape && ev.type == shape_event) {
-					handle_shape_event((XShapeEvent *)&ev);
+				if (have_shape && ev.xevent.type == shape_event) {
+					handle_shape_event(&ev.xshape);
 				}
 #endif
 #ifdef RANDR
-				if (have_randr && ev.type == randr_event_base + RRScreenChangeNotify) {
-					XRRUpdateConfiguration(&ev);
+				if (have_randr && ev.xevent.type == randr_event_base + RRScreenChangeNotify) {
+					XRRUpdateConfiguration(&ev.xevent);
 				}
 #endif
 				break;
