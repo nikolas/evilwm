@@ -154,7 +154,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 	unsigned long workarea[4] = {
 		0, 0,
 		DisplayWidth(dpy, s->screen), DisplayHeight(dpy, s->screen)
-       	};
+	};
 	s->supporting = XCreateSimpleWindow(dpy, s->root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, s->root, xa_net_supported,
 			XA_ATOM, 32, PropModeReplace,

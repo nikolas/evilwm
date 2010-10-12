@@ -11,7 +11,7 @@
 /* Wrap data in a new list container */
 static struct list *list_new(void *data) {
 	struct list *new;
-       	new = malloc(sizeof(struct list));
+	new = malloc(sizeof(struct list));
 	if (!new) return NULL;
 	new->next = NULL;
 	new->data = data;
