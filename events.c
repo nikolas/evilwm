@@ -30,7 +30,7 @@ static void handle_key_event(XKeyEvent *e) {
 
 	switch(key) {
 		case KEY_NEW:
-			spawn(opt_term);
+			spawn((const char *const *)opt_term);
 			break;
 		case KEY_NEXT:
 			next();

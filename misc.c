@@ -29,7 +29,7 @@ void spawn(const char *const cmd[]) {
 			 * way due to SUS maintaining compatability with older code.
 			 * However, execvp guarantees not to modify argv, so the following
 			 * cast is valid. */
-			case 0: execvp(cmd[0], (char *const *) cmd+1);
+			case 0: execvp(cmd[0], (char *const *)cmd);
 			default: _exit(0);
 		}
 	}

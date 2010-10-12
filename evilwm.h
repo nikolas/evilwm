@@ -228,7 +228,7 @@ extern unsigned int     numlockmask;
 extern unsigned int     grabmask1;
 extern unsigned int     grabmask2;
 extern unsigned int     altmask;
-extern const char       *opt_term[3];
+extern char             **opt_term;
 extern int              opt_bw;
 extern int              opt_snap;
 #ifdef SOLIDDRAG

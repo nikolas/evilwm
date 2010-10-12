@@ -9,6 +9,58 @@
 
 #include "xconfig.h"
 
+/* Break a space-separated string into an array of strings.
+ * Backslash escapes next character. */
+static char **split_string(const char *arg) {
+	int nelem = 0, elem = 0;
+	char **list = NULL;
+	char *string, *head, *tail;
+
+	head = tail = string = malloc(strlen(arg) + 1);
+	if (string == NULL)
+		return NULL;
+
+	for (;;) {
+		if (*arg == '\\' && *(arg+1) != 0) {
+			arg++;
+			*(tail++) = *(arg++);
+		} else if (*arg == 0 || isspace(*arg)) {
+			*tail = 0;
+			if (*head) {
+				if ((elem + 1) >= nelem) {
+					char **nlist;
+					nelem += 4;
+					nlist = realloc(list, nelem * sizeof(char *));
+					if (nlist == NULL) {
+						if (list)
+							free(list);
+						free(string);
+						return NULL;
+					}
+					list = nlist;
+				}
+				list[elem++] = head;
+				tail++;
+				head = tail;
+			}
+			while (isspace(*arg)) {
+				arg++;
+			}
+			if (*arg == 0) {
+				break;
+			}
+		} else {
+			*(tail++) = *(arg++);
+		}
+	}
+	if (elem == 0) {
+		free(string);
+		return NULL;
+	}
+	list[elem] = NULL;
+	return list;
+}
+
 static struct xconfig_option *find_option(struct xconfig_option *options,
 		const char *opt) {
 	int i;
@@ -30,6 +82,9 @@ static void set_option(struct xconfig_option *option, const char *arg) {
 			break;
 		case XCONFIG_STRING:
 			*(char **)option->dest = strdup(arg);
+			break;
+		case XCONFIG_STR_LIST:
+			*(char ***)option->dest = split_string(arg);
 			break;
 		case XCONFIG_CALL_0:
 			((void (*)(void))option->dest)();
@@ -58,11 +113,19 @@ enum xconfig_result xconfig_parse_file(struct xconfig_option *options,
 			continue;
 		opt = strtok(line, "\t\n\v\f\r =");
 		if (opt == NULL) continue;
-		arg = strtok(NULL, "\t\n\v\f\r =");
 		option = find_option(options, opt);
 		if (option == NULL) {
 			fclose(cfg);
 			return XCONFIG_BAD_OPTION;
+		}
+		if (option->type == XCONFIG_STR_LIST) {
+			/* special case: spaces here mean something */
+			arg = strtok(NULL, "\n\v\f\r");
+			while (isspace(*arg) || *arg == '=') {
+				arg++;
+			}
+		} else {
+			arg = strtok(NULL, "\t\n\v\f\r =");
 		}
 		set_option(option, arg);
 	}
