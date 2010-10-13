@@ -1,4 +1,4 @@
-.TH evilwm 1 "October 4, 2009" "" ""
+.TH evilwm 1 "October 13, 2010" "" ""
 .SH NAME
 evilwm \- Minimalist Window Manager for X
 .SH SYNOPSIS
@@ -104,7 +104,9 @@ specifies the X display to run on.
 .TP
 \-term \fItermprog\fP
 specifies an alternative program to run when spawning a new terminal (defaults
-to xterm, or x\-terminal\-emulator in Debian).
+to xterm, or x\-terminal\-emulator in Debian).  Separate arguments with
+whitespace, and escape needed whitespace with a backslash.  Remember that
+special characters will also need to be protected from the shell.
 .TP
 \-fn \fIfontname\fP
 specify a font to use when resizing or displaying window titles.
