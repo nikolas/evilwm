@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2010 Ciaran Anscomb
+ * Copyright (C) 1999-2011 Ciaran Anscomb
  * see README for license and other details. */
 
 #include <ctype.h>

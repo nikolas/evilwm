@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2010 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2011 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 #include <stdlib.h>
@@ -35,6 +35,7 @@ static Atom xa_net_wm_name;
 Atom xa_net_wm_desktop;
 #endif
 Atom xa_net_wm_window_type;
+Atom xa_net_wm_window_type_desktop;
 Atom xa_net_wm_window_type_dock;
 Atom xa_net_wm_state;
 Atom xa_net_wm_state_maximized_vert;
@@ -85,6 +86,7 @@ void ewmh_init(void) {
 	xa_net_wm_desktop = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
 #endif
 	xa_net_wm_window_type = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
+	xa_net_wm_window_type_desktop = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DESKTOP", False);
 	xa_net_wm_window_type_dock = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
 	xa_net_wm_state = XInternAtom(dpy, "_NET_WM_STATE", False);
 	xa_net_wm_state_maximized_vert = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
@@ -128,6 +130,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_wm_desktop,
 #endif
 		xa_net_wm_window_type,
+		xa_net_wm_window_type_desktop,
 		xa_net_wm_window_type_dock,
 		xa_net_wm_state,
 		xa_net_wm_state_maximized_vert,
@@ -309,6 +312,22 @@ void ewmh_set_net_wm_desktop(Client *c) {
 			(unsigned char *)&c->vdesk, 1);
 }
 #endif
+
+unsigned int ewmh_get_net_wm_window_type(Window w) {
+	Atom *aprop;
+	unsigned long nitems, i;
+	unsigned int type = 0;
+	if ( (aprop = get_property(w, xa_net_wm_window_type, XA_ATOM, &nitems)) ) {
+		for (i = 0; i < nitems; i++) {
+			if (aprop[i] == xa_net_wm_window_type_desktop)
+				type |= EWMH_WINDOW_TYPE_DESKTOP;
+			if (aprop[i] == xa_net_wm_window_type_dock)
+				type |= EWMH_WINDOW_TYPE_DOCK;
+		}
+		XFree(aprop);
+	}
+	return type;
+}
 
 void ewmh_set_net_wm_state(Client *c) {
 	Atom state[3];
