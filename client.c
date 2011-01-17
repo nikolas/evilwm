@@ -7,6 +7,8 @@
 #include "evilwm.h"
 #include "log.h"
 
+#define MAXIMUM_PROPERTY_LENGTH 4096
+
 static int send_xmessage(Window w, Atom a, long x);
 
 /* used all over the place.  return the client that has specified window as
@@ -40,8 +42,15 @@ void client_raise(Client *c) {
 	ewmh_set_net_client_list_stacking(c->screen);
 }
 
+/* This doesn't just call XLowerWindow(), as that could push the window
+ * below "DESKTOP" type windows we're not managing. */
 void client_lower(Client *c) {
-	XLowerWindow(dpy, c->parent);
+	Client *lowest = clients_stacking_order->data;
+	Window order[2];
+	if (c == lowest) return;
+	order[0] = lowest->parent;
+	order[1] = c->parent;
+	XRestackWindows(dpy, order, 2);
 	clients_stacking_order = list_to_head(clients_stacking_order, c);
 	ewmh_set_net_client_list_stacking(c->screen);
 }
@@ -260,3 +269,20 @@ void set_shape(Client *c) {
 	}
 }
 #endif
+
+void *get_property(Window w, Atom property, Atom req_type,
+	           unsigned long *nitems_return) {
+	Atom actual_type;
+	int actual_format;
+	unsigned long bytes_after;
+	unsigned char *prop;
+	if (XGetWindowProperty(dpy, w, property,
+	                       0L, MAXIMUM_PROPERTY_LENGTH / 4, False,
+	                       req_type, &actual_type, &actual_format,
+	                       nitems_return, &bytes_after, &prop) == Success) {
+		if (actual_type == req_type)
+			return (void *)prop;
+		XFree(prop);
+	}
+	return NULL;
+}

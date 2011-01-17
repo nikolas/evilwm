@@ -8,12 +8,9 @@
 #include "evilwm.h"
 #include "log.h"
 
-#define MAXIMUM_PROPERTY_LENGTH 4096
-
 static void init_geometry(Client *c);
 static void reparent(Client *c);
-static void *get_property(Window w, Atom property, Atom req_type,
-		unsigned long *nitems_return);
+static void update_window_type_flags(Client *c, unsigned int type);
 #ifdef XDEBUG
 static const char *map_state_string(int map_state);
 static const char *gravity_string(int gravity);
@@ -26,6 +23,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	Client *c;
 	char *name;
 	XClassHint *class;
+	unsigned int window_type;
 
 	LOG_ENTER("make_new_client(window=%lx, screen=%d)", w, s->screen);
 
@@ -55,11 +53,20 @@ void make_new_client(Window w, ScreenInfo *s) {
 	if (name)
 		XFree(name);
 
+	window_type = ewmh_get_net_wm_window_type(w);
+	/* Don't manage DESKTOP type windows */
+	if (window_type & EWMH_WINDOW_TYPE_DESKTOP) {
+		XMapWindow(dpy, w);
+		XUngrabServer(dpy);
+		return;
+	}
+
 	c = malloc(sizeof(Client));
 	/* Don't crash the window manager, just fail the operation. */
 	if (!c) {
 		LOG_ERROR("out of memory in new_client; limping onward\n");
 		LOG_LEAVE();
+		XUngrabServer(dpy);
 		return;
 	}
 	clients_tab_order = list_prepend(clients_tab_order, c);
@@ -78,6 +85,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 
 	c->border = opt_bw;
 
+	update_window_type_flags(c, window_type);
 	init_geometry(c);
 
 #ifdef DEBUG
@@ -338,36 +346,14 @@ long get_wm_normal_hints(Client *c) {
 	return flags;
 }
 
-/* Determine if client thinks of itself as a dock */
-void get_window_type(Client *c) {
-	Atom *aprop;
-	unsigned long nitems, i;
-	c->is_dock = 0;
-	if ( (aprop = get_property(c->window, xa_net_wm_window_type, XA_ATOM, &nitems)) ) {
-		for (i = 0; i < nitems; i++) {
-			if (aprop[i] == xa_net_wm_window_type_dock)
-				c->is_dock = 1;
-		}
-		XFree(aprop);
-	}
+static void update_window_type_flags(Client *c, unsigned int type) {
+	c->is_dock = (type & EWMH_WINDOW_TYPE_DOCK) ? 1 : 0;
 }
 
-static void *get_property(Window w, Atom property, Atom req_type,
-		unsigned long *nitems_return) {
-	Atom actual_type;
-	int actual_format;
-	unsigned long bytes_after;
-	unsigned char *prop;
-	if (XGetWindowProperty(dpy, w, property,
-				0L, MAXIMUM_PROPERTY_LENGTH / 4, False,
-				req_type, &actual_type, &actual_format,
-				nitems_return, &bytes_after, &prop)
-			== Success) {
-		if (actual_type == req_type)
-			return (void *)prop;
-		XFree(prop);
-	}
-	return NULL;
+/* Determine window type and update flags accordingly */
+void get_window_type(Client *c) {
+	unsigned int type = ewmh_get_net_wm_window_type(c->window);
+	update_window_type_flags(c, type);
 }
 
 #ifdef XDEBUG
