@@ -104,6 +104,9 @@ to change a window's current virtual desktop.</dd>
 <dt>_NET_WM_WINDOW_TYPE</dt>
 <dd>These window types affect behaviour:
    <dl>
+   <dt>_NET_WM_WINDOW_TYPE_DESKTOP</dt>
+   <dd>evilwm ignores windows of this type, allowing them to act as a fake
+   root window (e.g., Nautilus).</dd>
    <dt>_NET_WM_WINDOW_TYPE_DOCK</dt>
    <dd>Applications that declare themselves to be a dock can have their
    visibility toggled with a key combination.</dd>
@@ -176,7 +179,6 @@ client.</dd>
 <dt>_NET_WM_WINDOW_TYPE</dt>
 <dd>These window types are unsupported:
    <dl>
-   <dt>_NET_WM_WINDOW_TYPE_DESKTOP</dt>
    <dt>_NET_WM_WINDOW_TYPE_TOOLBAR</dt>
    <dt>_NET_WM_WINDOW_TYPE_MENU</dt>
    <dt>_NET_WM_WINDOW_TYPE_UTILITY</dt>
