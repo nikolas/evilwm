@@ -45,10 +45,7 @@ do this for you - the tools already exist!).
 If you use the GNOME session manager, you can configure it to
 use evilwm as its window manager.  Run gconf-editor and set the
 key /desktop/gnome/session/required_components/windowmanager
-to "evilwm".  It is probably also a good idea to set the key
-/desktop/gnome/session/required_components/filemanager to an empty string,
-as nautilus (the default) will try to create its own desktop backdrop as
-a full-screen window, and evilwm does not treat these windows specially.
+to "evilwm".
 
 
 CONTROLS
@@ -102,7 +99,7 @@ http://www.red-bean.com/~decklin/aewm/
 LICENCE
 
 evilwm 1.1
-Copyright (C) 1999-2010 Ciaran Anscomb <evilwm@6809.org.uk>
+Copyright (C) 1999-2011 Ciaran Anscomb <evilwm@6809.org.uk>
 
 This is free software.  You can do what you want to it, but if it
 breaks something, you get to pay for the counselling.  The code was

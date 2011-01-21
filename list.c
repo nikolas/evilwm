@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2010 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2011 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 /* Basic linked list handling code.  Operations that modify the list
@@ -11,7 +11,7 @@
 /* Wrap data in a new list container */
 static struct list *list_new(void *data) {
 	struct list *new;
-       	new = malloc(sizeof(struct list));
+	new = malloc(sizeof(struct list));
 	if (!new) return NULL;
 	new->next = NULL;
 	new->data = data;

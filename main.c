@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2010 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2011 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 #include <stdlib.h>
@@ -58,7 +58,8 @@ unsigned int numlockmask = 0;
 unsigned int grabmask1 = ControlMask|Mod1Mask;
 unsigned int grabmask2 = Mod1Mask;
 unsigned int altmask = ShiftMask;
-const char   *opt_term[3] = { DEF_TERM, DEF_TERM, NULL };
+static const char *const def_term[] = { DEF_TERM, NULL };
+char **opt_term = (char **)def_term;
 int          opt_bw = DEF_BW;
 int          opt_snap = 0;
 #ifdef SOLIDDRAG
@@ -93,7 +94,7 @@ static struct xconfig_option evilwm_options[] = {
 	{ XCONFIG_STRING,   "fc",           &opt_fc },
 #endif
 	{ XCONFIG_INT,      "bw",           &opt_bw },
-	{ XCONFIG_STRING,   "term",         &opt_term[0] },
+	{ XCONFIG_STR_LIST, "term",         &opt_term },
 	{ XCONFIG_INT,      "snap",         &opt_snap },
 	{ XCONFIG_STRING,   "mask1",        &opt_grabmask1 },
 	{ XCONFIG_STRING,   "mask2",        &opt_grabmask2 },
@@ -179,7 +180,6 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	opt_term[1] = opt_term[0];
 	if (opt_grabmask1) grabmask1 = parse_modifiers(opt_grabmask1);
 	if (opt_grabmask2) grabmask2 = parse_modifiers(opt_grabmask2);
 	if (opt_altmask) altmask = parse_modifiers(opt_altmask);

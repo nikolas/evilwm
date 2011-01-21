@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2010 Ciaran Anscomb
+ * Copyright (C) 1999-2011 Ciaran Anscomb
  * see README for license and other details. */
 
 #ifndef __XCONFIG_H__
@@ -16,6 +16,7 @@ enum xconfig_option_type {
 	XCONFIG_BOOL,
 	XCONFIG_INT,
 	XCONFIG_STRING,
+	XCONFIG_STR_LIST,
 	XCONFIG_CALL_0,
 	XCONFIG_CALL_1,
 	XCONFIG_END

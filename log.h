@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2010 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2011 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 #ifndef __LOG_H__

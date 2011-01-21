@@ -1,5 +1,5 @@
 /* evilwm - Minimalist Window Manager for X
- * Copyright (C) 1999-2010 Ciaran Anscomb <evilwm@6809.org.uk>
+ * Copyright (C) 1999-2011 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
 #include <X11/X.h>
@@ -69,6 +69,10 @@ typedef struct {
 #define NET_WM_STATE_REMOVE     0    /* remove/unset property */
 #define NET_WM_STATE_ADD        1    /* add/set property */
 #define NET_WM_STATE_TOGGLE     2    /* toggle property  */
+
+/* EWMH window type bits */
+#define EWMH_WINDOW_TYPE_DESKTOP (1<<0)
+#define EWMH_WINDOW_TYPE_DOCK    (1<<1)
 
 #define MAXIMISE_HORZ   (1<<0)
 #define MAXIMISE_VERT   (1<<1)
@@ -228,7 +232,7 @@ extern unsigned int     numlockmask;
 extern unsigned int     grabmask1;
 extern unsigned int     grabmask2;
 extern unsigned int     altmask;
-extern const char       *opt_term[3];
+extern char             **opt_term;
 extern int              opt_bw;
 extern int              opt_snap;
 #ifdef SOLIDDRAG
@@ -265,6 +269,7 @@ void send_config(Client *c);
 void send_wm_delete(Client *c, int kill_client);
 void set_wm_state(Client *c, int state);
 void set_shape(Client *c);
+void *get_property(Window w, Atom property, Atom req_type, unsigned long *nitems_return);
 
 /* events.c */
 
@@ -318,5 +323,6 @@ void ewmh_set_net_active_window(Client *c);
 #ifdef VWM
 void ewmh_set_net_wm_desktop(Client *c);
 #endif
+unsigned int ewmh_get_net_wm_window_type(Window w);
 void ewmh_set_net_wm_state(Client *c);
 void ewmh_set_net_frame_extents(Window w);
