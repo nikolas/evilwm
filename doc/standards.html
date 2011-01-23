@@ -118,6 +118,9 @@ to change a window's current virtual desktop.</dd>
    <dl>
    <dt>_NET_WM_STATE_MAXIMIZED_VERT</dt>
    <dt>_NET_WM_STATE_MAXIMIZED_HORZ</dt>
+   <dt>_NET_WM_STATE_HIDDEN</dt>
+   <dd>Advertised but never set: pagers should show "Iconic" windows (on other
+   virtual desktops) that don't have _NET_WM_STATE_HIDDEN set.</dd>
    <dt>_NET_WM_STATE_FULLSCREEN</dt>
    <dd>Currently, as evilwm does not calculate any sort of "work area", the
    fullscreen hint is considered equivalent to having both the vertically and
@@ -195,7 +198,6 @@ client.</dd>
    <dt>_NET_WM_STATE_SHADED</dt>
    <dt>_NET_WM_STATE_SKIP_TASKBAR</dt>
    <dt>_NET_WM_STATE_SKIP_PAGER</dt>
-   <dt>_NET_WM_STATE_HIDDEN</dt>
    <dt>_NET_WM_STATE_ABOVE</dt>
    <dt>_NET_WM_STATE_BELOW</dt>
    <dt>_NET_WM_STATE_DEMANDS_ATTENTION</dt>
