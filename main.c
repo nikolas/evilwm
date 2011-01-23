@@ -29,19 +29,6 @@ int         have_shape, shape_event;
 int         have_randr, randr_event_base;
 #endif
 
-/* Standard X protocol atoms */
-Atom xa_wm_state;
-Atom xa_wm_protos;
-Atom xa_wm_delete;
-Atom xa_wm_cmapwins;
-
-/* Motif atoms */
-Atom mwm_hints;
-
-/* evilwm atoms */
-Atom xa_evilwm_unmaximised_horz;
-Atom xa_evilwm_unmaximised_vert;
-
 /* Things that affect user interaction */
 #define CONFIG_FILE ".evilwmrc"
 static const char   *opt_display = "";
@@ -251,17 +238,7 @@ static void setup_display(void) {
 	XSetErrorHandler(handle_xerror);
 	/* XSynchronize(dpy, True); */
 
-	/* Standard X protocol atoms */
-	xa_wm_state = XInternAtom(dpy, "WM_STATE", False);
-	xa_wm_protos = XInternAtom(dpy, "WM_PROTOCOLS", False);
-	xa_wm_delete = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
-	xa_wm_cmapwins = XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
-	/* Motif atoms */
-	mwm_hints = XInternAtom(dpy, _XA_MWM_HINTS, False);
-	/* evilwm atoms */
-	xa_evilwm_unmaximised_horz = XInternAtom(dpy, "_EVILWM_UNMAXIMISED_HORZ", False);
-	xa_evilwm_unmaximised_vert = XInternAtom(dpy, "_EVILWM_UNMAXIMISED_VERT", False);
-	/* EWMH atoms */
+	/* Standard & EWMH atoms */
 	ewmh_init();
 
 	font = XLoadQueryFont(dpy, opt_font);
@@ -326,17 +303,16 @@ static void setup_display(void) {
 		ds = DisplayString(dpy);
 		/* set up DISPLAY environment variable to use */
 		colon = strrchr(ds, ':');
+		screens[i].display = xmalloc(14 + strlen(ds));
+		strcpy(screens[i].display, "DISPLAY=");
+		strcat(screens[i].display, ds);
 		if (colon && num_screens > 1) {
-			screens[i].display = xmalloc(14 + strlen(ds));
-			strcpy(screens[i].display, "DISPLAY=");
-			strcat(screens[i].display, ds);
 			colon = strrchr(screens[i].display, ':');
 			dot = strchr(colon, '.');
 			if (!dot)
 				dot = colon + strlen(colon);
 			snprintf(dot, 5, ".%d", i);
-		} else
-			screens[i].display = NULL;
+		}
 
 		screens[i].screen = i;
 		screens[i].root = RootWindow(dpy, i);

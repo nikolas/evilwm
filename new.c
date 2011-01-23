@@ -2,6 +2,7 @@
  * Copyright (C) 1999-2011 Ciaran Anscomb <evilwm@6809.org.uk>
  * see README for license and other details. */
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -25,7 +26,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	XClassHint *class;
 	unsigned int window_type;
 
-	LOG_ENTER("make_new_client(window=%lx, screen=%d)", w, s->screen);
+	LOG_ENTER("make_new_client(window=%lx)", w);
 
 	XGrabServer(dpy);
 
@@ -49,6 +50,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 		return;
 	}
 	initialising = None;
+	LOG_DEBUG("screen=%d\n", s->screen);
 	LOG_DEBUG("name=%s\n", name ? name : "Untitled");
 	if (name)
 		XFree(name);
@@ -202,8 +204,11 @@ static void init_geometry(Client *c) {
 #ifdef VWM
 	c->vdesk = c->screen->vdesk;
 	if ( (lprop = get_property(c->window, xa_net_wm_desktop, XA_CARDINAL, &nitems)) ) {
-		if (nitems && valid_vdesk(lprop[0]))
-			c->vdesk = lprop[0];
+		/* NB, Xlib not only returns a 32bit value in a long (which may
+		 * not be 32bits), it also sign extends the 32bit value */
+		if (nitems && valid_vdesk(lprop[0] & UINT32_MAX)) {
+			c->vdesk = lprop[0] & UINT32_MAX;
+		}
 		XFree(lprop);
 	}
 #endif

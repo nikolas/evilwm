@@ -128,6 +128,7 @@ struct ScreenInfo {
 #ifdef VWM
 	unsigned int vdesk;
 	XColor fc;
+	unsigned old_vdesk; /* most recently unmapped vdesk, so user may toggle back to it */
 #endif
 	char *display;
 	int docks_visible;
@@ -155,7 +156,7 @@ struct Client {
 	int             win_gravity;
 	int             old_border;
 #ifdef VWM
-	unsigned long   vdesk;
+	unsigned int vdesk;
 #endif
 	int             is_dock;
 	int             remove;  /* set when client needs to be removed */
@@ -170,7 +171,7 @@ struct Application {
 	unsigned int width, height;
 	int is_dock;
 #ifdef VWM
-	unsigned long vdesk;
+	unsigned int vdesk;
 #endif
 };
 

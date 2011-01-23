@@ -471,6 +471,8 @@ void switch_vdesk(ScreenInfo *s, unsigned int v) {
 #endif
 		}
 	}
+	/* cache the value of the current vdesk, so that user may toggle back to it */
+	s->old_vdesk = s->vdesk;
 	s->vdesk = v;
 	ewmh_set_net_current_desktop(s);
 	LOG_DEBUG("%d hidden, %d raised\n", hidden, raised);
@@ -540,7 +542,7 @@ static void grab_keysym(Window w, unsigned int mask, KeySym keysym) {
 
 static KeySym keys_to_grab[] = {
 #ifdef VWM
-	KEY_FIX, KEY_PREVDESK, KEY_NEXTDESK,
+	KEY_FIX, KEY_PREVDESK, KEY_NEXTDESK, KEY_TOGGLEDESK,
 	XK_1, XK_2, XK_3, XK_4, XK_5, XK_6, XK_7, XK_8,
 #endif
 	KEY_NEW, KEY_KILL,

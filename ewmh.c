@@ -7,6 +7,19 @@
 #include "evilwm.h"
 #include "log.h"
 
+/* Standard X protocol atoms */
+Atom xa_wm_state;
+Atom xa_wm_protos;
+Atom xa_wm_delete;
+Atom xa_wm_cmapwins;
+
+/* Motif atoms */
+Atom mwm_hints;
+
+/* evilwm atoms */
+Atom xa_evilwm_unmaximised_horz;
+Atom xa_evilwm_unmaximised_vert;
+
 /* Root Window Properties (and Related Messages) */
 static Atom xa_net_supported;
 static Atom xa_net_client_list;
@@ -41,6 +54,7 @@ Atom xa_net_wm_state;
 Atom xa_net_wm_state_maximized_vert;
 Atom xa_net_wm_state_maximized_horz;
 Atom xa_net_wm_state_fullscreen;
+Atom xa_net_wm_state_hidden;
 static Atom xa_net_wm_allowed_actions;
 static Atom xa_net_wm_action_move;
 static Atom xa_net_wm_action_resize;
@@ -58,6 +72,21 @@ static Window *window_array = NULL;
 static Window *alloc_window_array(void);
 
 void ewmh_init(void) {
+	/* Standard X protocol atoms */
+	xa_wm_state = XInternAtom(dpy, "WM_STATE", False);
+	xa_wm_protos = XInternAtom(dpy, "WM_PROTOCOLS", False);
+	xa_wm_delete = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+	xa_wm_cmapwins = XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
+	/* Motif atoms */
+	mwm_hints = XInternAtom(dpy, _XA_MWM_HINTS, False);
+	/* evilwm atoms */
+	xa_evilwm_unmaximised_horz = XInternAtom(dpy, "_EVILWM_UNMAXIMISED_HORZ", False);
+	xa_evilwm_unmaximised_vert = XInternAtom(dpy, "_EVILWM_UNMAXIMISED_VERT", False);
+
+	/*
+	 * extended windowmanager hints
+	 */
+
 	/* Root Window Properties (and Related Messages) */
 	xa_net_supported = XInternAtom(dpy, "_NET_SUPPORTED", False);
 	xa_net_client_list = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
@@ -92,6 +121,7 @@ void ewmh_init(void) {
 	xa_net_wm_state_maximized_vert = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	xa_net_wm_state_maximized_horz = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
 	xa_net_wm_state_fullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	xa_net_wm_state_hidden = XInternAtom(dpy, "_NET_WM_STATE_HIDDEN", False);
 	xa_net_wm_allowed_actions = XInternAtom(dpy, "_NET_WM_ALLOWED_ACTIONS", False);
 	xa_net_wm_action_move = XInternAtom(dpy, "_NET_WM_ACTION_MOVE", False);
 	xa_net_wm_action_resize = XInternAtom(dpy, "_NET_WM_ACTION_RESIZE", False);
@@ -136,6 +166,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_wm_state_maximized_vert,
 		xa_net_wm_state_maximized_horz,
 		xa_net_wm_state_fullscreen,
+		xa_net_wm_state_hidden,
 		xa_net_wm_allowed_actions,
 		/* Not sure if it makes any sense including every action here
 		 * as they'll already be listed per-client in the
@@ -307,9 +338,10 @@ void ewmh_set_net_active_window(Client *c) {
 
 #ifdef VWM
 void ewmh_set_net_wm_desktop(Client *c) {
+	unsigned long vdesk = c->vdesk;
 	XChangeProperty(dpy, c->window, xa_net_wm_desktop,
 			XA_CARDINAL, 32, PropModeReplace,
-			(unsigned char *)&c->vdesk, 1);
+			(unsigned char *)&vdesk, 1);
 }
 #endif
 
