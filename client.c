@@ -45,10 +45,18 @@ void client_raise(Client *c) {
 /* This doesn't just call XLowerWindow(), as that could push the window
  * below "DESKTOP" type windows we're not managing. */
 void client_lower(Client *c) {
-	Client *lowest = clients_stacking_order->data;
+	struct list *iter;
+	Client *below;
 	Window order[2];
-	if (c == lowest) return;
-	order[0] = lowest->parent;
+	/* Find lowest other client in stacking order that is visible on the
+	 * same screen. */
+	for (iter = clients_stacking_order; iter; iter = iter->next) {
+		below = iter->data;
+		if (below != c && below->screen == c->screen && (is_fixed(below) || below->vdesk == c->screen->vdesk))
+			break;
+	}
+	if (!iter) return;
+	order[0] = below->parent;
 	order[1] = c->parent;
 	XRestackWindows(dpy, order, 2);
 	clients_stacking_order = list_to_head(clients_stacking_order, c);
