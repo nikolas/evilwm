@@ -18,23 +18,31 @@ static struct list *list_new(void *data) {
 	return new;
 }
 
-/* Add new data to head of list */
-struct list *list_prepend(struct list *list, void *data) {
-	struct list *elem = list_new(data);
-	if (!elem) return list;
-	elem->next = list;
-	return elem;
-}
-
-/* Add new data to tail of list */
-struct list *list_append(struct list *list, void *data) {
+/* Insert new data before given position */
+struct list *list_insert_before(struct list *list, struct list *before, void *data) {
 	struct list *elem = list_new(data);
 	struct list *iter;
 	if (!elem) return list;
 	if (!list) return elem;
-	for (iter = list; iter->next; iter = iter->next);
-	iter->next = elem;
+	elem->next = before;
+	if (before == list) return elem;
+	for (iter = list; iter; iter = iter->next) {
+		if (!iter->next || iter->next == before) {
+			iter->next = elem;
+			break;
+		}
+	}
 	return list;
+}
+
+/* Add new data to head of list */
+struct list *list_prepend(struct list *list, void *data) {
+	return list_insert_before(list, list, data);
+}
+
+/* Add new data to tail of list */
+struct list *list_append(struct list *list, void *data) {
+	return list_insert_before(list, NULL, data);
 }
 
 /* Delete list element containing data */

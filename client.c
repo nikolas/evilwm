@@ -59,7 +59,8 @@ void client_lower(Client *c) {
 	order[0] = below->parent;
 	order[1] = c->parent;
 	XRestackWindows(dpy, order, 2);
-	clients_stacking_order = list_to_head(clients_stacking_order, c);
+	clients_stacking_order = list_delete(clients_stacking_order, c);
+	clients_stacking_order = list_insert_before(clients_stacking_order, iter, c);
 	ewmh_set_net_client_list_stacking(c->screen);
 }
 

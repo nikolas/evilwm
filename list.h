@@ -11,6 +11,7 @@ struct list {
 };
 
 /* Each of these return the new pointer to the head of the list: */
+struct list *list_insert_before(struct list *list, struct list *before, void *data);
 struct list *list_prepend(struct list *list, void *data);
 struct list *list_append(struct list *list, void *data);
 struct list *list_delete(struct list *list, void *data);
