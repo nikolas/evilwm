@@ -107,6 +107,7 @@ void gravitate_border(Client *c, int bw) {
 		break;
 	case NorthEastGravity:
 		dx = -bw;
+		dy = bw;
 		break;
 	case EastGravity:
 		dx = -bw;
