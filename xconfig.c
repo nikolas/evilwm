@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "log.h"
 #include "xconfig.h"
 
 /* Break a space-separated string into an array of strings.
@@ -115,8 +116,8 @@ enum xconfig_result xconfig_parse_file(struct xconfig_option *options,
 		if (opt == NULL) continue;
 		option = find_option(options, opt);
 		if (option == NULL) {
-			fclose(cfg);
-			return XCONFIG_BAD_OPTION;
+			LOG_INFO("Ignoring unknown option `%s'\n", opt);
+			continue;
 		}
 		if (option->type == XCONFIG_STR_LIST) {
 			/* special case: spaces here mean something */
