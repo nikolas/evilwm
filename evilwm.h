@@ -298,6 +298,7 @@ void next(void);
 void switch_vdesk(ScreenInfo *s, unsigned int v);
 #endif
 void set_docks_visible(ScreenInfo *s, int is_visible);
+void fix_screen_after_resize(ScreenInfo *s, int oldw, int oldh);
 ScreenInfo *find_screen(Window root);
 ScreenInfo *find_current_screen(void);
 void grab_keys_for_screen(ScreenInfo *s);

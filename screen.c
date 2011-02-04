@@ -507,6 +507,55 @@ void set_docks_visible(ScreenInfo *s, int is_visible) {
 	LOG_LEAVE();
 }
 
+static int scale_pos(int new_screen_size, int old_screen_size, int cli_pos, int cli_size) {
+	if (old_screen_size != cli_size && new_screen_size != cli_size) {
+		new_screen_size -= cli_size;
+		old_screen_size -= cli_size;
+	}
+	return new_screen_size * cli_pos / old_screen_size;
+}
+
+/* If a screen has been resized, eg, due to xrandr, some windows
+ * have the possibility of:
+ *   a) not being visible
+ *   b) being vertically/horizontally maximised to the wrong extent
+ * Currently, i can't think of a good policy for doing this, but
+ * the minimal modification is to fix (b), and ensure (a) is visible
+ * (NB, maximised windows will need their old* values updating according
+ * to (a).
+ */
+void fix_screen_after_resize(ScreenInfo *s, int oldw, int oldh) {
+	int neww = DisplayWidth(dpy, s->screen);
+	int newh = DisplayHeight(dpy, s->screen);
+
+	for (struct list *iter = clients_tab_order; iter; iter = iter->next) {
+		Client *c = iter->data;
+		/* only handle clients on the screen being resized */
+		if (c->screen != s)
+			continue;
+
+		if (c->oldw) {
+			/* horiz maximised: update width, update old x pos */
+			c->width = neww;
+			c->oldx = scale_pos(neww, oldw, c->oldx, c->oldw + c->border);
+		} else {
+			/* horiz normal: update x pos */
+			c->x = scale_pos(neww, oldw, c->x, c->width + c->border);
+		}
+
+		if (c->oldh) {
+			/* vert maximised: update height, update old y pos */
+			c->height = newh;
+			c->oldy = scale_pos(newh, oldh, c->oldy, c->oldh + c->border);
+		} else {
+			/* vert normal: update y pos */
+			c->y = scale_pos(newh, oldh, c->y, c->height + c->border);
+		}
+		moveresize(c);
+	}
+}
+
+
 ScreenInfo *find_screen(Window root) {
 	int i;
 	for (i = 0; i < num_screens; i++) {

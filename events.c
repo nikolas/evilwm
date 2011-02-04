@@ -397,6 +397,16 @@ static void handle_shape_event(XShapeEvent *e) {
 }
 #endif
 
+#ifdef RANDR
+static void handle_randr_event(XRRScreenChangeNotifyEvent *e) {
+	ScreenInfo *s = find_screen(e->root);
+	int oldw = DisplayWidth(dpy, s->screen);
+	int oldh = DisplayHeight(dpy, s->screen);
+	XRRUpdateConfiguration((XEvent*)e);
+	fix_screen_after_resize(s, oldw, oldh);
+}
+#endif
+
 static void handle_client_message(XClientMessageEvent *e) {
 #ifdef VWM
 	ScreenInfo *s = find_current_screen();
@@ -507,6 +517,9 @@ void event_main_loop(void) {
 #ifdef SHAPE
 		XShapeEvent xshape;
 #endif
+#ifdef RANDR
+		XRRScreenChangeNotifyEvent xrandr;
+#endif
 	} ev;
 	/* main event loop here */
 	while (!wm_exit) {
@@ -540,7 +553,7 @@ void event_main_loop(void) {
 #endif
 #ifdef RANDR
 				if (have_randr && ev.xevent.type == randr_event_base + RRScreenChangeNotify) {
-					XRRUpdateConfiguration(&ev.xevent);
+					handle_randr_event(&ev.xrandr);
 				}
 #endif
 				break;
