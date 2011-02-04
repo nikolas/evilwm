@@ -185,10 +185,6 @@ void ewmh_init_screen(ScreenInfo *s) {
 	unsigned long num_desktops = 8;
 	unsigned long vdesk = s->vdesk;
 #endif
-	unsigned long workarea[4] = {
-		0, 0,
-		DisplayWidth(dpy, s->screen), DisplayHeight(dpy, s->screen)
-	};
 	s->supporting = XCreateSimpleWindow(dpy, s->root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, s->root, xa_net_supported,
 			XA_ATOM, 32, PropModeReplace,
@@ -199,20 +195,11 @@ void ewmh_init_screen(ScreenInfo *s) {
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&num_desktops, 1);
 #endif
-	XChangeProperty(dpy, s->root, xa_net_desktop_geometry,
-			XA_CARDINAL, 32, PropModeReplace,
-			(unsigned char *)&workarea[2], 2);
-	XChangeProperty(dpy, s->root, xa_net_desktop_viewport,
-			XA_CARDINAL, 32, PropModeReplace,
-			(unsigned char *)&workarea[0], 2);
 #ifdef VWM
 	XChangeProperty(dpy, s->root, xa_net_current_desktop,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&vdesk, 1);
 #endif
-	XChangeProperty(dpy, s->root, xa_net_workarea,
-			XA_CARDINAL, 32, PropModeReplace,
-			(unsigned char *)&workarea, 4);
 	XChangeProperty(dpy, s->root, xa_net_supporting_wm_check,
 			XA_WINDOW, 32, PropModeReplace,
 			(unsigned char *)&s->supporting, 1);
@@ -225,6 +212,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 	XChangeProperty(dpy, s->supporting, xa_net_wm_pid,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&pid, 1);
+	ewmh_set_screen_workarea(s);
 }
 
 void ewmh_deinit_screen(ScreenInfo *s) {
@@ -243,6 +231,22 @@ void ewmh_deinit_screen(ScreenInfo *s) {
 	XDeleteProperty(dpy, s->root, xa_net_workarea);
 	XDeleteProperty(dpy, s->root, xa_net_supporting_wm_check);
 	XDestroyWindow(dpy, s->supporting);
+}
+
+void ewmh_set_screen_workarea(ScreenInfo *s) {
+	unsigned long workarea[4] = {
+		0, 0,
+		DisplayWidth(dpy, s->screen), DisplayHeight(dpy, s->screen)
+	};
+	XChangeProperty(dpy, s->root, xa_net_desktop_geometry,
+			XA_CARDINAL, 32, PropModeReplace,
+			(unsigned char *)&workarea[2], 2);
+	XChangeProperty(dpy, s->root, xa_net_desktop_viewport,
+			XA_CARDINAL, 32, PropModeReplace,
+			(unsigned char *)&workarea[0], 2);
+	XChangeProperty(dpy, s->root, xa_net_workarea,
+			XA_CARDINAL, 32, PropModeReplace,
+			(unsigned char *)&workarea, 4);
 }
 
 void ewmh_init_client(Client *c) {

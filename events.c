@@ -404,6 +404,7 @@ static void handle_randr_event(XRRScreenChangeNotifyEvent *e) {
 	int oldh = DisplayHeight(dpy, s->screen);
 	XRRUpdateConfiguration((XEvent*)e);
 	fix_screen_after_resize(s, oldw, oldh);
+	ewmh_set_screen_workarea(s);
 }
 #endif
 

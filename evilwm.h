@@ -308,6 +308,7 @@ void grab_keys_for_screen(ScreenInfo *s);
 void ewmh_init(void);
 void ewmh_init_screen(ScreenInfo *s);
 void ewmh_deinit_screen(ScreenInfo *s);
+void ewmh_set_screen_workarea(ScreenInfo *s);
 void ewmh_init_client(Client *c);
 void ewmh_deinit_client(Client *c);
 void ewmh_withdraw_client(Client *c);
