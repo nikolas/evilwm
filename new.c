@@ -139,9 +139,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 				}
 				moveresizeraise(c);
 				if (a->is_dock) c->is_dock = 1;
-#ifdef VWM
 				if (a->vdesk != VDESK_NONE) c->vdesk = a->vdesk;
-#endif
 			}
 			aiter = aiter->next;
 		}
@@ -155,9 +153,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 
 	/* Only map the window frame (and thus the window) if it's supposed
 	 * to be visible on this virtual desktop. */
-#ifdef VWM
 	if (is_fixed(c) || c->vdesk == s->vdesk)
-#endif
 	{
 		client_show(c);
 		client_raise(c);
@@ -168,12 +164,10 @@ void make_new_client(Window w, ScreenInfo *s) {
 #endif
 		discard_enter_events(c);
 	}
-#ifdef VWM
 	else {
 		set_wm_state(c, IconicState);
 	}
 	ewmh_set_net_wm_desktop(c);
-#endif
 	LOG_LEAVE();
 }
 
@@ -185,9 +179,7 @@ static void init_geometry(Client *c) {
 	unsigned long *eprop;
 	unsigned long nitems;
 	PropMwmHints *mprop;
-#ifdef VWM
 	unsigned long *lprop;
-#endif
 
 	if ( (mprop = get_property(c->window, mwm_hints, mwm_hints, &nitems)) ) {
 		if (nitems >= PROP_MWM_HINTS_ELEMENTS
@@ -199,7 +191,6 @@ static void init_geometry(Client *c) {
 		XFree(mprop);
 	}
 
-#ifdef VWM
 	c->vdesk = c->screen->vdesk;
 	if ( (lprop = get_property(c->window, xa_net_wm_desktop, XA_CARDINAL, &nitems)) ) {
 		/* NB, Xlib not only returns a 32bit value in a long (which may
@@ -209,7 +200,6 @@ static void init_geometry(Client *c) {
 		}
 		XFree(lprop);
 	}
-#endif
 
 	get_window_type(c);
 

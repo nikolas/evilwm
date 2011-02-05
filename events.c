@@ -48,7 +48,6 @@ static void handle_key_event(XKeyEvent *e) {
 		case KEY_DOCK_TOGGLE:
 			set_docks_visible(current_screen, !current_screen->docks_visible);
 			break;
-#ifdef VWM
 		case XK_1: case XK_2: case XK_3: case XK_4:
 		case XK_5: case XK_6: case XK_7: case XK_8:
 			switch_vdesk(current_screen, KEY_TO_VDESK(key));
@@ -68,7 +67,6 @@ static void handle_key_event(XKeyEvent *e) {
 		case KEY_TOGGLEDESK:
 			switch_vdesk(current_screen, current_screen->old_vdesk);
 			break;
-#endif
 		default: break;
 	}
 	c = current;
@@ -147,7 +145,6 @@ static void handle_key_event(XKeyEvent *e) {
 				maximise_client(c, NET_WM_STATE_TOGGLE, MAXIMISE_VERT);
 			}
 			break;
-#ifdef VWM
 		case KEY_FIX:
 			if (is_fixed(c)) {
 				client_to_vdesk(c, current_screen->vdesk);
@@ -155,7 +152,6 @@ static void handle_key_event(XKeyEvent *e) {
 				client_to_vdesk(c, VDESK_FIXED);
 			}
 			break;
-#endif
 		default: break;
 	}
 	return;
@@ -302,10 +298,8 @@ static void handle_map_request(XMapRequestEvent *e) {
 
 	LOG_ENTER("handle_map_request(window=%lx)", e->window);
 	if (c) {
-#ifdef VWM
 		if (!is_fixed(c) && c->vdesk != c->screen->vdesk)
 			switch_vdesk(c->screen, c->vdesk);
-#endif
 		client_show(c);
 		client_raise(c);
 	} else {
@@ -354,11 +348,7 @@ static void handle_property_change(XPropertyEvent *e) {
 			LOG_DEBUG("geometry=%dx%d+%d+%d\n", c->width, c->height, c->x, c->y);
 		} else if (e->atom == xa_net_wm_window_type) {
 			get_window_type(c);
-			if (!c->is_dock
-#ifdef VWM
-					&& (is_fixed(c) || (c->vdesk == c->screen->vdesk))
-#endif
-					) {
+			if (!c->is_dock && (is_fixed(c) || (c->vdesk == c->screen->vdesk))) {
 				client_show(c);
 			}
 		}
@@ -370,10 +360,8 @@ static void handle_enter_event(XCrossingEvent *e) {
 	Client *c;
 
 	if ((c = find_client(e->window))) {
-#ifdef VWM
 		if (!is_fixed(c) && c->vdesk != c->screen->vdesk)
 			return;
-#endif
 		select_client(c);
 		ewmh_select_client(c);
 	}
@@ -409,20 +397,16 @@ static void handle_randr_event(XRRScreenChangeNotifyEvent *e) {
 #endif
 
 static void handle_client_message(XClientMessageEvent *e) {
-#ifdef VWM
 	ScreenInfo *s = find_current_screen();
-#endif
 	Client *c;
 
 	LOG_ENTER("handle_client_message(window=%lx, format=%d, type=%s)", e->window, e->format, debug_atom_name(e->message_type));
 
-#ifdef VWM
 	if (e->message_type == xa_net_current_desktop) {
 		switch_vdesk(s, e->data.l[0]);
 		LOG_LEAVE();
 		return;
 	}
-#endif
 	c = find_client(e->window);
 	if (!c && e->message_type == xa_net_request_frame_extents) {
 		ewmh_set_net_frame_extents(e->window);
@@ -436,9 +420,7 @@ static void handle_client_message(XClientMessageEvent *e) {
 	if (e->message_type == xa_net_active_window) {
 		/* Only do this if it came from direct user action */
 		if (e->data.l[0] == 2) {
-#ifdef VWM
 			if (c->screen == s)
-#endif
 				select_client(c);
 		}
 		LOG_LEAVE();
@@ -481,7 +463,6 @@ static void handle_client_message(XClientMessageEvent *e) {
 		LOG_LEAVE();
 		return;
 	}
-#ifdef VWM
 	if (e->message_type == xa_net_wm_desktop) {
 		/* Only do this if it came from direct user action */
 		if (e->data.l[1] == 2) {
@@ -490,7 +471,6 @@ static void handle_client_message(XClientMessageEvent *e) {
 		LOG_LEAVE();
 		return;
 	}
-#endif
 	if (e->message_type == xa_net_wm_state) {
 		int i, maximise_hv = 0;
 		/* Message can contain up to two state changes: */

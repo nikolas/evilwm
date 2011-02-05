@@ -35,9 +35,7 @@ static const char   *opt_display = "";
 static const char   *opt_font = DEF_FONT;
 static const char   *opt_fg = DEF_FG;
 static const char   *opt_bg = DEF_BG;
-#ifdef VWM
 static const char   *opt_fc = DEF_FC;
-#endif
 static char *opt_grabmask1 = NULL;
 static char *opt_grabmask2 = NULL;
 static char *opt_altmask = NULL;
@@ -67,19 +65,15 @@ int wm_exit;
 static void set_app(const char *arg);
 static void set_app_geometry(const char *arg);
 static void set_app_dock(void);
-#ifdef VWM
 static void set_app_vdesk(const char *arg);
 static void set_app_fixed(void);
-#endif
 
 static struct xconfig_option evilwm_options[] = {
 	{ XCONFIG_STRING,   "fn",           &opt_font },
 	{ XCONFIG_STRING,   "display",      &opt_display },
 	{ XCONFIG_STRING,   "fg",           &opt_fg },
 	{ XCONFIG_STRING,   "bg",           &opt_bg },
-#ifdef VWM
 	{ XCONFIG_STRING,   "fc",           &opt_fc },
-#endif
 	{ XCONFIG_INT,      "bw",           &opt_bw },
 	{ XCONFIG_STR_LIST, "term",         &opt_term },
 	{ XCONFIG_INT,      "snap",         &opt_snap },
@@ -90,13 +84,11 @@ static struct xconfig_option evilwm_options[] = {
 	{ XCONFIG_CALL_1,   "geometry",     &set_app_geometry },
 	{ XCONFIG_CALL_1,   "g",            &set_app_geometry },
 	{ XCONFIG_CALL_0,   "dock",         &set_app_dock },
-#ifdef VWM
 	{ XCONFIG_CALL_1,   "vdesk",        &set_app_vdesk },
 	{ XCONFIG_CALL_1,   "v",            &set_app_vdesk },
 	{ XCONFIG_CALL_0,   "fixed",        &set_app_fixed },
 	{ XCONFIG_CALL_0,   "f",            &set_app_fixed },
 	{ XCONFIG_CALL_0,   "s",            &set_app_fixed },
-#endif
 #ifdef SOLIDDRAG
 	{ XCONFIG_BOOL,     "nosoliddrag",  &no_solid_drag },
 #endif
@@ -112,16 +104,12 @@ static void helptext(void) {
 	puts(
 "usage: evilwm [-display display] [-term termprog] [-fn fontname]\n"
 "              [-fg foreground]"
-#ifdef VWM
 " [-fc fixed]"
-#endif
 " [-bg background] [-bw borderwidth]\n"
 "              [-mask1 modifiers] [-mask2 modifiers] [-altmask modifiers]\n"
 "              [-snap num]"
 " [-app name/class] [-g geometry] [-dock]\n"
-#ifdef VWM
 "              [-v vdesk] [-s]"
-#endif
 #ifdef SOLIDDRAG
 " [-nosoliddrag]"
 #endif
@@ -321,15 +309,11 @@ static void setup_display(void) {
 			XRRSelectInput(dpy, screens[i].root, RRScreenChangeNotifyMask);
 		}
 #endif
-#ifdef VWM
 		screens[i].vdesk = KEY_TO_VDESK(XK_1);
-#endif
 
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_fg, &screens[i].fg, &dummy);
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_bg, &screens[i].bg, &dummy);
-#ifdef VWM
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_fc, &screens[i].fc, &dummy);
-#endif
 
 		screens[i].invert_gc = XCreateGC(dpy, screens[i].root, GCFunction | GCSubwindowMode | GCLineWidth | GCFont, &gv);
 
@@ -363,9 +347,7 @@ static void set_app(const char *arg) {
 	new->res_name = new->res_class = NULL;
 	new->geometry_mask = 0;
 	new->is_dock = 0;
-#ifdef VWM
 	new->vdesk = VDESK_NONE;
-#endif
 	if ((tmp = strchr(arg, '/'))) {
 		*(tmp++) = 0;
 	}
@@ -395,7 +377,6 @@ static void set_app_dock(void) {
 	}
 }
 
-#ifdef VWM
 static void set_app_vdesk(const char *arg) {
 	unsigned int v = atoi(arg);
 	if (applications && valid_vdesk(v)) {
@@ -410,7 +391,6 @@ static void set_app_fixed(void) {
 		app->vdesk = VDESK_FIXED;
 	}
 }
-#endif
 
 /* Used for overriding the default WM modifiers */
 static unsigned int parse_modifiers(char *s) {

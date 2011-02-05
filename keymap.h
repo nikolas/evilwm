@@ -17,12 +17,10 @@
 #define KEY_MAXVERT     XK_equal
 #define KEY_MAX         XK_x
 #define KEY_DOCK_TOGGLE XK_d
-#ifdef VWM
-# define KEY_FIX        XK_f
-# define KEY_PREVDESK   XK_Left
-# define KEY_NEXTDESK   XK_Right
-# define KEY_TOGGLEDESK XK_a
-#endif
+#define KEY_FIX        XK_f
+#define KEY_PREVDESK   XK_Left
+#define KEY_NEXTDESK   XK_Right
+#define KEY_TOGGLEDESK XK_a
 /* Mixtures of Ctrl, Alt an Escape are used for things like VMWare and
  * XFree86/Cygwin, so the KILL key is an option in the Makefile  */
 #ifndef KEY_KILL

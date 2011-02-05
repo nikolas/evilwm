@@ -57,7 +57,11 @@ typedef struct {
 
 #define VDESK_NONE  (0xfffffffe)
 #define VDESK_FIXED (0xffffffff)
-#define VDESK_MAX   (7)
+#ifdef VWM
+# define VDESK_MAX   (7)
+#else
+# define VDESK_MAX   (0)
+#endif
 #define KEY_TO_VDESK(key) ((key) - XK_1)
 #define valid_vdesk(v) ((v) == VDESK_FIXED || (v) <= VDESK_MAX)
 
@@ -119,11 +123,9 @@ struct ScreenInfo {
 	Window supporting;  /* Dummy window for EWMH */
 	GC invert_gc;
 	XColor fg, bg;
-#ifdef VWM
 	unsigned int vdesk;
 	XColor fc;
 	unsigned old_vdesk; /* most recently unmapped vdesk, so user may toggle back to it */
-#endif
 	char *display;
 	int docks_visible;
 };
@@ -149,9 +151,7 @@ struct Client {
 	int             win_gravity_hint;
 	int             win_gravity;
 	int             old_border;
-#ifdef VWM
 	unsigned int vdesk;
-#endif
 	int             is_dock;
 	int             remove;  /* set when client needs to be removed */
 };
@@ -164,9 +164,7 @@ struct Application {
 	int x, y;
 	unsigned int width, height;
 	int is_dock;
-#ifdef VWM
 	unsigned int vdesk;
-#endif
 };
 
 /* Declarations for global variables in main.c */
@@ -201,9 +199,7 @@ extern Atom xa_evilwm_unmaximised_horz;
 extern Atom xa_evilwm_unmaximised_vert;
 
 /* EWMH: Root Window Properties (and Related Messages) */
-#ifdef VWM
 extern Atom xa_net_current_desktop;
-#endif
 extern Atom xa_net_active_window;
 
 /* EWMH: Other Root Window Messages */
@@ -214,9 +210,7 @@ extern Atom xa_net_request_frame_extents;
 
 /* EWMH: Application Window Properties */
 extern Atom xa_net_wm_name;
-#ifdef VWM
 extern Atom xa_net_wm_desktop;
-#endif
 extern Atom xa_net_wm_window_type;
 extern Atom xa_net_wm_window_type_dock;
 extern Atom xa_net_wm_state;
@@ -259,9 +253,7 @@ void client_raise(Client *c);
 void client_lower(Client *c);
 void gravitate_border(Client *c, int bw);
 void select_client(Client *c);
-#ifdef VWM
 void client_to_vdesk(Client *c, unsigned int vdesk);
-#endif
 void remove_client(Client *c);
 void send_config(Client *c);
 void send_wm_delete(Client *c, int kill_client);
@@ -297,9 +289,7 @@ void maximise_client(Client *c, int action, int hv);
 void show_info(Client *c, unsigned int keycode);
 void sweep(Client *c);
 void next(void);
-#ifdef VWM
 void switch_vdesk(ScreenInfo *s, unsigned int v);
-#endif
 void set_docks_visible(ScreenInfo *s, int is_visible);
 void fix_screen_after_resize(ScreenInfo *s, int oldw, int oldh);
 ScreenInfo *find_screen(Window root);
@@ -318,13 +308,9 @@ void ewmh_withdraw_client(Client *c);
 void ewmh_select_client(Client *c);
 void ewmh_set_net_client_list(ScreenInfo *s);
 void ewmh_set_net_client_list_stacking(ScreenInfo *s);
-#ifdef VWM
 void ewmh_set_net_current_desktop(ScreenInfo *s);
-#endif
 void ewmh_set_net_active_window(Client *c);
-#ifdef VWM
 void ewmh_set_net_wm_desktop(Client *c);
-#endif
 unsigned int ewmh_get_net_wm_window_type(Window w);
 void ewmh_set_net_wm_state(Client *c);
 void ewmh_set_net_frame_extents(Window w);

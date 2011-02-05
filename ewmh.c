@@ -26,14 +26,10 @@ Atom xa_evilwm_unmaximised_vert;
 static Atom xa_net_supported;
 static Atom xa_net_client_list;
 static Atom xa_net_client_list_stacking;
-#ifdef VWM
 static Atom xa_net_number_of_desktops;
-#endif
 static Atom xa_net_desktop_geometry;
 static Atom xa_net_desktop_viewport;
-#ifdef VWM
 Atom xa_net_current_desktop;
-#endif
 Atom xa_net_active_window;
 static Atom xa_net_workarea;
 static Atom xa_net_supporting_wm_check;
@@ -46,9 +42,7 @@ Atom xa_net_request_frame_extents;
 
 /* Application Window Properties */
 Atom xa_net_wm_name;
-#ifdef VWM
 Atom xa_net_wm_desktop;
-#endif
 Atom xa_net_wm_window_type;
 Atom xa_net_wm_window_type_desktop;
 Atom xa_net_wm_window_type_dock;
@@ -93,14 +87,10 @@ void ewmh_init(void) {
 	xa_net_supported = XInternAtom(dpy, "_NET_SUPPORTED", False);
 	xa_net_client_list = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
 	xa_net_client_list_stacking = XInternAtom(dpy, "_NET_CLIENT_LIST_STACKING", False);
-#ifdef VWM
 	xa_net_number_of_desktops = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
-#endif
 	xa_net_desktop_geometry = XInternAtom(dpy, "_NET_DESKTOP_GEOMETRY", False);
 	xa_net_desktop_viewport = XInternAtom(dpy, "_NET_DESKTOP_VIEWPORT", False);
-#ifdef VWM
 	xa_net_current_desktop = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
-#endif
 	xa_net_active_window = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	xa_net_workarea = XInternAtom(dpy, "_NET_WORKAREA", False);
 	xa_net_supporting_wm_check = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
@@ -113,9 +103,7 @@ void ewmh_init(void) {
 
 	/* Application Window Properties */
 	xa_net_wm_name = XInternAtom(dpy, "_NET_WM_NAME", False);
-#ifdef VWM
 	xa_net_wm_desktop = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
-#endif
 	xa_net_wm_window_type = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
 	xa_net_wm_window_type_desktop = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DESKTOP", False);
 	xa_net_wm_window_type_dock = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
@@ -141,14 +129,10 @@ void ewmh_init_screen(ScreenInfo *s) {
 	Atom supported[] = {
 		xa_net_client_list,
 		xa_net_client_list_stacking,
-#ifdef VWM
 		xa_net_number_of_desktops,
-#endif
 		xa_net_desktop_geometry,
 		xa_net_desktop_viewport,
-#ifdef VWM
 		xa_net_current_desktop,
-#endif
 		xa_net_active_window,
 		xa_net_workarea,
 		xa_net_supporting_wm_check,
@@ -158,9 +142,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_restack_window,
 		xa_net_request_frame_extents,
 
-#ifdef VWM
 		xa_net_wm_desktop,
-#endif
 		xa_net_wm_window_type,
 		xa_net_wm_window_type_desktop,
 		xa_net_wm_window_type_dock,
@@ -183,25 +165,19 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_wm_action_close,
 		xa_net_frame_extents,
 	};
-#ifdef VWM
-	unsigned long num_desktops = 8;
+	unsigned long num_desktops = VDESK_MAX + 1;
 	unsigned long vdesk = s->vdesk;
-#endif
 	s->supporting = XCreateSimpleWindow(dpy, s->root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, s->root, xa_net_supported,
 			XA_ATOM, 32, PropModeReplace,
 			(unsigned char *)&supported,
 			sizeof(supported) / sizeof(Atom));
-#ifdef VWM
 	XChangeProperty(dpy, s->root, xa_net_number_of_desktops,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&num_desktops, 1);
-#endif
-#ifdef VWM
 	XChangeProperty(dpy, s->root, xa_net_current_desktop,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&vdesk, 1);
-#endif
 	XChangeProperty(dpy, s->root, xa_net_supporting_wm_check,
 			XA_WINDOW, 32, PropModeReplace,
 			(unsigned char *)&s->supporting, 1);
@@ -221,14 +197,10 @@ void ewmh_deinit_screen(ScreenInfo *s) {
 	XDeleteProperty(dpy, s->root, xa_net_supported);
 	XDeleteProperty(dpy, s->root, xa_net_client_list);
 	XDeleteProperty(dpy, s->root, xa_net_client_list_stacking);
-#ifdef VWM
 	XDeleteProperty(dpy, s->root, xa_net_number_of_desktops);
-#endif
 	XDeleteProperty(dpy, s->root, xa_net_desktop_geometry);
 	XDeleteProperty(dpy, s->root, xa_net_desktop_viewport);
-#ifdef VWM
 	XDeleteProperty(dpy, s->root, xa_net_current_desktop);
-#endif
 	XDeleteProperty(dpy, s->root, xa_net_active_window);
 	XDeleteProperty(dpy, s->root, xa_net_workarea);
 	XDeleteProperty(dpy, s->root, xa_net_supporting_wm_check);
@@ -278,9 +250,7 @@ void ewmh_deinit_client(Client *c) {
 }
 
 void ewmh_withdraw_client(Client *c) {
-#ifdef VWM
 	XDeleteProperty(dpy, c->window, xa_net_wm_desktop);
-#endif
 	XDeleteProperty(dpy, c->window, xa_net_wm_state);
 }
 
@@ -318,14 +288,12 @@ void ewmh_set_net_client_list_stacking(ScreenInfo *s) {
 			(unsigned char *)windows, i);
 }
 
-#ifdef VWM
 void ewmh_set_net_current_desktop(ScreenInfo *s) {
 	unsigned long vdesk = s->vdesk;
 	XChangeProperty(dpy, s->root, xa_net_current_desktop,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&vdesk, 1);
 }
-#endif
 
 void ewmh_set_net_active_window(Client *c) {
 	int i;
@@ -342,14 +310,12 @@ void ewmh_set_net_active_window(Client *c) {
 	}
 }
 
-#ifdef VWM
 void ewmh_set_net_wm_desktop(Client *c) {
 	unsigned long vdesk = c->vdesk;
 	XChangeProperty(dpy, c->window, xa_net_wm_desktop,
 			XA_CARDINAL, 32, PropModeReplace,
 			(unsigned char *)&vdesk, 1);
 }
-#endif
 
 unsigned int ewmh_get_net_wm_window_type(Window w) {
 	Atom *aprop;
