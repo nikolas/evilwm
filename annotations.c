@@ -178,6 +178,21 @@ static void xor_draw_info(Client *c) {
 		buf, strlen(buf));
 }
 
+static void xor_draw_cog(Client *c) {
+	int screen_x = client_to_Xcoord(c,x);
+	int screen_y = client_to_Xcoord(c,y);
+
+	/* draw a cross-hair representing the client's centre of gravity */
+	int cog_screen_x = screen_x + c->cog.x;
+	int cog_screen_y = screen_y + c->cog.y;
+	XDrawLine(dpy, c->screen->root, c->screen->invert_gc,
+	          cog_screen_x - 4, cog_screen_y,
+	          cog_screen_x + 5, cog_screen_y);
+	XDrawLine(dpy, c->screen->root, c->screen->invert_gc,
+	          cog_screen_x, cog_screen_y - 4,
+	          cog_screen_x, cog_screen_y + 5);
+}
+
 static unsigned grabbed = 0;
 static void xor_init(void) {
 	if (!grabbed++) {
@@ -204,16 +219,21 @@ static void xor_fini(void) {
 
 xor_template(outline);
 xor_template(info);
+xor_template(cog);
 
 /*
  * XShape decoration functions
  */
 #ifdef SHAPE
 static Window shape_outline_window = None;
+static unsigned shape_outline_serial = 0;
+static unsigned shape_outline_width;
+static unsigned shape_outline_height;
 
 static void shape_outline_shape(Client *c) {
-	unsigned width = c->width + 2 * c->border;
-	unsigned height = c->height + 2 * c->border;
+	(void)c;
+	unsigned width = shape_outline_width;
+	unsigned height = shape_outline_height;
 
 	Region r = XCreateRegion();
 	Region r_in = XCreateRegion();
@@ -225,6 +245,8 @@ static void shape_outline_shape(Client *c) {
 	XUnionRectWithRegion(&rect, r_in, r_in);
 	XSubtractRegion(r, r_in, r);
 	XShapeCombineRegion(dpy, shape_outline_window, ShapeBounding, 0,0, r, ShapeSet);
+
+	shape_outline_serial++;
 }
 
 static void shape_outline_create(Client *c) {
@@ -235,6 +257,9 @@ static void shape_outline_create(Client *c) {
 	int screen_y = client_to_Xcoord(c,y) - c->border;
 	unsigned width = c->width + 2 * c->border;
 	unsigned height = c->height + 2 * c->border;
+	/* cache width & height */
+	shape_outline_width = width;
+	shape_outline_height = height;
 
 	shape_outline_window =
 		XCreateWindow(dpy, c->screen->root, screen_x, screen_y, width, height, 0,
@@ -262,9 +287,35 @@ static void shape_outline_update(Client *c) {
 	unsigned width = c->width + 2 * c->border;
 	unsigned height = c->height + 2 * c->border;
 	XMoveResizeWindow(dpy, shape_outline_window, screen_x, screen_y, width, height);
+	if (width == shape_outline_width && height == shape_outline_height)
+		return;
+
+	shape_outline_width = width;
+	shape_outline_height = height;
 	shape_outline_shape(c);
 }
 
+static void shape_outline_cog_shape(Client *c) {
+	Region r = XCreateRegion();
+	XUnionRectWithRegion(&(XRectangle){ .x = 0, .y = 4, .width = 9, .height = 1 }, r, r);
+	XUnionRectWithRegion(&(XRectangle){ .x = 4, .y = 0, .width = 1, .height = 9 }, r, r);
+	XShapeCombineRegion(dpy, shape_outline_window, ShapeBounding, c->cog.x-4, c->cog.y-4, r, ShapeUnion);
+}
+
+static unsigned shape_cog_serial = 0;
+static void shape_cog_create(Client *c) {
+	shape_outline_create(c);
+	shape_outline_cog_shape(c);
+	shape_cog_serial = shape_outline_serial;
+}
+
+static void shape_cog_update(Client *c) {
+	shape_outline_update(c);
+	if (shape_cog_serial != shape_outline_serial) {
+		shape_outline_cog_shape(c);
+		shape_cog_serial = shape_outline_serial;
+	}
+}
 #endif
 
 /*
@@ -298,6 +349,13 @@ const annotate_funcs xor_outline = {
 	.remove = xor_outline_remove,
 };
 
+const annotate_funcs xor_cog = {
+	.create = xor_cog_create,
+	.preupdate = xor_cog_remove,
+	.update = xor_cog_create,
+	.remove = xor_cog_remove,
+};
+
 #ifdef SHAPE
 const annotate_funcs shape_outline = {
 	.create = shape_outline_create,
@@ -305,8 +363,15 @@ const annotate_funcs shape_outline = {
 	.update = shape_outline_update,
 	.remove = shape_outline_remove,
 };
+const annotate_funcs shape_cog = {
+	.create = shape_cog_create,
+	.preupdate = NULL,
+	.update = shape_cog_update,
+	.remove = shape_outline_remove,
+};
 #else
 # define shape_outline xor_outline
+# define shape_cog xor_cog
 #endif
 
 /* compile time defaults */
@@ -325,12 +390,13 @@ const annotate_funcs shape_outline = {
 struct annotate_ctx {
 	const annotate_funcs *outline;
 	const annotate_funcs *info;
+	const annotate_funcs *cog;
 };
 typedef struct annotate_ctx annotate_ctx_t;
 
-annotate_ctx_t annotate_info_ctx = { NULL, &ANNOTATE_INFOBANNER };
-annotate_ctx_t annotate_drag_ctx = { &shape_outline, &ANNOTATE_MOVERESIZE };
-annotate_ctx_t annotate_sweep_ctx = { &shape_outline, &ANNOTATE_MOVERESIZE };
+annotate_ctx_t annotate_info_ctx = { NULL, &ANNOTATE_INFOBANNER, NULL };
+annotate_ctx_t annotate_drag_ctx = { &shape_outline, &ANNOTATE_MOVERESIZE, &shape_cog };
+annotate_ctx_t annotate_sweep_ctx = { &shape_outline, &ANNOTATE_MOVERESIZE, &shape_cog };
 
 /*
  * Annotation functions
@@ -340,6 +406,7 @@ annotate_ctx_t annotate_sweep_ctx = { &shape_outline, &ANNOTATE_MOVERESIZE };
 		if (!a) return; \
 		if (a->outline && a->outline->name) a->outline->name(c); \
 		if (a->info && a->info->name) a->info->name(c); \
+		if (a->cog && a->cog->name) a->cog->name(c); \
 	}
 annotate_template(create);
 annotate_template(preupdate);
