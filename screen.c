@@ -405,8 +405,8 @@ static int scale_pos(int new_screen_size, int old_screen_size, int cli_pos, int 
 static void fix_screen_client(Client *c, const PhysicalScreen *old_phy) {
 	int oldw = old_phy->width;
 	int oldh = old_phy->height;
-	int neww = DisplayWidth(dpy, c->screen->screen);
-	int newh = DisplayHeight(dpy, c->screen->screen);
+	int neww = c->phy->width;
+	int newh = c->phy->height;
 
 	if (c->oldw) {
 		/* horiz maximised: update width, update old x pos */
@@ -439,15 +439,25 @@ static void fix_screen_client(Client *c, const PhysicalScreen *old_phy) {
  * (NB, maximised windows will need their old* values updating according
  * to (a).
  */
-void fix_screen_after_resize(ScreenInfo *s, int oldw, int oldh) {
+void fix_screen_after_resize(ScreenInfo *s) {
 	for (struct list *iter = clients_tab_order; iter; iter = iter->next) {
 		Client *c = iter->data;
 		/* only handle clients on the screen being resized */
 		if (c->screen != s)
 			continue;
 
-		const PhysicalScreen old_phy = {.width = oldw, .height = oldh};
-		fix_screen_client(c, &old_phy);
+		const PhysicalScreen *old_phy = c->phy;
+		int old_nx = c->nx;
+		int old_ny = c->ny;
+
+		/* determine the new phy, but keep the old relative position */
+		int old_screen_x = client_to_Xcoord(c,x);
+		int old_screen_y = client_to_Xcoord(c,y);
+		client_update_screenpos(c, old_screen_x, old_screen_y);
+		c->nx = old_nx;
+		c->ny = old_ny;
+
+		fix_screen_client(c, old_phy);
 	}
 }
 

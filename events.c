@@ -396,11 +396,11 @@ static void handle_shape_event(XShapeEvent *e) {
 
 #ifdef RANDR
 static void handle_randr_event(XRRScreenChangeNotifyEvent *e) {
-	ScreenInfo *s = find_screen(e->root);
-	int oldw = DisplayWidth(dpy, s->screen);
-	int oldh = DisplayHeight(dpy, s->screen);
 	XRRUpdateConfiguration((XEvent*)e);
-	fix_screen_after_resize(s, oldw, oldh);
+
+	ScreenInfo *s = find_screen(e->root);
+	probe_screen(s);
+	fix_screen_after_resize(s);
 	ewmh_set_screen_workarea(s);
 }
 #endif
