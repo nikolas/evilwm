@@ -191,6 +191,8 @@ extern Atom xa_wm_protos;
 extern Atom xa_wm_delete;
 extern Atom xa_wm_cmapwins;
 
+extern Atom xa_utf8_string;
+
 /* Motif atoms */
 extern Atom mwm_hints;
 
@@ -211,6 +213,7 @@ extern Atom xa_net_restack_window;
 extern Atom xa_net_request_frame_extents;
 
 /* EWMH: Application Window Properties */
+extern Atom xa_net_wm_name;
 #ifdef VWM
 extern Atom xa_net_wm_desktop;
 #endif

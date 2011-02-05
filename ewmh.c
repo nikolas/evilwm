@@ -13,6 +13,8 @@ Atom xa_wm_protos;
 Atom xa_wm_delete;
 Atom xa_wm_cmapwins;
 
+Atom xa_utf8_string; /* type = UTF8_STRING */
+
 /* Motif atoms */
 Atom mwm_hints;
 
@@ -43,7 +45,7 @@ Atom xa_net_restack_window;
 Atom xa_net_request_frame_extents;
 
 /* Application Window Properties */
-static Atom xa_net_wm_name;
+Atom xa_net_wm_name;
 #ifdef VWM
 Atom xa_net_wm_desktop;
 #endif

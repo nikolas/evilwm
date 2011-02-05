@@ -43,6 +43,10 @@ OPT_CPPFLAGS += -DVWM
 # Uncomment to move pointer around on certain actions.
 OPT_CPPFLAGS += -DWARP_POINTER
 
+# Uncomment to use pango for rendering title text
+OPT_CPPFLAGS += -DPANGO $(shell pkg-config --cflags-only-I freetype2 pango pangoxft)
+OPT_LDLIBS   += $(shell pkg-config --libs pango pangoxft)
+
 # Uncomment to use Ctrl+Alt+q instead of Ctrl+Alt+Escape.  Useful for Cygwin.
 #OPT_CPPFLAGS += -DKEY_KILL=XK_q
 

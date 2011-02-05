@@ -7,6 +7,12 @@
 #include <string.h>
 #include "evilwm.h"
 
+#ifdef PANGO
+# include <X11/Xft/Xft.h>
+# include <pango/pango.h>
+# include <pango/pangoxft.h>
+#endif
+
 /*
  * Infobanner window functions
  */
@@ -15,6 +21,12 @@ static Window info_window = None;
 static void infobanner_create(Client *c);
 static void infobanner_update(Client *c);
 static void infobanner_remove(Client *c);
+#ifdef PANGO
+static XftDraw *info_xft_draw = NULL;
+static PangoRenderer *info_pr = NULL;
+static PangoContext *info_pc = NULL;
+static PangoLayout *info_pl = NULL;
+#endif
 
 static void infobanner_create(Client *c) {
 	assert(info_window == None);
@@ -25,14 +37,55 @@ static void infobanner_create(Client *c) {
 	                                .background_pixel = c->screen->fg.pixel,
 	                                .save_under = True
 	                            });
+#ifdef PANGO
+	Visual *v = DefaultVisual(dpy, 0);
+	Colormap cmap = DefaultColormap(dpy, 0);
+
+	info_xft_draw = XftDrawCreate(dpy, info_window, v, cmap);
+
+	if (!info_pc)
+		info_pc = pango_xft_get_context(dpy, 0);
+
+	PangoColor colour;
+	pango_color_parse(&colour, "#255adf");
+
+	info_pr = pango_xft_renderer_new(dpy, 0);
+	pango_xft_renderer_set_draw((PangoXftRenderer*) info_pr, info_xft_draw);
+	pango_xft_renderer_set_default_color((PangoXftRenderer*) info_pr, &colour);
+
+	info_pl = pango_layout_new(info_pc);
+	PangoFontDescription *pd = pango_font_description_from_string("Sans 12");
+	pango_layout_set_font_description(info_pl, pd);
+	pango_layout_set_width(info_pl, c->width * PANGO_SCALE);
+	pango_font_description_free(pd);
+#endif
+
 	XMapRaised(dpy, info_window);
 	infobanner_update(c);
+}
+
+static void fetch_utf8_name (Display *d, Window w, char **name) {
+#ifndef NOUTF8
+	Atom actual_type;
+	int format;
+	unsigned long dummy;
+	unsigned long name_len;
+	XGetWindowProperty(d, w, xa_net_wm_name, 0, -1, False,
+	                   xa_utf8_string, &actual_type, &format,
+	                   &name_len, &dummy, (unsigned char**)name);
+# define _NOUTF8 0
+#else
+# define _NOUTF8 1
+#endif
+	if (_NOUTF8 || !*name) {
+		XFetchName(dpy, w, name);
+	}
 }
 
 static void infobanner_update(Client *c) {
 	char *name;
 	char buf[27];
-	int namew, iwinx, iwiny, iwinw, iwinh;
+	int iwinx, iwiny, iwinw, iwinh;
 	int width_inc = c->width_inc, height_inc = c->height_inc;
 
 	if (!info_window)
@@ -42,13 +95,24 @@ static void infobanner_update(Client *c) {
 	        c->x, c->y);
 	iwinw = XTextWidth(font, buf, strlen(buf)) + 2;
 	iwinh = font->max_bounds.ascent + font->max_bounds.descent;
-	XFetchName(dpy, c->window, &name);
+
+	fetch_utf8_name(dpy, c->window, &name);
 	if (name) {
-		namew = XTextWidth(font, name, strlen(name));
+#ifdef PANGO
+		int namew, nameh;
+		pango_layout_set_text(info_pl, name, -1);
+		pango_layout_get_size(info_pl, &namew, &nameh);
+		namew = PANGO_PIXELS_CEIL(namew);
+		nameh = PANGO_PIXELS_CEIL(nameh);
+#else
+		int namew = XTextWidth(font, name, strlen(name));
+		int nameh = iwinh;
+#endif
 		if (namew > iwinw)
 			iwinw = namew + 2;
-		iwinh = iwinh * 2;
+		iwinh += nameh;
 	}
+
 	iwinx = c->x + c->border + c->width - iwinw;
 	iwiny = c->y - c->border;
 	if (iwinx + iwinw > DisplayWidth(dpy, c->screen->screen))
@@ -62,8 +126,12 @@ static void infobanner_update(Client *c) {
 	XMoveResizeWindow(dpy, info_window, iwinx, iwiny, iwinw, iwinh);
 	XClearWindow(dpy, info_window);
 	if (name) {
+#ifdef PANGO
+		pango_renderer_draw_layout(info_pr, info_pl, 0, 0);
+#else
 		XDrawString(dpy, info_window, c->screen->invert_gc,
 				1, iwinh / 2 - 1, name, strlen(name));
+#endif
 		XFree(name);
 	}
 	XDrawString(dpy, info_window, c->screen->invert_gc, 1, iwinh - 1,
@@ -72,8 +140,12 @@ static void infobanner_update(Client *c) {
 
 static void infobanner_remove(Client *c) {
 	(void) c;
-	if (info_window)
+	if (info_window) {
+#ifdef PANGO
+		XftDrawDestroy(info_xft_draw);
+#endif
 		XDestroyWindow(dpy, info_window);
+	}
 	info_window = None;
 }
 
