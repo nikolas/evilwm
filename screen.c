@@ -11,6 +11,7 @@
 #include "log.h"
 
 static void grab_keysym(Window w, unsigned int mask, KeySym keysym);
+static void fix_screen_client(Client *c, const PhysicalScreen *old_phy);
 
 static void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2, unsigned force) {
 	if (force || c->oldw == 0) {
@@ -365,8 +366,9 @@ void switch_vdesk(ScreenInfo *s, PhysicalScreen *p, unsigned int v) {
 			/* NB, vdesk may not be on the same physical screen as previously,
 			 * so move windows onto the physical screen */
 			if (c->phy != p) {
+				PhysicalScreen *old_phy = c->phy;
 				c->phy = p;
-				moveresize(c);
+				fix_screen_client(c, old_phy);
 			}
 			if (!c->is_dock || s->docks_visible)
 				client_show(c);
