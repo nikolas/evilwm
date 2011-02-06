@@ -545,6 +545,43 @@ void grab_keys_for_screen(ScreenInfo *s) {
 	grab_keysym(s->root, grabmask2, KEY_NEXT);
 }
 
+/*
+ * physical screen discovery methods
+ */
+
+#ifdef XINERAMA
+static bool probe_screen_xinerama(void) {
+	if (!have_xinerama) {
+		return false;
+	}
+
+	/* xinerama as exposed by xlib does not allow multiple screens per display */
+	if (num_screens > 1) {
+		LOG_ERROR("Interesting, xinerama present, but there are multiple screens\n");
+		return false;
+	}
+
+	int num_phy_screens;
+	XineramaScreenInfo *xin_scr_info = XineramaQueryScreens(dpy, &num_phy_screens);
+	if (!num_phy_screens) {
+		return false;
+	}
+
+	PhysicalScreen *new_phys = malloc(num_phy_screens * sizeof(PhysicalScreen));
+	for (int j = 0; j < num_phy_screens; j++) {
+		new_phys[j].xoff   = xin_scr_info[j].x_org;
+		new_phys[j].yoff   = xin_scr_info[j].y_org;
+		new_phys[j].width  = xin_scr_info[j].width;
+		new_phys[j].height = xin_scr_info[j].height;
+	}
+	if (xin_scr_info) XFree(xin_scr_info);
+
+	screens[0].physical = new_phys;
+	screens[0].num_physical = num_phy_screens;
+	return true;
+}
+#endif
+
 static void probe_screen_default(ScreenInfo *s) {
 	s->num_physical     = 1;
 	s->physical         = malloc(sizeof(PhysicalScreen));
@@ -621,6 +658,11 @@ static bool probe_screen_xrandr(ScreenInfo *s) {
 void probe_screen(ScreenInfo *s) {
 #ifdef RANDR
 	if (probe_screen_xrandr(s))
+		return;
+#endif
+
+#ifdef XINERAMA
+	if (probe_screen_xinerama())
 		return;
 #endif
 
