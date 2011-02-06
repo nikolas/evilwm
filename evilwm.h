@@ -14,6 +14,9 @@
 #ifdef RANDR
 #include <X11/extensions/Xrandr.h>
 #endif
+#ifdef XINERAMA
+#include <X11/extensions/Xinerama.h>
+#endif
 
 #ifndef __GNUC__
 # define  __attribute__(x)
@@ -193,6 +196,9 @@ extern int          have_shape, shape_event;
 #endif
 #ifdef RANDR
 extern int          have_randr, randr_event_base;
+#endif
+#ifdef XINERAMA
+extern int          have_xinerama;
 #endif
 
 /* Standard X protocol atoms */

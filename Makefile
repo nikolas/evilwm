@@ -31,6 +31,10 @@ OPT_LDLIBS   += -lXrandr
 OPT_CPPFLAGS += -DSHAPE
 OPT_LDLIBS   += -lXext
 
+# Uncomment to support Xinerama
+OPT_CPPFLAGS += -DXINERAMA
+OPT_LDLIBS   += -lXinerama
+
 # Uncomment to enable solid window drags.  This can be slow on old systems.
 OPT_CPPFLAGS += -DSOLIDDRAG
 

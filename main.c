@@ -28,6 +28,11 @@ int         have_shape, shape_event;
 #ifdef RANDR
 int         have_randr, randr_event_base;
 #endif
+#ifdef XINERAMA
+int         have_xinerama, xinerama_event;
+#else
+# define have_xinerama 0
+#endif
 
 /* Things that affect user interaction */
 #define CONFIG_FILE ".evilwmrc"
@@ -287,6 +292,13 @@ static void setup_display(void) {
 		if (!have_randr) {
 			LOG_DEBUG("XRandR is not supported on this display.\n");
 		}
+	}
+#endif
+	/* Xinerama extension? */
+#ifdef XINERAMA
+	{
+		int e_dummy;
+		have_xinerama = XineramaQueryExtension(dpy, &xinerama_event, &e_dummy) && XineramaIsActive(dpy);
 	}
 #endif
 	LOG_LEAVE();
