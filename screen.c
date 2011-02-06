@@ -295,7 +295,7 @@ void next(void) {
 	}
 	/* NOTE: Checking against newc->screen->vdesk implies we can Alt+Tab
 	 * across screen boundaries.  Is this what we want? */
-	while ((!is_fixed(newc) && (newc->vdesk != newc->screen->vdesk)) || (newc->is_dock && !newc->screen->docks_visible));
+	while ((!is_fixed(newc) && (newc->vdesk != newc->screen->vdesk)) || newc->is_dock);
 
 	if (!newc)
 		return;
