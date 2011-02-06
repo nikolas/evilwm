@@ -543,3 +543,16 @@ void grab_keys_for_screen(ScreenInfo *s) {
 	}
 	grab_keysym(s->root, grabmask2, KEY_NEXT);
 }
+
+static void probe_screen_default(ScreenInfo *s) {
+	s->num_physical     = 1;
+	s->physical         = malloc(sizeof(PhysicalScreen));
+	s->physical->xoff   = 0;
+	s->physical->yoff   = 0;
+	s->physical->width  = DisplayWidth(dpy, s->screen);
+	s->physical->height = DisplayHeight(dpy, s->screen);
+}
+
+void probe_screen(ScreenInfo *s) {
+	probe_screen_default(s);
+}

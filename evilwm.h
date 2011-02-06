@@ -319,6 +319,7 @@ ScreenInfo *find_screen(Window root);
 ScreenInfo *find_current_screen(void);
 PhysicalScreen *find_physical_screen(ScreenInfo *screen, int x, int y);
 void grab_keys_for_screen(ScreenInfo *s);
+void probe_screen(ScreenInfo *s);
 
 /* ewmh.c */
 
