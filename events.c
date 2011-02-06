@@ -397,10 +397,46 @@ static void handle_shape_event(XShapeEvent *e) {
 #ifdef RANDR
 static void handle_randr_event(XRRScreenChangeNotifyEvent *e) {
 	XRRUpdateConfiguration((XEvent*)e);
-
 	ScreenInfo *s = find_screen(e->root);
+
+	PhysicalScreen *old_phys = s->physical;
+	int old_num_phys = s->num_physical;
 	probe_screen(s);
-	fix_screen_after_resize(s);
+
+	/* set all phys on screen to have a bogus vdesk */
+	for (int i = 0; i < s->num_physical; i++) {
+		s->physical[i].vdesk = VDESK_NONE;
+	}
+
+	/* for each phy, map an old vesk to it */
+	unsigned int save_old_vdesk = s->old_vdesk;
+	unsigned int vdesks[opt_vdesks];
+	for (unsigned int i = 0; i < opt_vdesks; i++) {
+		vdesks[i] = i;
+	}
+	for (int i = 0; i < s->num_physical; i++) {
+		unsigned int vdesk = VDESK_NONE;
+		if (i < old_num_phys) {
+			vdesk = old_phys[i].vdesk;
+		} else {
+			/* this is a new phy, pick a vdesk to show */
+			for (unsigned int j = 0; j < opt_vdesks; j++) {
+				if (vdesks[j] == VDESK_NONE)
+					continue;
+				vdesk = vdesks[j];
+				break;
+			}
+		}
+		vdesks[vdesk] = VDESK_NONE;
+		switch_vdesk(s, &s->physical[i], vdesk);
+	}
+	/* unmap clients on vdesks nolonger atatched to a current phy */
+	for (int i = s->num_physical; i < old_num_phys; i++) {
+		switch_vdesk(s, &old_phys[i], VDESK_NONE);
+	}
+	/* xxx, is there a better way to do this?, ie, avoid switch_vdesk, iterate
+	   through all clients, map phys to vdesks, then continue as long ago */
+	s->old_vdesk = save_old_vdesk;
 	ewmh_set_screen_workarea(s);
 }
 #endif

@@ -317,7 +317,6 @@ void sweep(Client *c);
 void next(void);
 void switch_vdesk(ScreenInfo *s, PhysicalScreen *p, unsigned int v);
 void set_docks_visible(ScreenInfo *s, int is_visible);
-void fix_screen_after_resize(ScreenInfo *s);
 ScreenInfo *find_screen(Window root);
 ScreenInfo *find_current_screen(void);
 void find_current_screen_and_phy(ScreenInfo **current_screen, PhysicalScreen **current_phy);
