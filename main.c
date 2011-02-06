@@ -51,6 +51,11 @@ int          opt_snap = 0;
 int          no_solid_drag = 0;  /* use solid drag by default */
 #endif
 struct list  *applications = NULL;
+#ifdef VWM
+unsigned int opt_vdesks = 8;
+#else
+unsigned int opt_vdesks = 0;
+#endif
 
 /* Client tracking information */
 struct list     *clients_tab_order = NULL;
@@ -71,6 +76,7 @@ static void set_app_fixed(void);
 static struct xconfig_option evilwm_options[] = {
 	{ XCONFIG_STRING,   "fn",           &opt_font },
 	{ XCONFIG_STRING,   "display",      &opt_display },
+	{ XCONFIG_INT,      "numvdesks",    &opt_vdesks },
 	{ XCONFIG_STRING,   "fg",           &opt_fg },
 	{ XCONFIG_STRING,   "bg",           &opt_bg },
 	{ XCONFIG_STRING,   "fc",           &opt_fc },
@@ -107,7 +113,7 @@ static void helptext(void) {
 " [-fc fixed]"
 " [-bg background] [-bw borderwidth]\n"
 "              [-mask1 modifiers] [-mask2 modifiers] [-altmask modifiers]\n"
-"              [-snap num]"
+"              [-snap num] [-numvdesks num]\n"
 " [-app name/class] [-g geometry] [-dock]\n"
 "              [-v vdesk] [-s]"
 #ifdef SOLIDDRAG

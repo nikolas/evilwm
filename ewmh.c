@@ -165,7 +165,7 @@ void ewmh_init_screen(ScreenInfo *s) {
 		xa_net_wm_action_close,
 		xa_net_frame_extents,
 	};
-	unsigned long num_desktops = VDESK_MAX + 1;
+	unsigned long num_desktops = opt_vdesks;
 	unsigned long vdesk = s->vdesk;
 	s->supporting = XCreateSimpleWindow(dpy, s->root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, s->root, xa_net_supported,

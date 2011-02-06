@@ -57,13 +57,9 @@ typedef struct {
 
 #define VDESK_NONE  (0xfffffffe)
 #define VDESK_FIXED (0xffffffff)
-#ifdef VWM
-# define VDESK_MAX   (7)
-#else
-# define VDESK_MAX   (0)
-#endif
+#define VDESK_MAX   (opt_vdesks - 1)
 #define KEY_TO_VDESK(key) ((key) - XK_1)
-#define valid_vdesk(v) ((v) == VDESK_FIXED || (v) <= VDESK_MAX)
+#define valid_vdesk(v) ((v) == VDESK_FIXED || (v) < opt_vdesks)
 
 #define RAISE           1
 #define NO_RAISE        0       /* for unhide() */
@@ -233,6 +229,7 @@ extern int              no_solid_drag;
 # define no_solid_drag (1)
 #endif
 extern struct list      *applications;
+extern unsigned int     opt_vdesks; /* number of virtual desktops to use */
 
 /* Client tracking information */
 extern struct list      *clients_tab_order;

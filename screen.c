@@ -314,6 +314,8 @@ void switch_vdesk(ScreenInfo *s, unsigned int v) {
 #ifdef DEBUG
 	int hidden = 0, raised = 0;
 #endif
+	if (!valid_vdesk(v))
+		return;
 
 	if (v == s->vdesk)
 		return;
