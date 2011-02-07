@@ -54,7 +54,11 @@ void client_lower(Client *c) {
 		below = iter->data;
 		if (below == c)
 			return;
-		if (below->screen == c->screen && (is_fixed(below) || below->vdesk == c->phy->vdesk))
+		if (below->screen == c->screen
+#ifdef VWM
+		&& (is_fixed(below) || below->vdesk == c->phy->vdesk)
+#endif
+		)
 			break;
 	}
 	if (!iter) return;
