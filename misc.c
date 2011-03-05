@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <signal.h>
+#include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include "evilwm.h"
@@ -76,4 +77,21 @@ int handle_xerror(Display *dsply, XErrorEvent *e) {
 	}
 	LOG_LEAVE();
 	return 0;
+}
+
+/* Remove all enter events from the queue except the last of any corresponding
+ * to "except"s parent. */
+void discard_enter_events(Client *except) {
+	XEvent tmp, putback_ev;
+	int putback = 0;
+	XSync(dpy, False);
+	while (XCheckMaskEvent(dpy, EnterWindowMask, &tmp)) {
+		if (tmp.xcrossing.window == except->parent) {
+			memcpy(&putback_ev, &tmp, sizeof(XEvent));
+			putback = 1;
+		}
+	}
+	if (putback) {
+		XPutBackEvent(dpy, &putback_ev);
+	}
 }

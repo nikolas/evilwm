@@ -110,12 +110,6 @@ typedef struct {
 #define add_fixed(c) c->vdesk = VDESK_FIXED
 #define remove_fixed(c) c->vdesk = c->screen->vdesk
 
-#define discard_enter_events() do { \
-		XEvent dummy; \
-		XSync(dpy, False); \
-		while (XCheckMaskEvent(dpy, EnterWindowMask, &dummy)); \
-	} while (0)
-
 /* screen structure */
 
 typedef struct ScreenInfo ScreenInfo;
@@ -283,6 +277,7 @@ extern int ignore_xerror;
 int handle_xerror(Display *dsply, XErrorEvent *e);
 void spawn(const char *const cmd[]);
 void handle_signal(int signo);
+void discard_enter_events(Client *except);
 
 /* new.c */
 

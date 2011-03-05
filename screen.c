@@ -402,7 +402,7 @@ void maximise_client(Client *c, int action, int hv) {
 	}
 	ewmh_set_net_wm_state(c);
 	moveresize(c);
-	discard_enter_events();
+	discard_enter_events(c);
 }
 
 void next(void) {
@@ -438,7 +438,7 @@ void next(void) {
 	setmouse(newc->window, newc->width + newc->border - 1,
 			newc->height + newc->border - 1);
 #endif
-	discard_enter_events();
+	discard_enter_events(newc);
 }
 
 #ifdef VWM

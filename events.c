@@ -165,7 +165,7 @@ move_client:
 	setmouse(c->window, c->width + c->border - 1,
 			c->height + c->border - 1);
 #endif
-	discard_enter_events();
+	discard_enter_events(c);
 	return;
 }
 
@@ -286,7 +286,7 @@ static void handle_configure_request(XConfigureRequestEvent *e) {
 		}
 		do_window_changes(e->value_mask, &wc, c, 0);
 		if (c == current) {
-			discard_enter_events();
+			discard_enter_events(c);
 		}
 	} else {
 		LOG_XENTER("XConfigureWindow(window=%lx, value_mask=%lx)", (unsigned int)e->window, e->value_mask);
