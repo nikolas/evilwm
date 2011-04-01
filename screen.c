@@ -402,6 +402,34 @@ static int scale_pos(int new_screen_size, int old_screen_size, int cli_pos, int 
 	return new_screen_size * cli_pos / old_screen_size;
 }
 
+static void fix_screen_client(Client *c, const PhysicalScreen *old_phy) {
+	int oldw = old_phy->width;
+	int oldh = old_phy->height;
+	int neww = DisplayWidth(dpy, c->screen->screen);
+	int newh = DisplayHeight(dpy, c->screen->screen);
+
+	if (c->oldw) {
+		/* horiz maximised: update width, update old x pos */
+		c->width = neww;
+		c->oldx = scale_pos(neww, oldw, c->oldx, c->oldw + c->border);
+	} else {
+		/* horiz normal: update x pos */
+		c->nx = scale_pos(neww, oldw, c->nx, c->width + c->border);
+	}
+
+	if (c->oldh) {
+		/* vert maximised: update height, update old y pos */
+		c->height = newh;
+		c->oldy = scale_pos(newh, oldh, c->oldy, c->oldh + c->border);
+	} else {
+		/* vert normal: update y pos */
+		c->ny = scale_pos(newh, oldh, c->ny, c->height + c->border);
+	}
+
+	client_calc_cog(c);
+	moveresize(c);
+}
+
 /* If a screen has been resized, eg, due to xrandr, some windows
  * have the possibility of:
  *   a) not being visible
@@ -412,34 +440,14 @@ static int scale_pos(int new_screen_size, int old_screen_size, int cli_pos, int 
  * to (a).
  */
 void fix_screen_after_resize(ScreenInfo *s, int oldw, int oldh) {
-	int neww = DisplayWidth(dpy, s->screen);
-	int newh = DisplayHeight(dpy, s->screen);
-
 	for (struct list *iter = clients_tab_order; iter; iter = iter->next) {
 		Client *c = iter->data;
 		/* only handle clients on the screen being resized */
 		if (c->screen != s)
 			continue;
 
-		if (c->oldw) {
-			/* horiz maximised: update width, update old x pos */
-			c->width = neww;
-			c->oldx = scale_pos(neww, oldw, c->oldx, c->oldw + c->border);
-		} else {
-			/* horiz normal: update x pos */
-			c->nx = scale_pos(neww, oldw, c->nx, c->width + c->border);
-		}
-
-		if (c->oldh) {
-			/* vert maximised: update height, update old y pos */
-			c->height = newh;
-			c->oldy = scale_pos(newh, oldh, c->oldy, c->oldh + c->border);
-		} else {
-			/* vert normal: update y pos */
-			c->ny = scale_pos(newh, oldh, c->ny, c->height + c->border);
-		}
-		client_calc_cog(c);
-		moveresize(c);
+		const PhysicalScreen old_phy = {.width = oldw, .height = oldh};
+		fix_screen_client(c, &old_phy);
 	}
 }
 
