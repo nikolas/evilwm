@@ -115,13 +115,11 @@ static unsigned int parse_modifiers(char *s);
 static void helptext(void) {
 	puts(
 "usage: evilwm [-display display] [-term termprog] [-fn fontname]\n"
-"              [-fg foreground]"
-" [-fc fixed]"
-" [-bg background] [-bw borderwidth]\n"
+"              [-fg foreground] [-fc fixed] [-bg background] [-bw borderwidth]\n"
 "              [-mask1 modifiers] [-mask2 modifiers] [-altmask modifiers]\n"
 "              [-snap num] [-numvdesks num]\n"
-" [-app name/class] [-g geometry] [-dock]\n"
-"              [-v vdesk] [-s]"
+"              [-app name/class] [-g geometry] [-dock] [-v vdesk] [-s]\n"
+"             "
 #ifdef SOLIDDRAG
 " [-nosoliddrag]"
 #endif
