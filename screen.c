@@ -3,6 +3,7 @@
  * see README for license and other details. */
 
 #include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -553,6 +554,75 @@ static void probe_screen_default(ScreenInfo *s) {
 	s->physical->height = DisplayHeight(dpy, s->screen);
 }
 
+#ifdef RANDR
+static bool probe_screen_xrandr(ScreenInfo *s) {
+	if (!have_randr)
+		return false;
+
+	int xrandr_major, xrandr_minor;
+	XRRQueryVersion(dpy, &xrandr_major, &xrandr_minor);
+	if (xrandr_major == 1 && xrandr_minor < 2)
+		return false;
+
+	LOG_ENTER("probe_screen(screen=%d)", s->screen);
+
+# if (RANDR_MAJOR > 1 || RANDR_MAJOR == 1 && RANDR_MINOR >= 3)
+	XRRScreenResources *rr_screenres = XRRGetScreenResourcesCurrent(dpy, s->root);
+# else
+	XRRScreenResources *rr_screenres = XRRGetScreenResources(dpy, s->root);
+# endif
+
+	/* assume a single crtc per physical screen, clean up later */
+	int num_physical = rr_screenres->ncrtc;
+	PhysicalScreen *new_phys = malloc(num_physical * sizeof(PhysicalScreen));
+
+	if (num_physical == 0) {
+		LOG_LEAVE();
+		return false;
+	}
+
+	for (int j = 0; j < num_physical; j++) {
+		XRRCrtcInfo *rr_crtc = XRRGetCrtcInfo(dpy, rr_screenres, rr_screenres->crtcs[j]);
+		new_phys[j].xoff   = rr_crtc->x;
+		new_phys[j].yoff   = rr_crtc->y;
+		new_phys[j].width  = rr_crtc->width;
+		new_phys[j].height = rr_crtc->height;
+		LOG_DEBUG("discovered: phy[%d]{.xoff=%d, .yoff=%d, .width=%d, .height=%d}\n",
+		          j, rr_crtc->x, rr_crtc->y, rr_crtc->width, rr_crtc->height);
+		XRRFreeCrtcInfo(rr_crtc);
+	}
+
+	/* prune all duplicates ⊂ new_phys */
+	for (int j = 0; j < num_physical; j++) {
+		for (int k = 0; k < num_physical; k++) {
+			if (k == j) continue;
+			if (new_phys[k].xoff < new_phys[j].xoff) continue;
+			if (new_phys[k].yoff < new_phys[j].yoff) continue;
+			if (new_phys[k].xoff + new_phys[k].width > new_phys[j].xoff + new_phys[j].width) continue;
+			if (new_phys[k].yoff + new_phys[k].height > new_phys[j].yoff + new_phys[j].height) continue;
+			/* k ⊂ j: delete k */
+			LOG_DEBUG("pruning %d\n", k);
+			memmove(&new_phys[k], &new_phys[k+1], (num_physical - k - 1) * sizeof(*new_phys));
+			num_physical--;
+			if (j > k) j--;
+			k--;
+		}
+	}
+	s->physical = new_phys;
+	s->num_physical = num_physical;
+
+	XRRFreeScreenResources(rr_screenres);
+
+	LOG_LEAVE();
+	return true;
+}
+#endif
+
 void probe_screen(ScreenInfo *s) {
+#ifdef RANDR
+	if (probe_screen_xrandr(s))
+		return;
+#endif
+
 	probe_screen_default(s);
 }
