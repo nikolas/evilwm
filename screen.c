@@ -153,7 +153,7 @@ void sweep(Client *c) {
 				remove_info_window();
 #endif
 				XUngrabPointer(dpy, CurrentTime);
-				moveresize(c);
+				moveresizeraise(c);
 				/* In case maximise state has changed: */
 				ewmh_set_net_wm_state(c);
 				return;
@@ -329,7 +329,7 @@ void drag(Client *c) {
 #endif
 				XUngrabPointer(dpy, CurrentTime);
 				if (no_solid_drag) {
-					moveresize(c);
+					moveresizeraise(c);
 				}
 				return;
 			default: break;
@@ -338,11 +338,15 @@ void drag(Client *c) {
 }
 
 void moveresize(Client *c) {
-	client_raise(c);
 	XMoveResizeWindow(dpy, c->parent, c->x - c->border, c->y - c->border,
 			c->width, c->height);
 	XMoveResizeWindow(dpy, c->window, 0, 0, c->width, c->height);
 	send_config(c);
+}
+
+void moveresizeraise(Client *c) {
+	client_raise(c);
+	moveresize(c);
 }
 
 void maximise_client(Client *c, int action, int hv) {
@@ -397,7 +401,7 @@ void maximise_client(Client *c, int action, int hv) {
 		}
 	}
 	ewmh_set_net_wm_state(c);
-	moveresize(c);
+	moveresizeraise(c);
 	discard_enter_events(c);
 }
 

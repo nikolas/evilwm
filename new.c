@@ -137,7 +137,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 					else
 						c->y = a->y + c->border;
 				}
-				moveresize(c);
+				moveresizeraise(c);
 				if (a->is_dock) c->is_dock = 1;
 #ifdef VWM
 				if (a->vdesk != VDESK_NONE) c->vdesk = a->vdesk;
