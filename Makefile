@@ -23,9 +23,6 @@ OPT_CPPFLAGS += -DINFOBANNER
 # Uncomment to show the same banner on moves and resizes.  Can be SLOW!
 #OPT_CPPFLAGS += -DINFOBANNER_MOVERESIZE
 
-# Uncomment for mouse support.  Recommended.
-OPT_CPPFLAGS += -DMOUSE
-
 # Uncomment to support the Xrandr extension (thanks, Yura Semashko).
 OPT_CPPFLAGS += -DRANDR
 OPT_LDLIBS   += -lXrandr
