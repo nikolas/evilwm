@@ -170,7 +170,6 @@ move_client:
 	return;
 }
 
-#ifdef MOUSE
 static void handle_button_event(XButtonEvent *e) {
 	Client *c = find_client(e->window);
 
@@ -186,7 +185,6 @@ static void handle_button_event(XButtonEvent *e) {
 		}
 	}
 }
-#endif
 
 static void do_window_changes(int value_mask, XWindowChanges *wc, Client *c,
 		int gravity) {
@@ -513,10 +511,8 @@ void event_main_loop(void) {
 			switch (ev.xevent.type) {
 			case KeyPress:
 				handle_key_event(&ev.xevent.xkey); break;
-#ifdef MOUSE
 			case ButtonPress:
 				handle_button_event(&ev.xevent.xbutton); break;
-#endif
 			case ConfigureRequest:
 				handle_configure_request(&ev.xevent.xconfigurerequest); break;
 			case MapRequest:

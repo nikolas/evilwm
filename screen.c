@@ -70,7 +70,6 @@ static void remove_info_window(void) {
 }
 #endif  /* INFOBANNER */
 
-#if defined(MOUSE) || !defined(INFOBANNER)
 static void draw_outline(Client *c) {
 #ifndef INFOBANNER_MOVERESIZE
 	char buf[27];
@@ -90,9 +89,7 @@ static void draw_outline(Client *c) {
 		buf, strlen(buf));
 #endif  /* ndef INFOBANNER_MOVERESIZE */
 }
-#endif
 
-#ifdef MOUSE
 static void recalculate_sweep(Client *c, int x1, int y1, int x2, int y2, unsigned force) {
 	if (force || c->oldw == 0) {
 		c->oldw = 0;
@@ -162,7 +159,6 @@ void sweep(Client *c) {
 		}
 	}
 }
-#endif
 
 /** predicate_keyrepeatpress:
  *  predicate function for use with XCheckIfEvent.
@@ -221,7 +217,6 @@ void show_info(Client *c, unsigned int keycode) {
 	XUngrabKeyboard(dpy, CurrentTime);
 }
 
-#ifdef MOUSE
 static int absmin(int a, int b) {
 	if (abs(a) < abs(b))
 		return a;
@@ -339,7 +334,6 @@ void drag(Client *c) {
 		}
 	}
 }
-#endif /* def MOUSE */
 
 void moveresize(Client *c) {
 	client_raise(c);
