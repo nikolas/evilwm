@@ -52,7 +52,9 @@ void client_lower(Client *c) {
 	 * same screen. */
 	for (iter = clients_stacking_order; iter; iter = iter->next) {
 		below = iter->data;
-		if (below != c && below->screen == c->screen && (is_fixed(below) || below->vdesk == c->screen->vdesk))
+		if (below == c)
+			return;
+		if (below->screen == c->screen && (is_fixed(below) || below->vdesk == c->screen->vdesk))
 			break;
 	}
 	if (!iter) return;
