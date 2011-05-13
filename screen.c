@@ -456,7 +456,7 @@ static void grab_keysym(Window w, unsigned int mask, KeySym keysym) {
 static KeySym keys_to_grab[] = {
 #ifdef VWM
 	KEY_FIX, KEY_PREVDESK, KEY_NEXTDESK, KEY_TOGGLEDESK,
-	XK_1, XK_2, XK_3, XK_4, XK_5, XK_6, XK_7, XK_8,
+	XK_1, XK_2, XK_3, XK_4, XK_5, XK_6, XK_7, XK_8, XK_9, XK_0,
 #endif
 	KEY_NEW, KEY_KILL,
 	KEY_TOPLEFT, KEY_TOPRIGHT, KEY_BOTTOMLEFT, KEY_BOTTOMRIGHT,

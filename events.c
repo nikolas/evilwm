@@ -50,6 +50,7 @@ static void handle_key_event(XKeyEvent *e) {
 			break;
 		case XK_1: case XK_2: case XK_3: case XK_4:
 		case XK_5: case XK_6: case XK_7: case XK_8:
+		case XK_9: case XK_0:
 			switch_vdesk(current_screen, KEY_TO_VDESK(key));
 			break;
 		case KEY_PREVDESK:

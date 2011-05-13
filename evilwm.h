@@ -58,7 +58,7 @@ typedef struct {
 #define VDESK_NONE  (0xfffffffe)
 #define VDESK_FIXED (0xffffffff)
 #define VDESK_MAX   (opt_vdesks - 1)
-#define KEY_TO_VDESK(key) ((key) - XK_1)
+#define KEY_TO_VDESK(key) (((key) - XK_1 + 10) % 10)
 #define valid_vdesk(v) ((v) == VDESK_FIXED || (v) < opt_vdesks)
 
 #define RAISE           1
