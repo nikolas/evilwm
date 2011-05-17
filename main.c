@@ -106,6 +106,15 @@ static struct xconfig_option evilwm_options[] = {
 	{ XCONFIG_BOOL,     "nosoliddrag",  &no_solid_drag },
 #endif
 	{ XCONFIG_CALL_1,   "key.kill",     &set_key_kill },
+	{ XCONFIG_CALL_1,   "annotate.info.outline",  &set_annotate_info_outline},
+	{ XCONFIG_CALL_1,   "annotate.info.banner",   &set_annotate_info_info},
+	{ XCONFIG_CALL_1,   "annotate.info.cog",      &set_annotate_info_cog},
+	{ XCONFIG_CALL_1,   "annotate.drag.outline",  &set_annotate_drag_outline},
+	{ XCONFIG_CALL_1,   "annotate.drag.banner",   &set_annotate_drag_info},
+	{ XCONFIG_CALL_1,   "annotate.drag.cog",      &set_annotate_drag_cog},
+	{ XCONFIG_CALL_1,   "annotate.sweep.outline", &set_annotate_sweep_outline},
+	{ XCONFIG_CALL_1,   "annotate.sweep.banner",  &set_annotate_sweep_info},
+	{ XCONFIG_CALL_1,   "annotate.sweep.cog",     &set_annotate_sweep_cog},
 	{ XCONFIG_END, NULL, NULL }
 };
 

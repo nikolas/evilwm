@@ -412,3 +412,36 @@ annotate_template(create);
 annotate_template(preupdate);
 annotate_template(update);
 annotate_template(remove);
+
+/* setter functions for config */
+
+static const annotate_funcs* name_to_annotateobj(const char* name) {
+	if (!strcmp(name, "x11_infobanner"))
+		return &x11_infobanner;
+	if (!strcmp(name, "xor_info"))
+		return &xor_info;
+	if (!strcmp(name, "xor_outline"))
+		return &xor_outline;
+	if (!strcmp(name, "xor_cog"))
+		return &xor_cog;
+	if (!strcmp(name, "shape_outline"))
+		return &shape_outline;
+	if (!strcmp(name, "shape_cog"))
+		return &shape_cog;
+	return NULL;
+}
+
+#define set_annotate_template(name, target) \
+void set_annotate_ ## name ## _ ## target (const char* arg) { \
+	annotate_ ## name ## _ctx.target = name_to_annotateobj(arg); \
+}
+
+set_annotate_template(info, outline)
+set_annotate_template(info, info)
+set_annotate_template(info, cog)
+set_annotate_template(drag, outline)
+set_annotate_template(drag, info)
+set_annotate_template(drag, cog)
+set_annotate_template(sweep, outline)
+set_annotate_template(sweep, info)
+set_annotate_template(sweep, cog)

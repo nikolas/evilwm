@@ -360,6 +360,15 @@ void annotate_create(Client *c, struct annotate_ctx *a);
 void annotate_preupdate(Client *c, struct annotate_ctx *a);
 void annotate_update(Client *c, struct annotate_ctx *a);
 void annotate_remove(Client *c, struct annotate_ctx *a);
+void set_annotate_info_outline(const char* arg);
+void set_annotate_info_info(const char* arg);
+void set_annotate_info_cog(const char* arg);
+void set_annotate_drag_outline(const char* arg);
+void set_annotate_drag_info(const char* arg);
+void set_annotate_drag_cog(const char* arg);
+void set_annotate_sweep_outline(const char* arg);
+void set_annotate_sweep_info(const char* arg);
+void set_annotate_sweep_cog(const char* arg);
 
 /* defines */
 static inline int should_be_mapped(Client *c) {
