@@ -51,9 +51,6 @@ OPT_CPPFLAGS += -DWARP_POINTER
 OPT_CPPFLAGS += -DPANGO $(shell pkg-config --cflags-only-I freetype2 pango pangoxft)
 OPT_LDLIBS   += $(shell pkg-config --libs pango pangoxft)
 
-# Uncomment to use Ctrl+Alt+q instead of Ctrl+Alt+Escape.  Useful for Cygwin.
-#OPT_CPPFLAGS += -DKEY_KILL=XK_q
-
 # Uncomment to include whatever debugging messages I've left in this release.
 #OPT_CPPFLAGS += -DDEBUG   # miscellaneous debugging
 #OPT_CPPFLAGS += -DXDEBUG  # show some X calls

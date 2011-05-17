@@ -539,27 +539,27 @@ static void grab_keysym(Window w, unsigned int mask, KeySym keysym) {
 	}
 }
 
-static KeySym keys_to_grab[] = {
+void grab_keys_for_screen(ScreenInfo *s) {
+	const KeySym keys_to_grab[] = {
 #ifdef VWM
-	KEY_FIX, KEY_PREVDESK, KEY_NEXTDESK, KEY_TOGGLEDESK,
-	XK_1, XK_2, XK_3, XK_4, XK_5, XK_6, XK_7, XK_8, XK_9, XK_0,
-	KEY_EXGPHY,
+		KEY_FIX, KEY_PREVDESK, KEY_NEXTDESK, KEY_TOGGLEDESK,
+		XK_1, XK_2, XK_3, XK_4, XK_5, XK_6, XK_7, XK_8, XK_9, XK_0,
+		KEY_EXGPHY,
 #endif
-	KEY_NEW, KEY_KILL,
-	KEY_TOPLEFT, KEY_TOPRIGHT, KEY_BOTTOMLEFT, KEY_BOTTOMRIGHT,
-	KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP,
-	KEY_LOWER, KEY_ALTLOWER, KEY_INFO, KEY_MAXVERT, KEY_MAX,
-	KEY_DOCK_TOGGLE
-};
+		KEY_NEW, KEY_KILL,
+		KEY_TOPLEFT, KEY_TOPRIGHT, KEY_BOTTOMLEFT, KEY_BOTTOMRIGHT,
+		KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP,
+		KEY_LOWER, KEY_ALTLOWER, KEY_INFO, KEY_MAXVERT, KEY_MAX,
+		KEY_DOCK_TOGGLE
+	};
 #define NUM_GRABS (int)(sizeof(keys_to_grab) / sizeof(KeySym))
 
-static KeySym alt_keys_to_grab[] = {
-	KEY_KILL, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP,
-	KEY_MAXVERT,
-};
+	const KeySym alt_keys_to_grab[] = {
+		KEY_KILL, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_UP,
+		KEY_MAXVERT,
+	};
 #define NUM_ALT_GRABS (int)(sizeof(alt_keys_to_grab) / sizeof(KeySym))
 
-void grab_keys_for_screen(ScreenInfo *s) {
 	int i;
 	/* Release any previous grabs */
 	XUngrabKey(dpy, AnyKey, AnyModifier, s->root);

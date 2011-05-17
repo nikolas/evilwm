@@ -249,6 +249,7 @@ extern unsigned int     numlockmask;
 extern unsigned int     grabmask1;
 extern unsigned int     grabmask2;
 extern unsigned int     altmask;
+extern KeySym           opt_key_kill;
 extern char             **opt_term;
 extern int              opt_bw;
 extern int              opt_snap;

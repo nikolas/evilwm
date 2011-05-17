@@ -61,6 +61,7 @@ unsigned int opt_vdesks = 8;
 #else
 unsigned int opt_vdesks = 0;
 #endif
+KeySym opt_key_kill = XK_Escape;
 
 /* Client tracking information */
 struct list     *clients_tab_order = NULL;
@@ -77,6 +78,7 @@ static void set_app_geometry(const char *arg);
 static void set_app_dock(void);
 static void set_app_vdesk(const char *arg);
 static void set_app_fixed(void);
+static void set_key_kill(const char *arg);
 
 static struct xconfig_option evilwm_options[] = {
 	{ XCONFIG_STRING,   "fn",           &opt_font },
@@ -103,6 +105,7 @@ static struct xconfig_option evilwm_options[] = {
 #ifdef SOLIDDRAG
 	{ XCONFIG_BOOL,     "nosoliddrag",  &no_solid_drag },
 #endif
+	{ XCONFIG_CALL_1,   "key.kill",     &set_key_kill },
 	{ XCONFIG_END, NULL, NULL }
 };
 
@@ -117,7 +120,7 @@ static void helptext(void) {
 "usage: evilwm [-display display] [-term termprog] [-fn fontname]\n"
 "              [-fg foreground] [-fc fixed] [-bg background] [-bw borderwidth]\n"
 "              [-mask1 modifiers] [-mask2 modifiers] [-altmask modifiers]\n"
-"              [-snap num] [-numvdesks num]\n"
+"              [-key.kill key] [-snap num] [-numvdesks num]\n"
 "              [-app name/class] [-g geometry] [-dock] [-v vdesk] [-s]\n"
 "             "
 #ifdef SOLIDDRAG
@@ -431,6 +434,10 @@ static void set_app_fixed(void) {
 		Application *app = applications->data;
 		app->vdesk = VDESK_FIXED;
 	}
+}
+
+static void set_key_kill(const char *arg) {
+	opt_key_kill = XStringToKeysym((char*)arg);
 }
 
 /* Used for overriding the default WM modifiers */

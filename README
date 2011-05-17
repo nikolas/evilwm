@@ -63,6 +63,7 @@ pressing a key.  Available functions are:
 
 Return         Spawn new xterm.
 Escape         Delete current window.
+               This binding may be changed with -key.kill
 Insert         Lower current window.
 H, J, K, L     Move window left, down, up or right (16 pixels).
                Holding Shift resizes the window instead.

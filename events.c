@@ -130,9 +130,6 @@ static void handle_key_event(XKeyEvent *e) {
 			c->nx = c->phy->width - c->width - c->border;
 			c->ny = c->phy->height - c->height - c->border;
 			goto move_client;
-		case KEY_KILL:
-			send_wm_delete(c, e->state & altmask);
-			break;
 		case KEY_LOWER: case KEY_ALTLOWER:
 			client_lower(c);
 			break;
@@ -158,6 +155,8 @@ static void handle_key_event(XKeyEvent *e) {
 			break;
 		default: break;
 	}
+	if (key == KEY_KILL)
+		send_wm_delete(c, e->state & altmask);
 	return;
 move_client:
 	if (abs(c->nx) == c->border && c->oldw != 0)
