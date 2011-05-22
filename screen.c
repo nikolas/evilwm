@@ -225,7 +225,14 @@ void drag(Client *c) {
 	}
 }
 
+/* limit the client to a visible position on the current phy */
+void position_policy(Client *c) {
+	c->nx = MAX(1 - c->width - c->border, MIN(c->nx, c->phy->width));
+	c->ny = MAX(1 - c->height - c->border, MIN(c->ny, c->phy->height));
+}
+
 void moveresize(Client *c) {
+	position_policy(c);
 	XMoveResizeWindow(dpy, c->parent,
 			client_to_Xcoord(c,x) - c->border, client_to_Xcoord(c,y) - c->border,
 			c->width, c->height);

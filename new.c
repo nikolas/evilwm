@@ -286,6 +286,13 @@ static void init_geometry(Client *c) {
 		}
 	}
 
+	/* ensure that the client isn't created off screen */
+	int old_nx = c->nx;
+	int old_ny = c->ny;
+	position_policy(c);
+	if (old_nx != c->nx || old_ny != c->ny)
+		need_send_config = 1;
+
 	if (need_send_config)
 		send_config(c);
 }

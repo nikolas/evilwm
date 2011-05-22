@@ -314,6 +314,7 @@ void get_window_type(Client *c);
 /* screen.c */
 
 void drag(Client *c);
+void position_policy(Client *c);
 void moveresizeraise(Client *c);
 void moveresize(Client *c);
 void maximise_client(Client *c, int action, int hv);
