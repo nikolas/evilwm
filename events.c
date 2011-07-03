@@ -26,7 +26,9 @@ static void handle_key_event(XKeyEvent *e) {
 	KeySym key = XKeycodeToKeysym(dpy,e->keycode,0);
 	Client *c;
 	int width_inc, height_inc;
-	ScreenInfo *current_screen = find_current_screen();
+	ScreenInfo *current_screen;
+	PhysicalScreen *current_phy;
+	find_current_screen_and_phy(&current_screen, &current_phy);
 
 	switch(key) {
 		case KEY_NEW:
@@ -48,27 +50,31 @@ static void handle_key_event(XKeyEvent *e) {
 		case KEY_DOCK_TOGGLE:
 			set_docks_visible(current_screen, !current_screen->docks_visible);
 			break;
-#ifdef VWM
 		case XK_1: case XK_2: case XK_3: case XK_4:
 		case XK_5: case XK_6: case XK_7: case XK_8:
-			switch_vdesk(current_screen, KEY_TO_VDESK(key));
+		case XK_9: case XK_0:
+			switch_vdesk(current_screen, current_phy, KEY_TO_VDESK(key));
 			break;
 		case KEY_PREVDESK:
-			if (current_screen->vdesk > 0) {
-				switch_vdesk(current_screen,
-						current_screen->vdesk - 1);
+			/* Find next avaliable vdesk */
+			for (unsigned i = current_phy->vdesk - 1; i < opt_vdesks ; i--) {
+				if (switch_vdesk(current_screen, current_phy, i))
+					break;
 			}
 			break;
 		case KEY_NEXTDESK:
-			if (current_screen->vdesk < VDESK_MAX) {
-				switch_vdesk(current_screen,
-						current_screen->vdesk + 1);
+			/* Find prev avaliable vdesk */
+			for (unsigned i = current_phy->vdesk + 1; i < opt_vdesks; i++) {
+				if (switch_vdesk(current_screen, current_phy, i))
+					break;
 			}
 			break;
 		case KEY_TOGGLEDESK:
-			switch_vdesk(current_screen, current_screen->old_vdesk);
+			switch_vdesk(current_screen, current_phy, current_screen->old_vdesk);
 			break;
-#endif
+		case KEY_EXGPHY:
+			exchange_phy(current_screen);
+			break;
 		default: break;
 	}
 	c = current;
@@ -81,7 +87,7 @@ static void handle_key_event(XKeyEvent *e) {
 				if ((c->width - width_inc) >= c->min_width)
 					c->width -= width_inc;
 			} else {
-				c->x -= 16;
+				c->nx -= 16;
 			}
 			goto move_client;
 		case KEY_DOWN:
@@ -89,7 +95,7 @@ static void handle_key_event(XKeyEvent *e) {
 				if (!c->max_height || (c->height + height_inc) <= c->max_height)
 					c->height += height_inc;
 			} else {
-				c->y += 16;
+				c->ny += 16;
 			}
 			goto move_client;
 		case KEY_UP:
@@ -97,7 +103,7 @@ static void handle_key_event(XKeyEvent *e) {
 				if ((c->height - height_inc) >= c->min_height)
 					c->height -= height_inc;
 			} else {
-				c->y -= 16;
+				c->ny -= 16;
 			}
 			goto move_client;
 		case KEY_RIGHT:
@@ -105,32 +111,25 @@ static void handle_key_event(XKeyEvent *e) {
 				if (!c->max_width || (c->width + width_inc) <= c->max_width)
 					c->width += width_inc;
 			} else {
-				c->x += 16;
+				c->nx += 16;
 			}
 			goto move_client;
 		case KEY_TOPLEFT:
-			c->x = c->border;
-			c->y = c->border;
+			c->nx = c->border;
+			c->ny = c->border;
 			goto move_client;
 		case KEY_TOPRIGHT:
-			c->x = DisplayWidth(dpy, c->screen->screen)
-				- c->width-c->border;
-			c->y = c->border;
+			c->nx = c->phy->width - c->width - c->border;
+			c->ny = c->border;
 			goto move_client;
 		case KEY_BOTTOMLEFT:
-			c->x = c->border;
-			c->y = DisplayHeight(dpy, c->screen->screen)
-				- c->height-c->border;
+			c->nx = c->border;
+			c->ny = c->phy->height - c->height - c->border;
 			goto move_client;
 		case KEY_BOTTOMRIGHT:
-			c->x = DisplayWidth(dpy, c->screen->screen)
-				- c->width-c->border;
-			c->y = DisplayHeight(dpy, c->screen->screen)
-				- c->height-c->border;
+			c->nx = c->phy->width - c->width - c->border;
+			c->ny = c->phy->height - c->height - c->border;
 			goto move_client;
-		case KEY_KILL:
-			send_wm_delete(c, e->state & altmask);
-			break;
 		case KEY_LOWER: case KEY_ALTLOWER:
 			client_lower(c);
 			break;
@@ -141,26 +140,32 @@ static void handle_key_event(XKeyEvent *e) {
 			maximise_client(c, NET_WM_STATE_TOGGLE, MAXIMISE_HORZ|MAXIMISE_VERT);
 			break;
 		case KEY_MAXVERT:
-			maximise_client(c, NET_WM_STATE_TOGGLE, MAXIMISE_VERT);
+			if (e->state & altmask) {
+				maximise_client(c, NET_WM_STATE_TOGGLE, MAXIMISE_HORZ);
+			} else {
+				maximise_client(c, NET_WM_STATE_TOGGLE, MAXIMISE_VERT);
+			}
 			break;
-#ifdef VWM
 		case KEY_FIX:
 			if (is_fixed(c)) {
-				client_to_vdesk(c, current_screen->vdesk);
+				client_to_vdesk(c, c->phy->vdesk);
 			} else {
 				client_to_vdesk(c, VDESK_FIXED);
 			}
 			break;
-#endif
 		default: break;
 	}
+	if (key == KEY_KILL)
+		send_wm_delete(c, e->state & altmask);
 	return;
 move_client:
-	if (abs(c->x) == c->border && c->oldw != 0)
-		c->x = 0;
-	if (abs(c->y) == c->border && c->oldh != 0)
-		c->y = 0;
-	moveresize(c);
+	if (abs(c->nx) == c->border && c->oldw != 0)
+		c->nx = 0;
+	if (abs(c->ny) == c->border && c->oldh != 0)
+		c->ny = 0;
+	client_calc_cog(c);
+	client_calc_phy(c);
+	moveresizeraise(c);
 #ifdef WARP_POINTER
 	setmouse(c->window, c->width + c->border - 1,
 			c->height + c->border - 1);
@@ -169,7 +174,6 @@ move_client:
 	return;
 }
 
-#ifdef MOUSE
 static void handle_button_event(XButtonEvent *e) {
 	Client *c = find_client(e->window);
 
@@ -185,15 +189,20 @@ static void handle_button_event(XButtonEvent *e) {
 		}
 	}
 }
-#endif
 
 static void do_window_changes(int value_mask, XWindowChanges *wc, Client *c,
 		int gravity) {
 	if (gravity == 0)
 		gravity = c->win_gravity_hint;
 	c->win_gravity = gravity;
-	if (value_mask & CWX) c->x = wc->x;
-	if (value_mask & CWY) c->y = wc->y;
+
+	/* Warning: these co-ordinates are in screen co-ordinates */
+	int screen_x = client_to_Xcoord(c,x);
+	int screen_y = client_to_Xcoord(c,y);
+	if (value_mask & CWX) screen_x = wc->x;
+	if (value_mask & CWY) screen_y = wc->y;
+	client_update_screenpos(c, screen_x, screen_y);
+
 	if (value_mask & (CWWidth|CWHeight)) {
 		int dw = 0, dh = 0;
 		if (!(value_mask & (CWX|CWY))) {
@@ -224,40 +233,44 @@ static void do_window_changes(int value_mask, XWindowChanges *wc, Client *c,
 			case NorthWestGravity:
 				break;
 			case NorthGravity:
-				c->x -= (dw / 2);
+				c->nx -= (dw / 2);
 				break;
 			case NorthEastGravity:
-				c->x -= dw;
+				c->nx -= dw;
 				break;
 			case WestGravity:
-				c->y -= (dh / 2);
+				c->ny -= (dh / 2);
 				break;
 			case CenterGravity:
-				c->x -= (dw / 2);
-				c->y -= (dh / 2);
+				c->nx -= (dw / 2);
+				c->ny -= (dh / 2);
 				break;
 			case EastGravity:
-				c->x -= dw;
-				c->y -= (dh / 2);
+				c->nx -= dw;
+				c->ny -= (dh / 2);
 				break;
 			case SouthWestGravity:
-				c->y -= dh;
+				c->ny -= dh;
 				break;
 			case SouthGravity:
-				c->x -= (dw / 2);
-				c->y -= dh;
+				c->nx -= (dw / 2);
+				c->ny -= dh;
 				break;
 			case SouthEastGravity:
-				c->x -= dw;
-				c->y -= dh;
+				c->nx -= dw;
+				c->ny -= dh;
 				break;
 			}
 			value_mask |= CWX|CWY;
 			gravitate_border(c, c->border);
 		}
+		/* Recalculate the centre of gravity if resized */
+		/* This may change the display to which the client belongs */
+		client_calc_cog(c);
+		client_calc_phy(c);
 	}
-	wc->x = c->x - c->border;
-	wc->y = c->y - c->border;
+	wc->x = client_to_Xcoord(c,x) - c->border;
+	wc->y = client_to_Xcoord(c,y) - c->border;
 	wc->border_width = c->border;
 	XConfigureWindow(dpy, c->parent, value_mask, wc);
 	XMoveResizeWindow(dpy, c->window, 0, 0, c->width, c->height);
@@ -300,10 +313,8 @@ static void handle_map_request(XMapRequestEvent *e) {
 
 	LOG_ENTER("handle_map_request(window=%lx)", e->window);
 	if (c) {
-#ifdef VWM
-		if (!is_fixed(c) && c->vdesk != c->screen->vdesk)
-			switch_vdesk(c->screen, c->vdesk);
-#endif
+		if (!is_fixed(c) && c->vdesk != c->phy->vdesk)
+			switch_vdesk(c->screen, c->phy, c->vdesk);
 		client_show(c);
 		client_raise(c);
 	} else {
@@ -349,14 +360,10 @@ static void handle_property_change(XPropertyEvent *e) {
 		LOG_ENTER("handle_property_change(window=%lx, atom=%s)", e->window, debug_atom_name(e->atom));
 		if (e->atom == XA_WM_NORMAL_HINTS) {
 			get_wm_normal_hints(c);
-			LOG_DEBUG("geometry=%dx%d+%d+%d\n", c->width, c->height, c->x, c->y);
+			LOG_DEBUG("geometry=%dx%d\n", c->width, c->height);
 		} else if (e->atom == xa_net_wm_window_type) {
 			get_window_type(c);
-			if (!c->is_dock
-#ifdef VWM
-					&& (is_fixed(c) || (c->vdesk == c->screen->vdesk))
-#endif
-					) {
+			if (!c->is_dock && (is_fixed(c) || (c->vdesk == c->phy->vdesk))) {
 				client_show(c);
 			}
 		}
@@ -368,10 +375,8 @@ static void handle_enter_event(XCrossingEvent *e) {
 	Client *c;
 
 	if ((c = find_client(e->window))) {
-#ifdef VWM
-		if (!is_fixed(c) && c->vdesk != c->screen->vdesk)
+		if (!is_fixed(c) && c->vdesk != c->phy->vdesk)
 			return;
-#endif
 		select_client(c);
 		ewmh_select_client(c);
 	}
@@ -395,21 +400,64 @@ static void handle_shape_event(XShapeEvent *e) {
 }
 #endif
 
-static void handle_client_message(XClientMessageEvent *e) {
-#ifdef VWM
-	ScreenInfo *s = find_current_screen();
+#ifdef RANDR
+static void handle_randr_event(XRRScreenChangeNotifyEvent *e) {
+	XRRUpdateConfiguration((XEvent*)e);
+	ScreenInfo *s = find_screen(e->root);
+
+	PhysicalScreen *old_phys = s->physical;
+	int old_num_phys = s->num_physical;
+	probe_screen(s);
+
+	/* set all phys on screen to have a bogus vdesk */
+	for (int i = 0; i < s->num_physical; i++) {
+		s->physical[i].vdesk = VDESK_NONE;
+	}
+
+	/* for each phy, map an old vesk to it */
+	unsigned int save_old_vdesk = s->old_vdesk;
+	unsigned int vdesks[opt_vdesks];
+	for (unsigned int i = 0; i < opt_vdesks; i++) {
+		vdesks[i] = i;
+	}
+	for (int i = 0; i < s->num_physical; i++) {
+		unsigned int vdesk = VDESK_NONE;
+		if (i < old_num_phys) {
+			vdesk = old_phys[i].vdesk;
+		} else {
+			/* this is a new phy, pick a vdesk to show */
+			for (unsigned int j = 0; j < opt_vdesks; j++) {
+				if (vdesks[j] == VDESK_NONE)
+					continue;
+				vdesk = vdesks[j];
+				break;
+			}
+		}
+		vdesks[vdesk] = VDESK_NONE;
+		switch_vdesk(s, &s->physical[i], vdesk);
+	}
+	/* unmap clients on vdesks nolonger atatched to a current phy */
+	for (int i = s->num_physical; i < old_num_phys; i++) {
+		switch_vdesk(s, &old_phys[i], VDESK_NONE);
+	}
+	/* xxx, is there a better way to do this?, ie, avoid switch_vdesk, iterate
+	   through all clients, map phys to vdesks, then continue as long ago */
+	s->old_vdesk = save_old_vdesk;
+	ewmh_set_screen_workarea(s);
+}
 #endif
+
+static void handle_client_message(XClientMessageEvent *e) {
+	ScreenInfo *s = find_current_screen();
 	Client *c;
 
 	LOG_ENTER("handle_client_message(window=%lx, format=%d, type=%s)", e->window, e->format, debug_atom_name(e->message_type));
 
-#ifdef VWM
 	if (e->message_type == xa_net_current_desktop) {
-		switch_vdesk(s, e->data.l[0]);
+		switch_vdesk(s, s->physical, e->data.l[0]);
 		LOG_LEAVE();
 		return;
 	}
-#endif
 	c = find_client(e->window);
 	if (!c && e->message_type == xa_net_request_frame_extents) {
 		ewmh_set_net_frame_extents(e->window);
@@ -423,9 +471,7 @@ static void handle_client_message(XClientMessageEvent *e) {
 	if (e->message_type == xa_net_active_window) {
 		/* Only do this if it came from direct user action */
 		if (e->data.l[0] == 2) {
-#ifdef VWM
 			if (c->screen == s)
-#endif
 				select_client(c);
 		}
 		LOG_LEAVE();
@@ -468,7 +514,6 @@ static void handle_client_message(XClientMessageEvent *e) {
 		LOG_LEAVE();
 		return;
 	}
-#ifdef VWM
 	if (e->message_type == xa_net_wm_desktop) {
 		/* Only do this if it came from direct user action */
 		if (e->data.l[1] == 2) {
@@ -477,7 +522,6 @@ static void handle_client_message(XClientMessageEvent *e) {
 		LOG_LEAVE();
 		return;
 	}
-#endif
 	if (e->message_type == xa_net_wm_state) {
 		int i, maximise_hv = 0;
 		/* Message can contain up to two state changes: */
@@ -505,6 +549,9 @@ void event_main_loop(void) {
 #ifdef SHAPE
 		XShapeEvent xshape;
 #endif
+#ifdef RANDR
+		XRRScreenChangeNotifyEvent xrandr;
+#endif
 	} ev;
 	/* main event loop here */
 	while (!wm_exit) {
@@ -512,10 +559,8 @@ void event_main_loop(void) {
 			switch (ev.xevent.type) {
 			case KeyPress:
 				handle_key_event(&ev.xevent.xkey); break;
-#ifdef MOUSE
 			case ButtonPress:
 				handle_button_event(&ev.xevent.xbutton); break;
-#endif
 			case ConfigureRequest:
 				handle_configure_request(&ev.xevent.xconfigurerequest); break;
 			case MapRequest:
@@ -540,7 +585,7 @@ void event_main_loop(void) {
 #endif
 #ifdef RANDR
 				if (have_randr && ev.xevent.type == randr_event_base + RRScreenChangeNotify) {
-					XRRUpdateConfiguration(&ev.xevent);
+					handle_randr_event(&ev.xrandr);
 				}
 #endif
 				break;

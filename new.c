@@ -96,7 +96,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 		int i = 0;
 		for (iter = clients_tab_order; iter; iter = iter->next)
 			i++;
-		LOG_DEBUG("new window %dx%d+%d+%d, wincount=%d\n", c->width, c->height, c->x, c->y, i);
+		LOG_DEBUG("new window %dx%d+%d+%d, wincount=%d\n", c->width, c->height, client_to_Xcoord(c,x), client_to_Xcoord(c,y), i);
 	}
 #endif
 
@@ -125,23 +125,28 @@ void make_new_client(Window w, ScreenInfo *s) {
 					c->width = a->width * c->width_inc;
 				if (a->geometry_mask & HeightValue)
 					c->height = a->height * c->height_inc;
-				if (a->geometry_mask & XValue) {
+				/* Warning: these co-ordinates are in screen co-ordinates */
+				int screen_x, screen_y;
+				if (!(a->geometry_mask & XValue)) {
+					screen_x = client_to_Xcoord(c,x);
+				} else {
 					if (a->geometry_mask & XNegative)
-						c->x = a->x + DisplayWidth(dpy, s->screen)-c->width-c->border;
+						screen_x = a->x + DisplayWidth(dpy, s->screen) - c->width - c->border;
 					else
-						c->x = a->x + c->border;
+						screen_x = a->x + c->border;
 				}
-				if (a->geometry_mask & YValue) {
+				if (!(a->geometry_mask & YValue)) {
+					screen_y = client_to_Xcoord(c,y);
+				} else {
 					if (a->geometry_mask & YNegative)
-						c->y = a->y + DisplayHeight(dpy, s->screen)-c->height-c->border;
+						screen_y = a->y + DisplayHeight(dpy, s->screen) - c->height - c->border;
 					else
-						c->y = a->y + c->border;
+						screen_y = a->y + c->border;
 				}
-				moveresize(c);
+				client_update_screenpos(c, screen_x, screen_y);
+				moveresizeraise(c);
 				if (a->is_dock) c->is_dock = 1;
-#ifdef VWM
 				if (a->vdesk != VDESK_NONE) c->vdesk = a->vdesk;
-#endif
 			}
 			aiter = aiter->next;
 		}
@@ -155,41 +160,34 @@ void make_new_client(Window w, ScreenInfo *s) {
 
 	/* Only map the window frame (and thus the window) if it's supposed
 	 * to be visible on this virtual desktop. */
-#ifdef VWM
-	if (is_fixed(c) || c->vdesk == s->vdesk)
-#endif
+	if (should_be_mapped(c))
 	{
 		client_show(c);
 		client_raise(c);
-#ifndef MOUSE
 		select_client(c);
 #ifdef WARP_POINTER
 		setmouse(c->window, c->width + c->border - 1,
 				c->height + c->border - 1);
 #endif
 		discard_enter_events(c);
-#endif
 	}
-#ifdef VWM
 	else {
 		set_wm_state(c, IconicState);
 	}
 	ewmh_set_net_wm_desktop(c);
-#endif
 	LOG_LEAVE();
 }
 
 /* Calls XGetWindowAttributes, XGetWMHints and XGetWMNormalHints to determine
  * window's initial geometry. */
 static void init_geometry(Client *c) {
+	int need_send_config = 0;
 	long size_flags;
 	XWindowAttributes attr;
 	unsigned long *eprop;
 	unsigned long nitems;
 	PropMwmHints *mprop;
-#ifdef VWM
 	unsigned long *lprop;
-#endif
 
 	if ( (mprop = get_property(c->window, mwm_hints, mwm_hints, &nitems)) ) {
 		if (nitems >= PROP_MWM_HINTS_ELEMENTS
@@ -200,18 +198,6 @@ static void init_geometry(Client *c) {
 		}
 		XFree(mprop);
 	}
-
-#ifdef VWM
-	c->vdesk = c->screen->vdesk;
-	if ( (lprop = get_property(c->window, xa_net_wm_desktop, XA_CARDINAL, &nitems)) ) {
-		/* NB, Xlib not only returns a 32bit value in a long (which may
-		 * not be 32bits), it also sign extends the 32bit value */
-		if (nitems && valid_vdesk(lprop[0] & UINT32_MAX)) {
-			c->vdesk = lprop[0] & UINT32_MAX;
-		}
-		XFree(lprop);
-	}
-#endif
 
 	get_window_type(c);
 
@@ -248,35 +234,67 @@ static void init_geometry(Client *c) {
 	} else {
 		c->width = c->min_width;
 		c->height = c->min_height;
-		send_config(c);
+		need_send_config = 1;
 	}
+	client_calc_cog(c);
+
+	/* Calculate client position (and physical screen) */
 	if ((attr.map_state == IsViewable)
 			|| (size_flags & (/*PPosition |*/ USPosition))) {
-		c->x = attr.x;
-		c->y = attr.y;
+		client_update_screenpos(c, attr.x, attr.y);
 	} else {
-#ifdef MOUSE
-		int xmax = DisplayWidth(dpy, c->screen->screen);
-		int ymax = DisplayHeight(dpy, c->screen->screen);
 		int x, y;
 		get_mouse_position(&x, &y, c->screen->root);
-		c->x = (x * (xmax - c->border - c->width)) / xmax;
-		c->y = (y * (ymax - c->border - c->height)) / ymax;
-#else
-		c->x = c->y = 0;
-#endif
-		send_config(c);
+		/* The client will belong to the physical screen the mouse
+		 * is currently on. */
+		c->phy = find_physical_screen(c->screen, x, y);
+		x -= c->phy->xoff;
+		y -= c->phy->yoff;
+		c->nx = (x * (c->phy->width - c->border - c->width)) / c->phy->width;
+		c->ny = (y * (c->phy->height - c->border - c->height)) / c->phy->height;
+		need_send_config = 1;
 	}
 
-	LOG_DEBUG("window started as %dx%d +%d+%d\n", c->width, c->height, c->x, c->y);
+	LOG_DEBUG("window started as %dx%d +%d+%d\n", c->width, c->height, client_to_Xcoord(c,x), client_to_Xcoord(c,y));
 	if (attr.map_state == IsViewable) {
 		/* The reparent that is to come would trigger an unmap event */
 		c->ignore_unmap++;
 	}
-	c->x += c->old_border;
-	c->y += c->old_border;
+	c->nx += c->old_border;
+	c->ny += c->old_border;
 	gravitate_border(c, -c->old_border);
 	gravitate_border(c, c->border);
+
+	c->vdesk = c->phy->vdesk;
+	if ( (lprop = get_property(c->window, xa_net_wm_desktop, XA_CARDINAL, &nitems)) ) {
+		/* NB, Xlib not only returns a 32bit value in a long (which may
+		 * not be 32bits), it also sign extends the 32bit value */
+		if (nitems && valid_vdesk(lprop[0] & UINT32_MAX)) {
+			c->vdesk = lprop[0] & UINT32_MAX;
+		}
+		XFree(lprop);
+	}
+	/* When restarting the window manager, there may be a mismatch between
+	 * the mapped virtual desktops of the old WM and those of the new. */
+	if (attr.map_state == IsViewable && c->vdesk != c->phy->vdesk) {
+		for (unsigned i = 0; i < (unsigned) c->screen->num_physical; i++) {
+			if (c->vdesk != c->screen->physical[i].vdesk)
+				continue;
+			/* Update client to be on the correct phy */
+			c->phy = &c->screen->physical[i];
+			break;
+		}
+	}
+
+	/* ensure that the client isn't created off screen */
+	int old_nx = c->nx;
+	int old_ny = c->ny;
+	position_policy(c);
+	if (old_nx != c->nx || old_ny != c->ny)
+		need_send_config = 1;
+
+	if (need_send_config)
+		send_config(c);
 }
 
 static void reparent(Client *c) {
@@ -285,7 +303,8 @@ static void reparent(Client *c) {
 	p_attr.border_pixel = c->screen->bg.pixel;
 	p_attr.override_redirect = True;
 	p_attr.event_mask = ChildMask | ButtonPressMask | EnterWindowMask;
-	c->parent = XCreateWindow(dpy, c->screen->root, c->x-c->border, c->y-c->border,
+	c->parent = XCreateWindow(dpy, c->screen->root,
+		client_to_Xcoord(c,x) - c->border, client_to_Xcoord(c,y) - c->border,
 		c->width, c->height, c->border,
 		DefaultDepth(dpy, c->screen->screen), CopyFromParent,
 		DefaultVisual(dpy, c->screen->screen),
@@ -295,10 +314,8 @@ static void reparent(Client *c) {
 	XSetWindowBorderWidth(dpy, c->window, 0);
 	XReparentWindow(dpy, c->window, c->parent, 0, 0);
 	XMapWindow(dpy, c->window);
-#ifdef MOUSE
 	grab_button(c->parent, grabmask2, AnyButton);
 	grab_button(c->parent, grabmask2 | altmask, AnyButton);
-#endif
 }
 
 /* Get WM_NORMAL_HINTS property */

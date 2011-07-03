@@ -20,6 +20,7 @@ evilwm \- Minimalist Window Manager for X
 [ \fB\-vdesk\fP \fIvdesk\fP ]
 [ \fB\-fixed\fP ] ]...
 [ \fB\-nosoliddrag\fP ]
+[ \fB\-key.kill\fP \fIkey\fP ]
 [ \fB\-V\fP ]
 .SH DESCRIPTION
 .B evilwm
@@ -69,7 +70,8 @@ I
 Show information about current window.
 .TP
 Equals
-Maximise current window vertically (toggle).
+Maximise current window vertically (toggle). Holding Shift toggles horizontal
+maximization.
 .TP
 X
 Maximise current window (toggle).
@@ -93,6 +95,9 @@ Next virtual desktop.
 .TP
 A
 Switch to the most recently unmapped virtual desktop.
+.TP
+S
+[dual-head xinerama only] Exchange(swap) the currently visible virtual desktops.
 .PP
 In addition to the above, Alt+Tab can be used to cycle through windows
 on screen.
@@ -128,6 +133,9 @@ width of window borders in pixels.
 .TP
 \-snap \fInum\fP
 enable snap-to-border support.  num gives the proximity in pixels to snap to.
+.TP
+\-numvdesks \fInum\fP
+number of virtual desktops to provide.
 .TP
 \-mask1 \fImodifiers\fP, \-mask2 \fImodifiers\fP, \-altmask \fImodifier\fP
 override the default keyboard modifiers used to grab keys for window manager
@@ -167,6 +175,10 @@ also accepted to be compatible with previous versions).
 .TP
 \-nosoliddrag
 draw a window outline while moving or resizing.
+.TP
+\-key.kill \fIkey\fP
+use \fIkey\fP as the keybinding for killing a client, overriding the
+default binding.
 .TP
 \-V
 print version number.

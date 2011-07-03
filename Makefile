@@ -23,9 +23,6 @@ OPT_CPPFLAGS += -DINFOBANNER
 # Uncomment to show the same banner on moves and resizes.  Can be SLOW!
 #OPT_CPPFLAGS += -DINFOBANNER_MOVERESIZE
 
-# Uncomment for mouse support.  Recommended.
-OPT_CPPFLAGS += -DMOUSE
-
 # Uncomment to support the Xrandr extension (thanks, Yura Semashko).
 OPT_CPPFLAGS += -DRANDR
 OPT_LDLIBS   += -lXrandr
@@ -33,6 +30,10 @@ OPT_LDLIBS   += -lXrandr
 # Uncomment to support shaped windows.
 OPT_CPPFLAGS += -DSHAPE
 OPT_LDLIBS   += -lXext
+
+# Uncomment to support Xinerama
+OPT_CPPFLAGS += -DXINERAMA
+OPT_LDLIBS   += -lXinerama
 
 # Uncomment to enable solid window drags.  This can be slow on old systems.
 OPT_CPPFLAGS += -DSOLIDDRAG
@@ -46,8 +47,9 @@ OPT_CPPFLAGS += -DVWM
 # Uncomment to move pointer around on certain actions.
 OPT_CPPFLAGS += -DWARP_POINTER
 
-# Uncomment to use Ctrl+Alt+q instead of Ctrl+Alt+Escape.  Useful for Cygwin.
-#OPT_CPPFLAGS += -DKEY_KILL=XK_q
+# Uncomment to use pango for rendering title text
+OPT_CPPFLAGS += -DPANGO $(shell pkg-config --cflags-only-I freetype2 pango pangoxft)
+OPT_LDLIBS   += $(shell pkg-config --libs pango pangoxft)
 
 # Uncomment to include whatever debugging messages I've left in this release.
 #OPT_CPPFLAGS += -DDEBUG   # miscellaneous debugging
@@ -114,7 +116,7 @@ EVILWM_CFLAGS = -std=c99 $(CFLAGS) $(WARN)
 EVILWM_LDLIBS = -lX11 $(OPT_LDLIBS) $(LDLIBS)
 
 HEADERS = evilwm.h keymap.h list.h log.h xconfig.h
-OBJS = client.o events.o ewmh.o list.o main.o misc.o new.o screen.o xconfig.o
+OBJS = annotations.o client.o events.o ewmh.o list.o main.o misc.o new.o screen.o xconfig.o
 
 .PHONY: all
 all: evilwm$(EXEEXT)

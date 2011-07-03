@@ -54,7 +54,7 @@ void client_lower(Client *c) {
 		below = iter->data;
 		if (below == c)
 			return;
-		if (below->screen == c->screen && (is_fixed(below) || below->vdesk == c->screen->vdesk))
+		if (below->screen == c->screen && (is_fixed(below) || below->vdesk == c->phy->vdesk))
 			break;
 	}
 	if (!iter) return;
@@ -64,6 +64,38 @@ void client_lower(Client *c) {
 	clients_stacking_order = list_delete(clients_stacking_order, c);
 	clients_stacking_order = list_insert_before(clients_stacking_order, iter, c);
 	ewmh_set_net_client_list_stacking(c->screen);
+}
+
+/** client_calc_cog:
+ *   Calculate the centre of gravity for a particular client
+ */
+void client_calc_cog(Client *c) {
+	c->cog.x = c->width/2;
+	c->cog.y = c->height/2;
+	/* xxx: handle shaped windows oneday */
+}
+
+/** client_update_phy:
+ *   Update the client's notion of which physical screen it belongs.
+ */
+void client_calc_phy(Client *c) {
+	client_update_screenpos(c, client_to_Xcoord(c,x), client_to_Xcoord(c,y));
+	/* if the client changes physical screens, the vdesk changes too */
+	if (c->vdesk != VDESK_FIXED && c->vdesk != c->phy->vdesk) {
+		c->vdesk = c->phy->vdesk;
+		ewmh_set_net_wm_desktop(c);
+	}
+}
+
+/** client_update_screenpos:
+ *   Update the client's position using screen coordinates and
+ *   the client's notion of which physical screen it belongs.
+ *  NB, this routine must be used when translating from X11 screen co-ordinates
+ */
+void client_update_screenpos(Client *c, int screen_x, int screen_y) {
+	c->phy = find_physical_screen(c->screen, screen_x + c->cog.x, screen_y + c->cog.y);
+	c->nx = screen_x - c->phy->xoff;
+	c->ny = screen_y - c->phy->yoff;
 }
 
 void set_wm_state(Client *c, int state) {
@@ -78,14 +110,15 @@ void set_wm_state(Client *c, int state) {
 			PropModeReplace, (unsigned char *)data, 2);
 }
 
+/* Inform the client of the current window configuration */
 void send_config(Client *c) {
 	XConfigureEvent ce;
 
 	ce.type = ConfigureNotify;
 	ce.event = c->window;
 	ce.window = c->window;
-	ce.x = c->x;
-	ce.y = c->y;
+	ce.x = client_to_Xcoord(c,x);
+	ce.y = client_to_Xcoord(c,y);
 	ce.width = c->width;
 	ce.height = c->height;
 	ce.border_width = 0;
@@ -131,12 +164,13 @@ void gravitate_border(Client *c, int bw) {
 		dy = -bw;
 		break;
 	}
-	if (c->x != 0 || c->width != DisplayWidth(dpy, c->screen->screen)) {
-		c->x += dx;
+	if (c->nx != 0 || c->width != c->phy->width) {
+		c->nx += dx;
 	}
-	if (c->y != 0 || c->height != DisplayHeight(dpy, c->screen->screen)) {
-		c->y += dy;
+	if (c->ny != 0 || c->height != c->phy->height) {
+		c->ny += dy;
 	}
+	/* XXX: do we need to recalculate phy? */
 }
 
 void select_client(Client *c) {
@@ -144,11 +178,9 @@ void select_client(Client *c) {
 		XSetWindowBorder(dpy, current->parent, current->screen->bg.pixel);
 	if (c) {
 		unsigned long bpixel;
-#ifdef VWM
 		if (is_fixed(c))
 			bpixel = c->screen->fc.pixel;
 		else
-#endif
 			bpixel = c->screen->fg.pixel;
 		XSetWindowBorder(dpy, c->parent, bpixel);
 		XInstallColormap(dpy, c->cmap);
@@ -158,11 +190,13 @@ void select_client(Client *c) {
 	ewmh_set_net_active_window(c);
 }
 
-#ifdef VWM
+/** client_to_vdesk:
+ *   Send a client to a particular vdesk, mapping/unmapping it as required.
+ */
 void client_to_vdesk(Client *c, unsigned int vdesk) {
 	if (valid_vdesk(vdesk)) {
 		c->vdesk = vdesk;
-		if (c->vdesk == c->screen->vdesk || c->vdesk == VDESK_FIXED) {
+		if (is_fixed(c) || c->vdesk == c->phy->vdesk) {
 			client_show(c);
 		} else {
 			client_hide(c);
@@ -171,7 +205,6 @@ void client_to_vdesk(Client *c, unsigned int vdesk) {
 		select_client(current);
 	}
 }
-#endif
 
 void remove_client(Client *c) {
 	LOG_ENTER("remove_client(window=%lx, %s)", c->window, c->remove ? "withdrawing" : "wm quitting");
@@ -198,9 +231,10 @@ void remove_client(Client *c) {
 
 	gravitate_border(c, -c->border);
 	gravitate_border(c, c->old_border);
-	c->x -= c->old_border;
-	c->y -= c->old_border;
-	XReparentWindow(dpy, c->window, c->screen->root, c->x, c->y);
+	c->nx -= c->old_border;
+	c->ny -= c->old_border;
+	XReparentWindow(dpy, c->window, c->screen->root,
+	                client_to_Xcoord(c,x), client_to_Xcoord(c,y));
 	XSetWindowBorderWidth(dpy, c->window, c->old_border);
 	XRemoveFromSaveSet(dpy, c->window);
 	if (c->parent)

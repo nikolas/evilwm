@@ -63,6 +63,7 @@ pressing a key.  Available functions are:
 
 Return         Spawn new xterm.
 Escape         Delete current window.
+               This binding may be changed with -key.kill
 Insert         Lower current window.
 H, J, K, L     Move window left, down, up or right (16 pixels).
                Holding Shift resizes the window instead.
@@ -70,6 +71,7 @@ Y, U, B, N     Move window to top-left, top-right, bottom-left or
                bottom-right of screen.
 I              Show information about current window.
 Equals         Maximise current window vertically (toggle).
+               Holding Shift toggles horizontal maximization.
 X              Maximise current window (toggle).
 D              Toggle visible state of docks (e.g., pagers and launch bars).
 
@@ -81,6 +83,8 @@ F              Fix or unfix window.
 Left           Previous virtual desktop.
 Right          Next virtual desktop.
 A              Switch to the most recently unmapped virtual desktop.
+S              [dual-head xinerama only]
+               Exchange the [two] currently visible virtual desktops.
 
 In addition to the above, Alt+Tab can be used to cycle through windows
 on screen.

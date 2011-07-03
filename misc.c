@@ -67,6 +67,12 @@ int handle_xerror(Display *dsply, XErrorEvent *e) {
 		exit(1);
 	}
 
+	if (e->request_code == X_SetInputFocus) {
+		LOG_DEBUG("ignoring harmless error caused by possible race\n");
+		LOG_LEAVE();
+		return 0;
+	}
+
 	c = find_client(e->resourceid);
 	if (c) {
 		LOG_DEBUG("flagging client for removal\n");

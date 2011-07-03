@@ -28,6 +28,11 @@ int         have_shape, shape_event;
 #ifdef RANDR
 int         have_randr, randr_event_base;
 #endif
+#ifdef XINERAMA
+int         have_xinerama, xinerama_event;
+#else
+# define have_xinerama 0
+#endif
 
 /* Things that affect user interaction */
 #define CONFIG_FILE ".evilwmrc"
@@ -35,9 +40,7 @@ static const char   *opt_display = "";
 static const char   *opt_font = DEF_FONT;
 static const char   *opt_fg = DEF_FG;
 static const char   *opt_bg = DEF_BG;
-#ifdef VWM
 static const char   *opt_fc = DEF_FC;
-#endif
 static char *opt_grabmask1 = NULL;
 static char *opt_grabmask2 = NULL;
 static char *opt_altmask = NULL;
@@ -53,6 +56,12 @@ int          opt_snap = 0;
 int          no_solid_drag = 0;  /* use solid drag by default */
 #endif
 struct list  *applications = NULL;
+#ifdef VWM
+unsigned int opt_vdesks = 8;
+#else
+unsigned int opt_vdesks = 0;
+#endif
+KeySym opt_key_kill = XK_Escape;
 
 /* Client tracking information */
 struct list     *clients_tab_order = NULL;
@@ -67,19 +76,17 @@ int wm_exit;
 static void set_app(const char *arg);
 static void set_app_geometry(const char *arg);
 static void set_app_dock(void);
-#ifdef VWM
 static void set_app_vdesk(const char *arg);
 static void set_app_fixed(void);
-#endif
+static void set_key_kill(const char *arg);
 
 static struct xconfig_option evilwm_options[] = {
 	{ XCONFIG_STRING,   "fn",           &opt_font },
 	{ XCONFIG_STRING,   "display",      &opt_display },
+	{ XCONFIG_INT,      "numvdesks",    &opt_vdesks },
 	{ XCONFIG_STRING,   "fg",           &opt_fg },
 	{ XCONFIG_STRING,   "bg",           &opt_bg },
-#ifdef VWM
 	{ XCONFIG_STRING,   "fc",           &opt_fc },
-#endif
 	{ XCONFIG_INT,      "bw",           &opt_bw },
 	{ XCONFIG_STR_LIST, "term",         &opt_term },
 	{ XCONFIG_INT,      "snap",         &opt_snap },
@@ -90,20 +97,29 @@ static struct xconfig_option evilwm_options[] = {
 	{ XCONFIG_CALL_1,   "geometry",     &set_app_geometry },
 	{ XCONFIG_CALL_1,   "g",            &set_app_geometry },
 	{ XCONFIG_CALL_0,   "dock",         &set_app_dock },
-#ifdef VWM
 	{ XCONFIG_CALL_1,   "vdesk",        &set_app_vdesk },
 	{ XCONFIG_CALL_1,   "v",            &set_app_vdesk },
 	{ XCONFIG_CALL_0,   "fixed",        &set_app_fixed },
 	{ XCONFIG_CALL_0,   "f",            &set_app_fixed },
 	{ XCONFIG_CALL_0,   "s",            &set_app_fixed },
-#endif
 #ifdef SOLIDDRAG
 	{ XCONFIG_BOOL,     "nosoliddrag",  &no_solid_drag },
 #endif
+	{ XCONFIG_CALL_1,   "key.kill",     &set_key_kill },
+	{ XCONFIG_CALL_1,   "annotate.info.outline",  &set_annotate_info_outline},
+	{ XCONFIG_CALL_1,   "annotate.info.banner",   &set_annotate_info_info},
+	{ XCONFIG_CALL_1,   "annotate.info.cog",      &set_annotate_info_cog},
+	{ XCONFIG_CALL_1,   "annotate.drag.outline",  &set_annotate_drag_outline},
+	{ XCONFIG_CALL_1,   "annotate.drag.banner",   &set_annotate_drag_info},
+	{ XCONFIG_CALL_1,   "annotate.drag.cog",      &set_annotate_drag_cog},
+	{ XCONFIG_CALL_1,   "annotate.sweep.outline", &set_annotate_sweep_outline},
+	{ XCONFIG_CALL_1,   "annotate.sweep.banner",  &set_annotate_sweep_info},
+	{ XCONFIG_CALL_1,   "annotate.sweep.cog",     &set_annotate_sweep_cog},
 	{ XCONFIG_END, NULL, NULL }
 };
 
 static void setup_display(void);
+static void setup_screens(void);
 static void *xmalloc(size_t size);
 static unsigned int parse_modifiers(char *s);
 
@@ -111,17 +127,11 @@ static unsigned int parse_modifiers(char *s);
 static void helptext(void) {
 	puts(
 "usage: evilwm [-display display] [-term termprog] [-fn fontname]\n"
-"              [-fg foreground]"
-#ifdef VWM
-" [-fc fixed]"
-#endif
-" [-bg background] [-bw borderwidth]\n"
+"              [-fg foreground] [-fc fixed] [-bg background] [-bw borderwidth]\n"
 "              [-mask1 modifiers] [-mask2 modifiers] [-altmask modifiers]\n"
-"              [-snap num]"
-" [-app name/class] [-g geometry] [-dock]\n"
-#ifdef VWM
-"              [-v vdesk] [-s]"
-#endif
+"              [-key.kill key] [-snap num] [-numvdesks num]\n"
+"              [-app name/class] [-g geometry] [-dock] [-v vdesk] [-s]\n"
+"             "
 #ifdef SOLIDDRAG
 " [-nosoliddrag]"
 #endif
@@ -180,6 +190,7 @@ int main(int argc, char *argv[]) {
 	sigaction(SIGHUP, &act, NULL);
 
 	setup_display();
+	setup_screens();
 
 	event_main_loop();
 
@@ -218,15 +229,26 @@ static void *xmalloc(size_t size) {
 	return ptr;
 }
 
+/* set up DISPLAY environment variable to use */
+static char* screen_to_display_str(int num) {
+	char *ds = DisplayString(dpy);
+	char *display = xmalloc(14 + strlen(ds));
+	strcpy(display, "DISPLAY=");
+	strcat(display, ds);
+	char *colon = strrchr(display, ':');
+	if (!colon || num_screens < 2)
+		return display;
+
+	char *dot = strchr(colon, '.');
+	if (!dot)
+		dot = colon + strlen(colon);
+	snprintf(dot, 5, ".%d", num);
+
+	return display;
+}
+
 static void setup_display(void) {
-	XGCValues gv;
-	XSetWindowAttributes attr;
-	XColor dummy;
 	XModifierKeymap *modmap;
-	/* used in scanning windows (XQueryTree) */
-	unsigned int i, j, nwins;
-	Window dw1, dw2, *wins;
-	XWindowAttributes winattr;
 
 	LOG_ENTER("setup_display()");
 
@@ -235,6 +257,7 @@ static void setup_display(void) {
 		LOG_ERROR("can't open display %s\n", opt_display);
 		exit(1);
 	}
+
 	XSetErrorHandler(handle_xerror);
 	/* XSynchronize(dpy, True); */
 
@@ -254,8 +277,8 @@ static void setup_display(void) {
 	/* find out which modifier is NumLock - we'll use this when grabbing
 	 * every combination of modifiers we can think of */
 	modmap = XGetModifierMapping(dpy);
-	for (i = 0; i < 8; i++) {
-		for (j = 0; j < (unsigned int)modmap->max_keypermod; j++) {
+	for (unsigned i = 0; i < 8; i++) {
+		for (unsigned j = 0; j < (unsigned int)modmap->max_keypermod; j++) {
 			if (modmap->modifiermap[i*modmap->max_keypermod+j] == XKeysymToKeycode(dpy, XK_Num_Lock)) {
 				numlockmask = (1<<i);
 				LOG_DEBUG("XK_Num_Lock is (1<<0x%02x)\n", i);
@@ -263,15 +286,6 @@ static void setup_display(void) {
 		}
 	}
 	XFreeModifiermap(modmap);
-
-	/* set up GC parameters - same for each screen */
-	gv.function = GXinvert;
-	gv.subwindow_mode = IncludeInferiors;
-	gv.line_width = 1;  /* opt_bw */
-	gv.font = font->fid;
-
-	/* set up root window attributes - same for each screen */
-	attr.event_mask = ChildMask | EnterWindowMask | ColormapChangeMask;
 
 	/* SHAPE extension? */
 #ifdef SHAPE
@@ -290,46 +304,66 @@ static void setup_display(void) {
 		}
 	}
 #endif
+	/* Xinerama extension? */
+#ifdef XINERAMA
+	{
+		int e_dummy;
+		have_xinerama = XineramaQueryExtension(dpy, &xinerama_event, &e_dummy) && XineramaIsActive(dpy);
+	}
+#endif
+	LOG_LEAVE();
+}
 
-	/* now set up each screen in turn */
+/* now set up each screen in turn */
+static void setup_screens(void) {
+	LOG_ENTER("setup_screens()");
+
 	num_screens = ScreenCount(dpy);
 	if (num_screens < 0) {
 		LOG_ERROR("Can't count screens\n");
 		exit(1);
 	}
-	screens = xmalloc(num_screens * sizeof(ScreenInfo));
-	for (i = 0; i < (unsigned int)num_screens; i++) {
-		char *ds, *colon, *dot;
-		ds = DisplayString(dpy);
-		/* set up DISPLAY environment variable to use */
-		colon = strrchr(ds, ':');
-		screens[i].display = xmalloc(14 + strlen(ds));
-		strcpy(screens[i].display, "DISPLAY=");
-		strcat(screens[i].display, ds);
-		if (colon && num_screens > 1) {
-			colon = strrchr(screens[i].display, ':');
-			dot = strchr(colon, '.');
-			if (!dot)
-				dot = colon + strlen(colon);
-			snprintf(dot, 5, ".%d", i);
-		}
 
+	/* set up GC parameters - same for each screen */
+	XGCValues gv;
+	gv.function = GXinvert;
+	gv.subwindow_mode = IncludeInferiors;
+	gv.line_width = 1;  /* opt_bw */
+	gv.font = font->fid;
+
+	/* set up root window attributes - same for each screen */
+	XSetWindowAttributes attr;
+	attr.event_mask = ChildMask | EnterWindowMask | ColormapChangeMask;
+
+	screens = xmalloc(num_screens * sizeof(ScreenInfo));
+	for (int i = 0; i < num_screens; i++) {
+		screens[i].display = screen_to_display_str(i);
 		screens[i].screen = i;
 		screens[i].root = RootWindow(dpy, i);
+		probe_screen(&screens[i]);
+
+		unsigned long vdesks_num;
+		unsigned long *vdesks = get_property(screens[i].root, xa_evilwm_current_desktops, XA_CARDINAL, &vdesks_num);
+
+		for (int j = 0; j < screens[i].num_physical; j++) {
+			if (vdesks && vdesks_num > (unsigned) j)
+				screens[i].physical[j].vdesk = vdesks[j];
+			else
+				screens[i].physical[j].vdesk = KEY_TO_VDESK(XK_1) + MIN(opt_vdesks, (unsigned)j);
+		}
+
+		if (vdesks) XFree(vdesks);
+
 #ifdef RANDR
 		if (have_randr) {
 			XRRSelectInput(dpy, screens[i].root, RRScreenChangeNotifyMask);
 		}
 #endif
-#ifdef VWM
-		screens[i].vdesk = KEY_TO_VDESK(XK_1);
-#endif
 
+		XColor dummy;
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_fg, &screens[i].fg, &dummy);
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_bg, &screens[i].bg, &dummy);
-#ifdef VWM
 		XAllocNamedColor(dpy, DefaultColormap(dpy, i), opt_fc, &screens[i].fc, &dummy);
-#endif
 
 		screens[i].invert_gc = XCreateGC(dpy, screens[i].root, GCFunction | GCSubwindowMode | GCLineWidth | GCFont, &gv);
 
@@ -339,10 +373,13 @@ static void setup_display(void) {
 
 		/* scan all the windows on this screen */
 		LOG_XENTER("XQueryTree(screen=%d)", i);
+		unsigned nwins;
+		Window dw1, dw2, *wins;
 		XQueryTree(dpy, screens[i].root, &dw1, &dw2, &wins, &nwins);
 		LOG_XDEBUG("%d windows\n", nwins);
 		LOG_XLEAVE();
-		for (j = 0; j < nwins; j++) {
+		for (unsigned j = 0; j < nwins; j++) {
+			XWindowAttributes winattr;
 			XGetWindowAttributes(dpy, wins[j], &winattr);
 			if (!winattr.override_redirect && winattr.map_state == IsViewable)
 				make_new_client(wins[j], &screens[i]);
@@ -363,9 +400,7 @@ static void set_app(const char *arg) {
 	new->res_name = new->res_class = NULL;
 	new->geometry_mask = 0;
 	new->is_dock = 0;
-#ifdef VWM
 	new->vdesk = VDESK_NONE;
-#endif
 	if ((tmp = strchr(arg, '/'))) {
 		*(tmp++) = 0;
 	}
@@ -395,7 +430,6 @@ static void set_app_dock(void) {
 	}
 }
 
-#ifdef VWM
 static void set_app_vdesk(const char *arg) {
 	unsigned int v = atoi(arg);
 	if (applications && valid_vdesk(v)) {
@@ -410,7 +444,10 @@ static void set_app_fixed(void) {
 		app->vdesk = VDESK_FIXED;
 	}
 }
-#endif
+
+static void set_key_kill(const char *arg) {
+	opt_key_kill = XStringToKeysym((char*)arg);
+}
 
 /* Used for overriding the default WM modifiers */
 static unsigned int parse_modifiers(char *s) {
