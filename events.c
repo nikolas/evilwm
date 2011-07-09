@@ -116,7 +116,7 @@ static void handle_key_event(XKeyEvent *e) {
 			goto move_client;
 		case KEY_TOPLEFT:
 			if (e->state & altmask) {
-				if ( ((c->width - width_inc) >= c->min_width)
+				if ( ((c->phy->width - width_inc) >= c->min_width)
 					&&
 					((c->height - height_inc) >= c->min_height) )
 				{
@@ -124,28 +124,24 @@ static void handle_key_event(XKeyEvent *e) {
 					c->height -= height_inc;
 				}
 			} else {
-				c->x = c->border;
-				c->y = c->border;
+				c->nx = c->border;
+				c->ny = c->border;
 			}
 			goto move_client;
 		case KEY_TOPRIGHT:
 			if (e->state & altmask) {
-				c->width = DisplayWidth(dpy, c->screen->screen)
-					- c->x-c->border;
+				c->width = c->phy->width- c->nx - c->border;
 			} else {
-				c->x = DisplayWidth(dpy, c->screen->screen)
-					- c->width-c->border;
-				c->y = c->border;
+				c->nx = c->phy->width - c->width - c->border;
+				c->ny = c->border;
 			}
 			goto move_client;
 		case KEY_BOTTOMLEFT:
 			if (e->state & altmask) {
-				c->height = DisplayHeight(dpy, c->screen->screen)
-					- c->y-c->border;
+				c->height = c->phy->height - c->ny - c->border;
 			} else {
-				c->x = c->border;
-				c->y = DisplayHeight(dpy, c->screen->screen)
-					- c->height-c->border;
+				c->nx = c->border;
+				c->ny = c->phy->height - c->height - c->border;
 			}
 			goto move_client;
 		case KEY_BOTTOMRIGHT:
@@ -160,10 +156,8 @@ static void handle_key_event(XKeyEvent *e) {
 					c->height += height_inc;
 				}
 			} else {
-				c->x = DisplayWidth(dpy, c->screen->screen)
-					- c->width-c->border;
-				c->y = DisplayHeight(dpy, c->screen->screen)
-					- c->height-c->border;
+				c->nx = c->phy->width - c->width - c->border;
+				c->ny = c->phy->height - c->height - c->border;
 			}
 			goto move_client;
 		case KEY_LOWER: case KEY_ALTLOWER:
