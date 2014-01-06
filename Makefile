@@ -44,7 +44,7 @@ OPT_CPPFLAGS += -DSTDIO
 OPT_CPPFLAGS += -DVWM
 
 # Uncomment to move pointer around on certain actions.
-OPT_CPPFLAGS += -DWARP_POINTER
+#OPT_CPPFLAGS += -DWARP_POINTER
 
 # Uncomment to use Ctrl+Alt+q instead of Ctrl+Alt+Escape.  Useful for Cygwin.
 #OPT_CPPFLAGS += -DKEY_KILL=XK_q
