@@ -42,27 +42,9 @@ void client_raise(Client *c) {
 	ewmh_set_net_client_list_stacking(c->screen);
 }
 
-/* This doesn't just call XLowerWindow(), as that could push the window
- * below "DESKTOP" type windows we're not managing. */
 void client_lower(Client *c) {
-	struct list *iter;
-	Client *below;
-	Window order[2];
-	/* Find lowest other client in stacking order that is visible on the
-	 * same screen. */
-	for (iter = clients_stacking_order; iter; iter = iter->next) {
-		below = iter->data;
-		if (below == c)
-			return;
-		if (below->screen == c->screen && (is_fixed(below) || below->vdesk == c->screen->vdesk))
-			break;
-	}
-	if (!iter) return;
-	order[0] = below->parent;
-	order[1] = c->parent;
-	XRestackWindows(dpy, order, 2);
-	clients_stacking_order = list_delete(clients_stacking_order, c);
-	clients_stacking_order = list_insert_before(clients_stacking_order, iter, c);
+	XLowerWindow(dpy, c->parent);
+	clients_stacking_order = list_to_head(clients_stacking_order, c);
 	ewmh_set_net_client_list_stacking(c->screen);
 }
 
