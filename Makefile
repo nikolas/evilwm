@@ -100,7 +100,7 @@ INSTALL_PROGRAM = $(INSTALL) -m 0755 $(INSTALL_STRIP)
 ############################################################################
 # You shouldn't need to change anything beyond this point
 
-version = 1.1.0
+version = 1.1.1
 distname = evilwm-$(version)
 
 # Generally shouldn't be overridden:
