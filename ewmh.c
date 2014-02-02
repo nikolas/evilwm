@@ -71,67 +71,76 @@ Atom xa_net_frame_extents;
 static Window *window_array = NULL;
 static Window *alloc_window_array(void);
 
-void ewmh_init(void) {
+static const struct {
+	Atom *dest;
+	const char *name;
+} atom_list[] = {
 	/* Standard X protocol atoms */
-	xa_wm_state = XInternAtom(dpy, "WM_STATE", False);
-	xa_wm_protos = XInternAtom(dpy, "WM_PROTOCOLS", False);
-	xa_wm_delete = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
-	xa_wm_cmapwins = XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
+	{ &xa_wm_state, "WM_STATE" },
+	{ &xa_wm_protos, "WM_PROTOCOLS" },
+	{ &xa_wm_delete, "WM_DELETE_WINDOW" },
+	{ &xa_wm_cmapwins, "WM_COLORMAP_WINDOWS" },
 	/* Motif atoms */
-	mwm_hints = XInternAtom(dpy, _XA_MWM_HINTS, False);
+	{ &mwm_hints, _XA_MWM_HINTS },
 	/* evilwm atoms */
-	xa_evilwm_unmaximised_horz = XInternAtom(dpy, "_EVILWM_UNMAXIMISED_HORZ", False);
-	xa_evilwm_unmaximised_vert = XInternAtom(dpy, "_EVILWM_UNMAXIMISED_VERT", False);
+	{ &xa_evilwm_unmaximised_horz, "_EVILWM_UNMAXIMISED_HORZ" },
+	{ &xa_evilwm_unmaximised_vert, "_EVILWM_UNMAXIMISED_VERT" },
 
 	/*
 	 * extended windowmanager hints
 	 */
 
 	/* Root Window Properties (and Related Messages) */
-	xa_net_supported = XInternAtom(dpy, "_NET_SUPPORTED", False);
-	xa_net_client_list = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
-	xa_net_client_list_stacking = XInternAtom(dpy, "_NET_CLIENT_LIST_STACKING", False);
+	{ &xa_net_supported, "_NET_SUPPORTED" },
+	{ &xa_net_client_list, "_NET_CLIENT_LIST" },
+	{ &xa_net_client_list_stacking, "_NET_CLIENT_LIST_STACKING" },
 #ifdef VWM
-	xa_net_number_of_desktops = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
+	{ &xa_net_number_of_desktops, "_NET_NUMBER_OF_DESKTOPS" },
 #endif
-	xa_net_desktop_geometry = XInternAtom(dpy, "_NET_DESKTOP_GEOMETRY", False);
-	xa_net_desktop_viewport = XInternAtom(dpy, "_NET_DESKTOP_VIEWPORT", False);
+	{ &xa_net_desktop_geometry, "_NET_DESKTOP_GEOMETRY" },
+	{ &xa_net_desktop_viewport, "_NET_DESKTOP_VIEWPORT" },
 #ifdef VWM
-	xa_net_current_desktop = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
+	{ &xa_net_current_desktop, "_NET_CURRENT_DESKTOP" },
 #endif
-	xa_net_active_window = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
-	xa_net_workarea = XInternAtom(dpy, "_NET_WORKAREA", False);
-	xa_net_supporting_wm_check = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
+	{ &xa_net_active_window, "_NET_ACTIVE_WINDOW" },
+	{ &xa_net_workarea, "_NET_WORKAREA" },
+	{ &xa_net_supporting_wm_check, "_NET_SUPPORTING_WM_CHECK" },
 
 	/* Other Root Window Messages */
-	xa_net_close_window = XInternAtom(dpy, "_NET_CLOSE_WINDOW", False);
-	xa_net_moveresize_window = XInternAtom(dpy, "_NET_MOVERESIZE_WINDOW", False);
-	xa_net_restack_window = XInternAtom(dpy, "_NET_RESTACK_WINDOW", False);
-	xa_net_request_frame_extents = XInternAtom(dpy, "_NET_REQUEST_FRAME_EXTENTS", False);
+	{ &xa_net_close_window, "_NET_CLOSE_WINDOW" },
+	{ &xa_net_moveresize_window, "_NET_MOVERESIZE_WINDOW" },
+	{ &xa_net_restack_window, "_NET_RESTACK_WINDOW" },
+	{ &xa_net_request_frame_extents, "_NET_REQUEST_FRAME_EXTENTS" },
 
 	/* Application Window Properties */
-	xa_net_wm_name = XInternAtom(dpy, "_NET_WM_NAME", False);
+	{ &xa_net_wm_name, "_NET_WM_NAME" },
 #ifdef VWM
-	xa_net_wm_desktop = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
+	{ &xa_net_wm_desktop, "_NET_WM_DESKTOP" },
 #endif
-	xa_net_wm_window_type = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
-	xa_net_wm_window_type_desktop = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DESKTOP", False);
-	xa_net_wm_window_type_dock = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
-	xa_net_wm_state = XInternAtom(dpy, "_NET_WM_STATE", False);
-	xa_net_wm_state_maximized_vert = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
-	xa_net_wm_state_maximized_horz = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
-	xa_net_wm_state_fullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
-	xa_net_wm_state_hidden = XInternAtom(dpy, "_NET_WM_STATE_HIDDEN", False);
-	xa_net_wm_allowed_actions = XInternAtom(dpy, "_NET_WM_ALLOWED_ACTIONS", False);
-	xa_net_wm_action_move = XInternAtom(dpy, "_NET_WM_ACTION_MOVE", False);
-	xa_net_wm_action_resize = XInternAtom(dpy, "_NET_WM_ACTION_RESIZE", False);
-	xa_net_wm_action_maximize_horz = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_HORZ", False);
-	xa_net_wm_action_maximize_vert = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_VERT", False);
-	xa_net_wm_action_fullscreen = XInternAtom(dpy, "_NET_WM_ACTION_FULLSCREEN", False);
-	xa_net_wm_action_change_desktop = XInternAtom(dpy, "_NET_WM_ACTION_CHANGE_DESKTOP", False);
-	xa_net_wm_action_close = XInternAtom(dpy, "_NET_WM_ACTION_CLOSE", False);
-	xa_net_wm_pid = XInternAtom(dpy, "_NET_WM_PID", False);
-	xa_net_frame_extents = XInternAtom(dpy, "_NET_FRAME_EXTENTS", False);
+	{ &xa_net_wm_window_type, "_NET_WM_WINDOW_TYPE" },
+	{ &xa_net_wm_window_type_desktop, "_NET_WM_WINDOW_TYPE_DESKTOP" },
+	{ &xa_net_wm_window_type_dock, "_NET_WM_WINDOW_TYPE_DOCK" },
+	{ &xa_net_wm_state, "_NET_WM_STATE" },
+	{ &xa_net_wm_state_maximized_vert, "_NET_WM_STATE_MAXIMIZED_VERT" },
+	{ &xa_net_wm_state_maximized_horz, "_NET_WM_STATE_MAXIMIZED_HORZ" },
+	{ &xa_net_wm_state_fullscreen, "_NET_WM_STATE_FULLSCREEN" },
+	{ &xa_net_wm_state_hidden, "_NET_WM_STATE_HIDDEN" },
+	{ &xa_net_wm_allowed_actions, "_NET_WM_ALLOWED_ACTIONS" },
+	{ &xa_net_wm_action_move, "_NET_WM_ACTION_MOVE" },
+	{ &xa_net_wm_action_resize, "_NET_WM_ACTION_RESIZE" },
+	{ &xa_net_wm_action_maximize_horz, "_NET_WM_ACTION_MAXIMIZE_HORZ" },
+	{ &xa_net_wm_action_maximize_vert, "_NET_WM_ACTION_MAXIMIZE_VERT" },
+	{ &xa_net_wm_action_fullscreen, "_NET_WM_ACTION_FULLSCREEN" },
+	{ &xa_net_wm_action_change_desktop, "_NET_WM_ACTION_CHANGE_DESKTOP" },
+	{ &xa_net_wm_action_close, "_NET_WM_ACTION_CLOSE" },
+	{ &xa_net_wm_pid, "_NET_WM_PID" },
+	{ &xa_net_frame_extents, "_NET_FRAME_EXTENTS" },
+};
+
+void ewmh_init(void) {
+	for (unsigned i = 0; i < (sizeof(atom_list)/sizeof(atom_list[0])); i++) {
+		*(atom_list[i].dest) = XInternAtom(dpy, atom_list[i].name, False);
+	}
 }
 
 void ewmh_init_screen(ScreenInfo *s) {
