@@ -161,12 +161,14 @@ void make_new_client(Window w, ScreenInfo *s) {
 	{
 		client_show(c);
 		client_raise(c);
-		select_client(c);
+		if (!(window_type & EWMH_WINDOW_TYPE_NOTIFICATION)) {
+			select_client(c);
 #ifdef WARP_POINTER
-		setmouse(c->window, c->width + c->border - 1,
-				c->height + c->border - 1);
+			setmouse(c->window, c->width + c->border - 1,
+				 c->height + c->border - 1);
 #endif
-		discard_enter_events(c);
+			discard_enter_events(c);
+		}
 	}
 #ifdef VWM
 	else {

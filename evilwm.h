@@ -73,6 +73,7 @@ typedef struct {
 /* EWMH window type bits */
 #define EWMH_WINDOW_TYPE_DESKTOP (1<<0)
 #define EWMH_WINDOW_TYPE_DOCK    (1<<1)
+#define EWMH_WINDOW_TYPE_NOTIFICATION (1<<2)
 
 #define MAXIMISE_HORZ   (1<<0)
 #define MAXIMISE_VERT   (1<<1)

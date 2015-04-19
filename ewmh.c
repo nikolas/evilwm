@@ -50,6 +50,7 @@ Atom xa_net_wm_desktop;
 Atom xa_net_wm_window_type;
 Atom xa_net_wm_window_type_desktop;
 Atom xa_net_wm_window_type_dock;
+static Atom xa_net_wm_window_type_notification;
 Atom xa_net_wm_state;
 Atom xa_net_wm_state_maximized_vert;
 Atom xa_net_wm_state_maximized_horz;
@@ -117,6 +118,7 @@ void ewmh_init(void) {
 	xa_net_wm_window_type = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
 	xa_net_wm_window_type_desktop = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DESKTOP", False);
 	xa_net_wm_window_type_dock = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
+	xa_net_wm_window_type_notification = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_NOTIFICATION", False);
 	xa_net_wm_state = XInternAtom(dpy, "_NET_WM_STATE", False);
 	xa_net_wm_state_maximized_vert = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	xa_net_wm_state_maximized_horz = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
@@ -355,6 +357,8 @@ unsigned int ewmh_get_net_wm_window_type(Window w) {
 				type |= EWMH_WINDOW_TYPE_DESKTOP;
 			if (aprop[i] == xa_net_wm_window_type_dock)
 				type |= EWMH_WINDOW_TYPE_DOCK;
+			if (aprop[i] == xa_net_wm_window_type_notification)
+				type |= EWMH_WINDOW_TYPE_NOTIFICATION;
 		}
 		XFree(aprop);
 	}
