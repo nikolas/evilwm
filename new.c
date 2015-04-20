@@ -161,7 +161,7 @@ void make_new_client(Window w, ScreenInfo *s) {
 	{
 		client_show(c);
 		client_raise(c);
-		if (!(window_type & EWMH_WINDOW_TYPE_NOTIFICATION)) {
+		if (!(window_type & (EWMH_WINDOW_TYPE_DOCK|EWMH_WINDOW_TYPE_NOTIFICATION))) {
 			select_client(c);
 #ifdef WARP_POINTER
 			setmouse(c->window, c->width + c->border - 1,
