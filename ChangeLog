@@ -1,9 +1,10 @@
-Version 1.1.1, unreleased
+Version 1.1.1, Mon Jul 13 2015
 
   * Revert client lowering behaviour from 1.1.0.  Also fixes a build error
     when virtual desktops are disabled.
   * Change default to not warp pointer.
   * Don't automatically focus notification windows.
+  * Don't automatically focus dock windows.
 
 Version 1.1.0, Sun Jul  3 2011
 
